@@ -29,7 +29,7 @@
     ".next/types/**/*.ts",
     "**/*.ts",
     "**/*.tsx"
-, "src/app/properties/layout.jsx", "src/app/properties/page.jsx", "src/app/interactive-map/layout.jsx", "src/app/interactive-map/page.jsx"  ],
+, "src/app/properties/layout.jsx", "src/app/properties/page.js", "src/app/interactive-map/layout.jsx", "src/app/interactive-map/page.jsx"  ],
   "exclude": [
     "node_modules"
   ]
