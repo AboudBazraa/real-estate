@@ -32,7 +32,7 @@ function NavBar() {
                 Login
               </Link>
               <Link
-                href="/register"
+                href="/dashboard"
                 className="text-gray-300 hover:bg-gray-700/50 hover:text-white px-3 py-2 rounded-md text-sm font-medium transition duration-200"
               >
                 Register
