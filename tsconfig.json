@@ -22,14 +22,24 @@
         "name": "next"
       }
     ],
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "baseUrl": ".",
+    "paths": {
+      "@/*": [
+        "src/*"
+      ]
+    }
   },
   "include": [
     "next-env.d.ts",
     ".next/types/**/*.ts",
     "**/*.ts",
-    "**/*.tsx"
-, "src/app/properties/layout.jsx", "src/app/properties/page.js", "src/app/interactive-map/layout.jsx", "src/app/interactive-map/page.jsx"  ],
+    "**/*.tsx",
+    "src/app/properties/layout.jsx",
+    "src/app/properties/page.js",
+    "src/app/interactive-map/layout.jsx",
+    "src/app/interactive-map/page.jsx"
+  ],
   "exclude": [
     "node_modules"
   ]
