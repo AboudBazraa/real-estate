@@ -5,6 +5,12 @@ export default {
     "./src/pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/components/**/*.{js,ts,jsx,tsx,mdx}",
     "./src/app/**/*.{js,ts,jsx,tsx,mdx}",
+    "./src/app/**/components/**/*.{js,ts,jsx,tsx,mdx}",
+	"./src/shared/**/*.{js,ts,jsx,tsx,mdx}",
+	"./src/shared/components/**/*.{js,ts,jsx,tsx,mdx}",
+	"./src/shared/components/ui/**/*.{js,ts,jsx,tsx,mdx}",
+	"./src/shared/components/layout/**/*.{js,ts,jsx,tsx,mdx}",
+	"./src/shared/components/sections/**/*.{js,ts,jsx,tsx,mdx}",
   ],
   theme: {
   	extend: {

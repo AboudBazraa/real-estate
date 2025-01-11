@@ -1,5 +1,7 @@
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { Toaster } from "@/shared/components/ui/toaster";
+import { ThemeProvider } from "next-themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -13,7 +15,8 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: "Real Estate Application",
-  description: "A modern web platform for listing and exploring properties such as land plots, rentals, villas, and apartments.",
+  description:
+    "A modern web platform for listing and exploring properties such as land plots, rentals, villas, and apartments.",
 };
 
 export default function RootLayout({ children }) {
@@ -22,7 +25,10 @@ export default function RootLayout({ children }) {
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        {children}
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem>
+          {children}
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   );
