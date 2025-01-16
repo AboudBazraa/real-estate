@@ -14,8 +14,9 @@ import {
   SidebarTrigger,
 } from "@/shared/components/ui/sidebar";
 import { Suspense } from "react";
+import Page from "./page";
 
-export default function DashboardLayout() {
+export default function DashboardLayout({ children }) {
   return (
     <>
       <SidebarProvider>
@@ -40,11 +41,7 @@ export default function DashboardLayout() {
               </Breadcrumb>
             </div>
           </header>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            <Suspense>
-              <page />
-            </Suspense>
-          </div>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">{children}</div>
         </SidebarInset>
       </SidebarProvider>
     </>
