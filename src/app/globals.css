@@ -5,6 +5,58 @@
 body {
   font-family: Arial, Helvetica, sans-serif;
 }
+::-webkit-scrollbar {
+  width: 5px;
+  height: 8px;
+}
+
+*::-webkit-scrollbar-track { /* For WebKit-based browsers (Chrome, Safari, newer versions of Opera) */
+  background: rgba(240, 240, 240, 0.2);
+}
+
+.dark *::-webkit-scrollbar-track {
+  background: rgba(20, 20, 20, 0.2);
+}
+
+*::-webkit-scrollbar-thumb { /* For WebKit-based browsers */
+  background-color: silver;
+  border-radius: 9px;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.dark *::-webkit-scrollbar-thumb {
+  background-color: #202020;
+  border-radius: 9px;
+  border: 2px solid rgba(0, 0, 0, 0.2);
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+
+/* Firefox-specific styling */
+@supports (scrollbar-color: silver, rgba(255, 255, 255, 0.2)) {
+  *::-moz-scrollbar-track { /* For Firefox */
+    background: rgba(240, 240, 240, 0.2);
+  }
+  .dark *::-moz-scrollbar-track {
+    background: rgba(20, 20, 20, 0.2);
+  }
+  *::-moz-scrollbar-thumb { /* For Firefox */
+    background-color: silver;
+    border-radius: 9px;
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  }
+  .dark *::-moz-scrollbar-thumb {
+    background-color: #202020;
+    border-radius: 9px;
+    border: 2px solid rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+  }
+}
+
+
+
 
 @layer base {
   :root {
