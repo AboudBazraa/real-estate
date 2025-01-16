@@ -1,14 +1,13 @@
-'use client';
+"use client";
 import Link from "next/link";
 import { useState } from "react";
-import ThemeToggle from './ui/ThemeToggle';
+import ModeToggle from "./ui/modetoggle";
 import { useToast } from "../hooks/use-toast";
 import { Button } from "./ui/button";
 
-
 function NavBar() {
   const [isOpen, setIsOpen] = useState(false);
-  const { toast } = useToast()
+  const { toast } = useToast();
 
   return (
     <nav className="bg-gray-800 text-white shadow-lg sticky top-0 z-50 flex items-center justify-between px-4">
@@ -20,33 +19,48 @@ function NavBar() {
             </Link>
           </div>
           <div className="hidden md:flex items-center space-x-4">
-            <Link href="/" className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+            <Link
+              href="/"
+              className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+            >
               Home
             </Link>
-            <Link href="/dashboard" className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+            <Link
+              href="/dashboard"
+              className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+            >
               Dashboard
             </Link>
-            <Link href="/properties" className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+            <Link
+              href="/properties"
+              className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+            >
               Properties
             </Link>
-            <Link href="/login" className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+            <Link
+              href="/login"
+              className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+            >
               Login
             </Link>
-            <Link href="/register" className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium">
+            <Link
+              href="/register"
+              className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium"
+            >
               Register
             </Link>
             <Button
-      onClick={() => {
-        toast({
-          title: "Scheduled: Catch up",
-          description: "Friday, February 10, 2023 at 5:57 PM",
-        })
-      }}
-    >
-      Show Toast
-    </Button>
+              onClick={() => {
+                toast({
+                  title: "Scheduled: Catch up",
+                  description: "Friday, February 10, 2023 at 5:57 PM",
+                });
+              }}
+            >
+              Show Toast
+            </Button>
           </div>
-          <ThemeToggle />
+          <ModeToggle />
           <div className="-mr-2 flex md:hidden">
             <button
               onClick={() => setIsOpen(!isOpen)}
@@ -94,7 +108,10 @@ function NavBar() {
         </div>
       </div>
 
-      <div className={`md:hidden ${isOpen ? "block" : "hidden"}`} id="mobile-menu">
+      <div
+        className={`md:hidden ${isOpen ? "block" : "hidden"}`}
+        id="mobile-menu"
+      >
         <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
           <Link
             href="/"

@@ -14,7 +14,7 @@ import {
   SidebarTrigger,
 } from "@/shared/components/ui/sidebar"
 
-export default function Page() {
+export default function Page(  ) {
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -47,6 +47,6 @@ export default function Page() {
           <div className="min-h-[100vh] flex-1 rounded-xl bg-slate-100/50 md:min-h-min dark:bg-slate-800/50" />
         </div>
       </SidebarInset>
-    </SidebarProvider>
+    </SidebarProvider> */}
   )
 }

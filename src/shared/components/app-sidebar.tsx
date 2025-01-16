@@ -27,6 +27,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/shared/components/ui/sidebar"
+import Link from "next/link"
 
 const data = {
   user: {
@@ -37,88 +38,88 @@ const data = {
   navMain: [
     {
       title: "Playground",
-      url: "#",
+      url: "/dashboard",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
           title: "History",
-          url: "#",
+          url: "",
         },
         {
           title: "Starred",
-          url: "#",
+          url: "",
         },
         {
           title: "Settings",
-          url: "#",
+          url: "",
         },
       ],
     },
     {
       title: "Models",
-      url: "#",
+      url: "",
       icon: Bot,
       items: [
         {
           title: "Genesis",
-          url: "#",
+          url: "",
         },
         {
           title: "Explorer",
-          url: "#",
+          url: "",
         },
         {
           title: "Quantum",
-          url: "#",
+          url: "",
         },
       ],
     },
     {
       title: "Documentation",
-      url: "#",
+      url: "",
       icon: BookOpen,
       items: [
         {
           title: "Introduction",
-          url: "#",
+          url: "",
         },
         {
           title: "Get Started",
-          url: "#",
+          url: "",
         },
         {
           title: "Tutorials",
-          url: "#",
+          url: "",
         },
         {
           title: "Changelog",
-          url: "#",
+          url: "",
         },
       ],
     },
     {
       title: "Settings",
-      url: "#",
+      url: "/dashboard/settings",
       icon: Settings2,
-      items: [
-        {
-          title: "General",
-          url: "#",
-        },
-        {
-          title: "Team",
-          url: "#",
-        },
-        {
-          title: "Billing",
-          url: "#",
-        },
-        {
-          title: "Limits",
-          url: "#",
-        },
-      ],
+      // items: [
+      //   {
+      //     title: "General",
+      //     url: "#",
+      //   },
+      //   {
+      //     title: "Team",
+      //     url: "#",
+      //   },
+      //   {
+      //     title: "Billing",
+      //     url: "#",
+      //   },
+      //   {
+      //     title: "Limits",
+      //     url: "#",
+      //   },
+      // ],
     },
   ],
   navSecondary: [
@@ -159,7 +160,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
-              <a href="#">
+              <Link href="/">
                 <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-sidebar-primary text-sidebar-primary-foreground">
                   <Command className="size-4" />
                 </div>
@@ -167,7 +168,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <span className="truncate font-semibold">Acme Inc</span>
                   <span className="truncate text-xs">Enterprise</span>
                 </div>
-              </a>
+              </Link>
             </SidebarMenuButton>
           </SidebarMenuItem>
         </SidebarMenu>
