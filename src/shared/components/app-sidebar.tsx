@@ -1,6 +1,5 @@
-"use client"
-
-import * as React from "react"
+"use client";
+import * as React from "react";
 import {
   BookOpen,
   Bot,
@@ -12,12 +11,12 @@ import {
   Send,
   Settings2,
   SquareTerminal,
-} from "lucide-react"
+} from "lucide-react";
 
-import { NavMain } from "@/shared/components/nav-main"
-import { NavProjects } from "@/shared/components/nav-projects"
-import { NavSecondary } from "@/shared/components/nav-secondary"
-import { NavUser } from "@/shared/components/nav-user"
+import { NavMain } from "@/shared/components/nav-main";
+import { NavProjects } from "@/shared/components/nav-projects";
+import { NavSecondary } from "@/shared/components/nav-secondary";
+import { NavUser } from "@/shared/components/nav-user";
 import {
   Sidebar,
   SidebarContent,
@@ -26,8 +25,8 @@ import {
   SidebarMenu,
   SidebarMenuButton,
   SidebarMenuItem,
-} from "@/shared/components/ui/sidebar"
-import Link from "next/link"
+} from "@/shared/components/ui/sidebar";
+import Link from "next/link";
 
 const data = {
   user: {
@@ -45,14 +44,17 @@ const data = {
         {
           title: "History",
           url: "",
+          isActive: true,
         },
         {
           title: "Starred",
           url: "",
+          isActive: true,
         },
         {
           title: "Settings",
           url: "",
+          isActive: true,
         },
       ],
     },
@@ -151,7 +153,7 @@ const data = {
       icon: Map,
     },
   ],
-}
+};
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   return (
@@ -182,5 +184,5 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavUser user={data.user} />
       </SidebarFooter>
     </Sidebar>
-  )
+  );
 }

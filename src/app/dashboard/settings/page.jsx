@@ -1,5 +1,10 @@
+import DynamicBreadcrumb from "@/app/dashboard/components/breadcrumb";
 export default function Page() {
+  const name = 'Settings';
   return (
-    <h1>Dashboard Settings</h1>
+    <>
+      <DynamicBreadcrumb namepage={name} />
+      <h1>Dashboard Settings</h1>
+    </>
   );
 }

@@ -11,24 +11,24 @@ body {
 }
 
 *::-webkit-scrollbar-track { /* For WebKit-based browsers (Chrome, Safari, newer versions of Opera) */
-  background: rgba(240, 240, 240, 0.2);
+  background: rgba(189, 85, 85, 0);
 }
 
 .dark *::-webkit-scrollbar-track {
-  background: rgba(20, 20, 20, 0.2);
+  background: rgba(20, 20, 20, 0);
 }
 
 *::-webkit-scrollbar-thumb { /* For WebKit-based browsers */
-  background-color: silver;
+  background-color: rgb(192, 192, 192);
   border-radius: 9px;
   border: 2px solid rgba(255, 255, 255, 0.2);
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
 .dark *::-webkit-scrollbar-thumb {
-  background-color: #202020;
+  background-color: #34343483;
   border-radius: 9px;
-  border: 2px solid rgba(0, 0, 0, 0.2);
+  border: 2px solid rgba(55, 55, 55, 0.2);
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
 }
 
