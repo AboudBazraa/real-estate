@@ -12,7 +12,7 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/shared/components/ui/sidebar";
-import DynamicBreadcrumb from "@/app/dashboard/components/breadcrumb";
+import DynamicBreadcrumb from "@/app/(dashboard)/components/breadcrumb";
 
 export default function DashboardLayout({ children }) {
   return (

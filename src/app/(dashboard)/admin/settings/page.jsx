@@ -1,4 +1,4 @@
-import DynamicBreadcrumb from "@/app/dashboard/components/breadcrumb";
+import DynamicBreadcrumb from "@/app/(dashboard)/components/breadcrumb";
 export default function Page() {
   const name = 'Settings';
   return (

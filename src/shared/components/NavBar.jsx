@@ -26,7 +26,7 @@ function NavBar() {
               Home
             </Link>
             <Link
-              href="/dashboard"
+              href="/admin"
               className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium"
             >
               Dashboard

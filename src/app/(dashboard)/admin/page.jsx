@@ -1,6 +1,6 @@
-import LayoutDashboard from "@/app/dashboard/layout";
-import DynamicBreadcrumb from "@/app/dashboard/components/breadcrumb";
-export default function Page() {
+import LayoutDashboard from "@/app/(dashboard)/layout";
+import DynamicBreadcrumb from "@/app/(dashboard)/components/breadcrumb";
+export default function AdminPage() {
   const name = "Dashboard";
 
   return (
