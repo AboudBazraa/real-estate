@@ -15,7 +15,7 @@ body {
 }
 
 .dark *::-webkit-scrollbar-track {
-  background: rgba(20, 20, 20, 0);
+  background: none;
 }
 
 *::-webkit-scrollbar-thumb { /* For WebKit-based browsers */
@@ -26,7 +26,7 @@ body {
 }
 
 .dark *::-webkit-scrollbar-thumb {
-  background-color: #34343483;
+  background-color: #202020;
   border-radius: 9px;
   border: 2px solid rgba(55, 55, 55, 0.2);
   transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;

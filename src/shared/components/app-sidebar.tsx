@@ -37,7 +37,7 @@ const data = {
   navMain: [
     {
       title: "Playground",
-      url: "/dashboard",
+      url: "/admin",
       icon: SquareTerminal,
       isActive: true,
       items: [
@@ -102,7 +102,7 @@ const data = {
     },
     {
       title: "Settings",
-      url: "/dashboard/settings",
+      url: "/admin/settings",
       icon: Settings2,
       // items: [
       //   {
