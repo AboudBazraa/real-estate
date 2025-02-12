@@ -38,7 +38,7 @@ function NavBar() {
               Properties
             </Link>
             <Link
-              href="/auth"
+              href="/auth/login"
               className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium"
             >
               Login
