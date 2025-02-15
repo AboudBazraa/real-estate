@@ -1,4 +1,4 @@
-@import 'tailwindcss';
+@import "tailwindcss";
 
 @plugin 'tailwindcss-animate';
 
@@ -41,73 +41,77 @@
 }
 
 @layer utilities {
-  body {
-    font-family: Arial, Helvetica, sans-serif;
-  }
+  
+
   ::-webkit-scrollbar {
-    width: 5px;
-    height: 8px;
+    @apply w-[3px] h-[6px] md:w-[4px] rounded-full;
   }
 
   *::-webkit-scrollbar-track {
-    /* For WebKit-based browsers (Chrome, Safari, newer versions of Opera) */
-    background: rgba(189, 85, 85, 0);
+    @apply bg-transparent;
   }
 
   .dark *::-webkit-scrollbar-track {
-    background: none;
+    @apply bg-transparent;
   }
 
   *::-webkit-scrollbar-thumb {
-    /* For WebKit-based browsers */
-    background-color: rgb(192, 192, 192);
-    border-radius: 9px;
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    transition:
-      background-color 0.2s ease-in-out,
-      border-color 0.2s ease-in-out;
+    @apply bg-gray-500/60 hover:bg-gray-500/80 rounded-full transition-all duration-300 ease-in-out;
+    animation: pulseThumb 1.5s infinite alternate;
   }
 
   .dark *::-webkit-scrollbar-thumb {
-    background-color: #202020;
-    border-radius: 9px;
-    border: 2px solid rgba(55, 55, 55, 0.2);
-    transition:
-      background-color 0.2s ease-in-out,
-      border-color 0.2s ease-in-out;
+    @apply bg-[#2a2a2a] hover:bg-[#3a3a3a] transition-all duration-300 ease-in-out;
+    animation: pulseThumbDark 1.5s infinite alternate;
   }
 
-  /* Firefox-specific styling */
-  @supports (scrollbar-color: silver, rgba(255, 255, 255, 0.2)) {
+  @keyframes pulseThumb {
+    0% {
+      background-color: rgba(107, 114, 128, 0.6);
+      transform: scale(1);
+    }
+    100% {
+      background-color: rgba(107, 114, 128, 0.9);
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes pulseThumbDark {
+    0% {
+      background-color: #2a2a2a;
+      transform: scale(1);
+    }
+    100% {
+      background-color: #3a3a3a;
+      transform: scale(1.05);
+    }
+  }
+
+  @supports (
+    scrollbar-color: silver,
+    rgba(
+      255,
+      255,
+      255,
+      0.2,
+    )
+  ) {
     *::-moz-scrollbar-track {
-      /* For Firefox */
-      background: rgba(240, 240, 240, 0.2);
+      @apply bg-transparent;
     }
     .dark *::-moz-scrollbar-track {
-      background: rgba(20, 20, 20, 0.2);
+      @apply bg-transparent;
     }
     *::-moz-scrollbar-thumb {
-      /* For Firefox */
-      background-color: silver;
-      border-radius: 9px;
-      border: 2px solid rgba(255, 255, 255, 0.2);
-      transition:
-        background-color 0.2s ease-in-out,
-        border-color 0.2s ease-in-out;
+      @apply bg-gray-500/60 hover:bg-gray-500/80 rounded-full transition-all duration-300 ease-in-out;
+      animation: pulseThumb 1.5s infinite alternate;
     }
     .dark *::-moz-scrollbar-thumb {
-      background-color: #202020;
-      border-radius: 9px;
-      border: 2px solid rgba(0, 0, 0, 0.2);
-      transition:
-        background-color 0.2s ease-in-out,
-        border-color 0.2s ease-in-out;
+      @apply bg-[#2a2a2a] hover:bg-[#3a3a3a] transition-all duration-300 ease-in-out;
+      animation: pulseThumbDark 1.5s infinite alternate;
     }
   }
 }
-
-
-
 
 @layer base {
   :root {
@@ -128,7 +132,6 @@
     --sidebar-primary-foreground: 0 0% 100%;
     --sidebar-accent: 240 3.7% 15.9%;
     --sidebar-accent-foreground: 240 4.8% 95.9%;
-    --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
   }
 }

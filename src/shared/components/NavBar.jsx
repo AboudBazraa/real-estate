@@ -10,7 +10,7 @@ function NavBar() {
   const { toast } = useToast();
 
   return (
-    <nav className="bg-gray-800 text-white shadow-lg sticky top-0 z-50 flex items-center justify-between px-4">
+    <nav className="dark:bg-zinc-950/5 h-14 border-b border-zinc-300 dark:border-zinc-800 border-dashed  dark:text-white  sticky top-0 z-50 flex items-center justify-between px-4 backdrop-blur-md">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between">
           <div className="flex items-center">
@@ -44,7 +44,7 @@ function NavBar() {
               Login
             </Link>
             <Link
-              href="/register"
+              href="/auth/registration"
               className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium"
             >
               Register
@@ -54,6 +54,7 @@ function NavBar() {
                 toast({
                   title: "Scheduled: Catch up",
                   description: "Friday, February 10, 2023 at 5:57 PM",
+                  action: '',
                 });
               }}
             >
