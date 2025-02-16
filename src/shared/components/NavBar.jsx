@@ -44,7 +44,7 @@ function NavBar() {
               Login
             </Link>
             <Link
-              href="/auth/registration"
+              href="/auth"
               className="hover:bg-gray-700 px-3 py-2 rounded-md text-sm font-medium"
             >
               Register

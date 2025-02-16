@@ -1,4 +1,3 @@
-"use client";
 import Image from "next/image";
 import NavBar from "../shared/components/NavBar";
 
@@ -8,14 +7,32 @@ export default function Home() {
       <NavBar />
       <div className="flex items-center justify-between justify-items-stretch h-full w-full font-geist-sans absolute top-0">
         <div className=" h-full w-20 border-r border-zinc-300 dark:border-zinc-800 border-dashed "></div>
-        <div className="pt-16 h-full w-full">
-          <Next />
+        <div className="pt-16 p-1 h-full w-full flex flex-col justify-between">
+          <div className="border-2 h-2/5 w-full ">
+            <Next />
+          </div>
+          <div className="w-full h-3/5 bg-zinc-950 shadow dark:bg-black border-2 border-zinc-300 dark:border-zinc-800 rounded-3xl">
+            <SectionAnmation />
+          </div>
         </div>
-          <div className=" w-80 h-full  border-l border-zinc-300 dark:border-zinc-800 border-dashed "></div>
+        <div className=" w-80 h-full  border-l border-zinc-300 dark:border-zinc-800 border-dashed "></div>
       </div>
     </div>
   );
 }
+
+const SectionAnmation = () => {
+  return (
+    <>
+      <div className="w-full h-full rounded-2xl flex">
+        <div className="h-full w-4/5 relative z-10">
+          <div className="h-full w-full absolute top-0 left-48 z-0 bg-gradient-to-l from-zinc-900/50 border backdrop-blur-sm to-zinc-950"></div>
+        </div>
+        <div className="h-full w-full bg-fuchsia-300"></div>
+      </div>
+    </>
+  );
+};
 
 const Next = () => {
   return (

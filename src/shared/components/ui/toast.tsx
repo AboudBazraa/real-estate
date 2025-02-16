@@ -37,7 +37,7 @@ const toastVariants = cva(
         add: "bg-emerald-500 text-white dark:bg-emerald-600",
         remove: "bg-rose-500 text-white dark:bg-rose-600",
         edit: "bg-amber-500 text-white dark:bg-amber-600",
-        error: "bg-red-500 text-white dark:bg-red-600", // Reusing destructive color
+        error: "bg-red-500 text-white dark:bg-red-600", 
       },
     },
     defaultVariants: {
