@@ -24,12 +24,13 @@ const sidebarData = {
           title: "Playground",
           url: "/admin",
           icon: SquareTerminal,
-          isActive: true,
+          isActive: (url, currentUrl) => currentUrl === url,
         },
         {
           title: "Properties Management",
           url: "",
           icon: Bot,
+          isActive: (url, currentUrl) => currentUrl === url,
           items: [
             {
               title: "All Listings",
