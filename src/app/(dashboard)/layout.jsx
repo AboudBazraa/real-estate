@@ -24,6 +24,7 @@ export default function DashboardLayout({ children }) {
         <SidebarInset>
           <Suspense fallback={<Loading />}>
             <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+              <DynamicBreadcrumb />
               {children}
             </div>
           </Suspense>
