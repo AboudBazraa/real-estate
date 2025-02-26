@@ -1,8 +1,20 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Fredericka_the_Great , Abril_Fatface, Abhaya_Libre } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/shared/components/ui/toaster";
 import { ThemeProvider } from "@/shared/components/ThemeProvider";
 import { SessionProvider } from "next-auth/react";
+
+const barriecito = Abhaya_Libre({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-barriecito",
+});
+
+const fredericka = Fredericka_the_Great({
+  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-fredericka",
+});
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -24,7 +36,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={` ${barriecito.variable} antialiased font-barriecito`}
       >
         <ThemeProvider
           attribute="class"
@@ -32,8 +44,8 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-            {children}
-            <Toaster />
+          {children}
+          <Toaster />
         </ThemeProvider>
       </body>
     </html>

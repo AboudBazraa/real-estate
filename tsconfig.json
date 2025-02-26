@@ -39,7 +39,7 @@
     "src/app/properties/page.js",
     "src/app/interactive-map/layout.jsx",
     "src/app/interactive-map/page.jsx"
-, "src/app/(dashboard)/page.jsx", "src/shared/components/ThemeProvider.jsx"  ],
+, "src/app/(dashboard)/page.jsx", "src/shared/components/ThemeProvider.jsx", "src/app/(dashboard)/admin/settings/components/site-settings-form.jsx"  ],
   "exclude": [
     "node_modules"
   ]
