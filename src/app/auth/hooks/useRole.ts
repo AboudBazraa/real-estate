@@ -8,7 +8,7 @@ import Role from '../types/roles';
  */
 export function useRole(): Role {
   const { user, isLoading } = useAuth();
-  const [role, setRole] = useState<Role>(Role.ADMIN);
+  const [role, setRole] = useState<Role>(Role.AGENT);
 
   useEffect(() => {
     if (user && !isLoading) {

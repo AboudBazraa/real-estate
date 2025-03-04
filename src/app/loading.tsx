@@ -1,25 +1,10 @@
-"use client";
-import { useEffect, useState } from "react";
-export default function Loading({ children }) {
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setLoading(false);
-    }, 2000);
-
-    return () => clearTimeout(timer);
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="fixed top-0 left-0 w-screen h-screen flex items-center justify-center bg-white/50 backdrop-blur-xs z-50">
-        <div className="w-16 h-16 border-4 border-t-4 border-gray-200 rounded-full animate-spin">
-          Loading...
-        </div>
+export default function Loading() {
+  return (
+    <div className="fixed inset-0 grid place-items-center bg-background/80 backdrop-blur-sm">
+      <div className="flex flex-col items-center gap-2">
+        <div className="h-12 w-12 animate-spin rounded-full border-4 border-primary border-t-transparent" />
+        <p className="text-sm text-muted-foreground">Loading...</p>
       </div>
-    );
-  }
-
-  return <>{children}</>;
+    </div>
+  );
 }

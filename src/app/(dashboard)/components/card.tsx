@@ -1,4 +1,14 @@
-export default function CardDashboard({ title, icon, value, change, key }) {
+export default function CardDashboard({
+  title,
+  icon,
+  value,
+  change,
+}: {
+  title: string;
+  icon: string;
+  value: number;
+  change: string;
+}) {
   return (
     <div className="rounded-xl border shadow dark:border-zinc-800">
       <div className="p-6 flex flex-row items-center justify-between space-y-0 pb-2">

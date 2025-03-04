@@ -1,8 +1,8 @@
-import { GalleryVerticalEnd } from "lucide-react"
+import { GalleryVerticalEnd } from "lucide-react";
 
-import { RegisterForm } from "@/shared/components/register-form"
-import Image from "next/image"
-import Link from "next/link"
+import { RegisterForm } from "@/shared/components/register-form";
+import Image from "next/image";
+import Link from "next/link";
 
 export default function RegisterPage() {
   return (
@@ -11,7 +11,7 @@ export default function RegisterPage() {
         <div className="flex justify-center gap-2 md:justify-start">
           <Link href="/" className="flex items-center gap-2 font-medium">
             <div className="flex h-6 w-6 items-center justify-center rounded-md bg-slate-900 text-slate-50 dark:bg-slate-50 dark:text-slate-900">
-              <GalleryVerticalEnd className="size-4"/>
+              <GalleryVerticalEnd className="size-4" />
             </div>
             Acme Inc.
           </Link>
@@ -30,5 +30,5 @@ export default function RegisterPage() {
         /> */}
       </div>
     </div>
-  )
+  );
 }

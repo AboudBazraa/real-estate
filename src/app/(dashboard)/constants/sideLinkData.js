@@ -12,6 +12,8 @@ import {
 } from "lucide-react";
 import Roles from "@/app/auth/types/roles";
 
+const isActive = (url, currentUrl) => currentUrl === url;
+
 const sidebarData = {
   [Roles.ADMIN]: {
     user: {
@@ -24,14 +26,13 @@ const sidebarData = {
         title: "Dashboard",
         url: "/admin",
         icon: SquareTerminal,
-        isActive: (url, currentUrl) => currentUrl === url,
+        isActive,
       },
-
       {
         title: "Properties Management",
         url: "/admin/propertyList",
         icon: Bot,
-        isActive: (url, currentUrl) => currentUrl === url,
+        isActive,
         items: [
           {
             title: "All Listings",
@@ -51,7 +52,7 @@ const sidebarData = {
         title: "Users Management",
         url: "/admin/userList",
         icon: BookOpen,
-        isActive: (url, currentUrl) => currentUrl === url,
+        isActive,
         items: [
           {
             title: "Listings All User ",
@@ -71,7 +72,7 @@ const sidebarData = {
         title: "Transactions & Payments",
         url: "/admin/transactions/subscriptions",
         icon: BookOpen,
-        isActive: (url, currentUrl) => currentUrl === url,
+        isActive,
         items: [
           {
             title: "Subscription Plans",
@@ -91,37 +92,11 @@ const sidebarData = {
         title: "Settings",
         url: "/admin/settings",
         icon: Settings2,
+        isActive,
       },
     ],
-    navSecondary: [
-      // {
-      //   title: "Support",
-      //   url: "#",
-      //   icon: LifeBuoy,
-      // },
-      // {
-      //   title: "Feedback",
-      //   url: "#",
-      //   icon: Send,
-      // },
-    ],
-    projects: [
-      // {
-      //   name: "Reports & Analytics",
-      //   url: "#",
-      //   icon: Frame,
-      // },
-      // {
-      //   name: "Sales & Marketing",
-      //   url: "#",
-      //   icon: PieChart,
-      // },
-      // {
-      //   name: "FAQs",
-      //   url: "#",
-      //   icon: Map,
-      // },
-    ],
+    navSecondary: [],
+    projects: [],
   },
   [Roles.AGENT]: {
     user: {
@@ -131,68 +106,54 @@ const sidebarData = {
     },
     navMain: [
       {
-        title: "Playground",
-        url: "/admin",
+        title: "Dashboard",
+        url: "/agent",
         icon: SquareTerminal,
-        isActive: true,
+        isActive,
       },
       {
         title: "My Properties",
-        url: "",
+        url: "/agent/agentProperties",
         icon: Bot,
+        isActive,
         items: [
           {
             title: "View All Properties",
-            url: "",
+            url: "/agent/agentProperties",
           },
           {
             title: "Add New Property",
-            url: "",
-          },
-          {
-            title: "Edit Listings",
-            url: "",
+            url: "/agent/agentProperties/addNewProp",
           },
         ],
       },
       {
         title: "Appointments & Meetings",
-        url: "",
+        url: "/agent/meetings",
         icon: BookOpen,
+        isActive,
         items: [
           {
             title: "Scheduled Visits",
-            url: "",
+            url: "/agent/meetings",
           },
           {
             title: "Meeting Requests",
-            url: "",
+            url: "/agent/meetings/request",
           },
         ],
       },
       {
         title: "Profile & Settings ",
-        url: "/admin/settings",
+        url: "/agent/profile", // Corrected URL
         icon: Settings2,
+        isActive,
         items: [
           {
             title: "Edit Profile",
-            url: "#",
-          },
-          {
-            title: "Change Password",
-            url: "#",
-          },
-          {
-            title: "Notification Preferences",
-            url: "#",
+            url: "/agent/profile",
           },
         ],
-      },
-      {
-        title: "Settings",
-        url: "/admin/settings",
-        icon: Settings2,
       },
     ],
     navSecondary: [

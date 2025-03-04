@@ -44,11 +44,11 @@ export default function AdminPage() {
           </div>
         ))}
       </div>
-      <div className="grid grid-cols-4 md:grid-cols-7 gap-4 mt-4">
-        <div className="rounded-xl border dark:border-zinc-800 shadow md:col-span-1 lg:col-span-2 xl:col-span-4 max-h-96 p-4">
+      <div className="grid grid-cols-1 lg:grid-cols-4 xl:grid-cols-7 gap-4 my-4">
+        <div className="rounded-xl border dark:border-zinc-800 shadow col-span-1 lg:col-span-2 xl:col-span-4 max-h-96 p-4 ">
           <TableDemo />
         </div>
-        <div className="rounded-xl border dark:border-zinc-800 shadow md:col-span-1 lg:col-span-2 xl:col-span-3 h-auto md:h-96">
+        <div className="rounded-xl border dark:border-zinc-800 shadow col-span-1 lg:col-span-2 xl:col-span-3 h-auto md:h-96">
           <ChartOne />
         </div>
       </div>

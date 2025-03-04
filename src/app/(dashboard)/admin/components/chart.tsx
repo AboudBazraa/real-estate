@@ -3,7 +3,7 @@
 import { TrendingUp } from "lucide-react";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 
-import * as React from "react"
+import * as React from "react";
 import {
   Card,
   CardContent,
@@ -41,8 +41,8 @@ export function ChartOne() {
         <CardTitle>Bar Chart</CardTitle>
         <CardDescription>January - June 2024</CardDescription>
       </CardHeader>
-      <CardContent className="h-full flex flex-col ease-in-out duration-300">
-        <ChartContainer config={chartConfigOne} className="h-full">
+      <CardContent className="h-full flex ease-in-out duration-300">
+        <ChartContainer config={chartConfigOne} className="h-full w-full">
           <BarChart
             accessibilityLayer
             data={chartDataOne}
@@ -76,7 +76,6 @@ export function ChartOne() {
     </Card>
   );
 }
-
 
 const chartDataTwo = [
   { date: "2024-04-01", desktop: 222, mobile: 150 },
@@ -170,7 +169,7 @@ const chartDataTwo = [
   { date: "2024-06-28", desktop: 149, mobile: 200 },
   { date: "2024-06-29", desktop: 103, mobile: 160 },
   { date: "2024-06-30", desktop: 446, mobile: 400 },
-]
+];
 
 const chartConfigTwo = {
   views: {
@@ -184,11 +183,11 @@ const chartConfigTwo = {
     label: "Mobile",
     color: "hsl(var(--chart-2))",
   },
-} satisfies ChartConfig
+} satisfies ChartConfig;
 
 export function ChartTwo() {
   const [activeChart, setActiveChart] =
-    React.useState<keyof typeof chartConfigTwo>("desktop")
+    React.useState<keyof typeof chartConfigTwo>("desktop");
 
   const total = React.useMemo(
     () => ({
@@ -196,7 +195,7 @@ export function ChartTwo() {
       mobile: chartDataTwo.reduce((acc, curr) => acc + curr.mobile, 0),
     }),
     []
-  )
+  );
 
   return (
     <Card className="border-none">
@@ -209,7 +208,7 @@ export function ChartTwo() {
         </div>
         <div className="flex">
           {["desktop", "mobile"].map((key) => {
-            const chart = key as keyof typeof chartConfigTwo
+            const chart = key as keyof typeof chartConfigTwo;
             return (
               <button
                 key={chart}
@@ -224,7 +223,7 @@ export function ChartTwo() {
                   {total[key as keyof typeof total].toLocaleString()}
                 </span>
               </button>
-            )
+            );
           })}
         </div>
       </CardHeader>
@@ -249,11 +248,11 @@ export function ChartTwo() {
               tickMargin={8}
               minTickGap={32}
               tickFormatter={(value) => {
-                const date = new Date(value)
+                const date = new Date(value);
                 return date.toLocaleDateString("en-US", {
                   month: "short",
                   day: "numeric",
-                })
+                });
               }}
             />
             <ChartTooltip
@@ -266,7 +265,7 @@ export function ChartTwo() {
                       month: "short",
                       day: "numeric",
                       year: "numeric",
-                    })
+                    });
                   }}
                 />
               }
@@ -276,5 +275,5 @@ export function ChartTwo() {
         </ChartContainer>
       </CardContent>
     </Card>
-  )
+  );
 }
