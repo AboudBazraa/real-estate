@@ -1,8 +1,8 @@
 import {
   Geist,
   Geist_Mono,
-  Fredericka_the_Great,
-  Abhaya_Libre,
+  Sigmar,
+  Playwrite_IT_Moderna,
 } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/shared/components/ui/toaster";
@@ -11,19 +11,19 @@ import { Suspense } from "react";
 import { ErrorBoundary } from '@/shared/components/ErrorBoundary';
 
 // Optimize font loading
-const barriecito = Abhaya_Libre({
+const playwrite  = Playwrite_IT_Moderna({
   subsets: ["latin"],
   weight: "400",
-  variable: "--font-barriecito",
+  variable: "--font-playwrite",
   display: 'swap',
   preload: true,
   adjustFontFallback: true
 });
 
-const fredericka = Fredericka_the_Great({
+const sigmar = Sigmar({
   subsets: ["latin"],
   weight: "400",
-  variable: "--font-fredericka",
+  variable: "--font-sigmar",
   display: 'swap',
   preload: true,
   adjustFontFallback: true
@@ -69,7 +69,7 @@ export default function RootLayout({ children }) {
     <html 
       lang="en" 
       suppressHydrationWarning
-      className={`${barriecito.variable} ${fredericka.variable} ${geistSans.variable} ${geistMono.variable}`}
+      className={`${sigmar.variable} ${playwrite.variable} ${geistSans.variable} ${geistMono.variable} `}
     >
       <head>
         {/* Preconnect to external domains */}
@@ -100,7 +100,7 @@ export default function RootLayout({ children }) {
             disableTransitionOnChange
             storageKey="real-estate-theme"
           >
-              <main className="min-h-screen">
+              <main className="min-h-screen font-sans">
                 {children}
               </main>
             

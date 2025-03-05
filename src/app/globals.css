@@ -150,8 +150,12 @@
     font-family: var(--font-barriecito);
   }
 
-  .font-fredericka{
-    font-family: var(--font-fredericka);
+  .font-sigmar{
+    font-family: var(--font-sigmar);
+  }
+
+  .font-playwrite{
+    font-family: var(--font-playwrite);
   }
 
   .dark {
@@ -161,4 +165,13 @@
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
   }
+}
+
+body {
+  overflow-x: hidden;
+  height: 100%;
+}
+
+html {
+  scroll-behavior: smooth;
 }

@@ -19,7 +19,7 @@ const Section = () => {
           animateBy="words"
           direction="top"
           // onAnimationComplete={handleAnimationComplete}
-          className="text-5xl mb-8 font-bold italic font-fredericka"
+          className="text-5xl mb-8 font-sigmar "
         />
       </div>
     </>
