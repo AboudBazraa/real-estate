@@ -9,6 +9,8 @@ import { Toaster } from "@/shared/components/ui/toaster";
 import { ThemeProvider } from "@/shared/components/ThemeProvider";
 import { Suspense } from "react";
 import { ErrorBoundary } from '@/shared/components/ErrorBoundary';
+import Providers from "./providers";
+import { ToastProvider } from "@/shared/components/ui/toast"
 
 // Optimize font loading
 const playwrite  = Playwrite_IT_Moderna({
@@ -43,15 +45,21 @@ const geistMono = Geist_Mono({
   preload: true
 });
 
-// Enhanced metadata
-export const metadata = {
-  title: "Real Estate Application",
-  description: "A modern web platform for listing and exploring properties such as land plots, rentals, villas, and apartments.",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+// Enhanced viewport
+export const viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
   themeColor: [
     { media: "(prefers-color-scheme: light)", color: "white" },
     { media: "(prefers-color-scheme: dark)", color: "black" }
   ],
+};
+
+// Enhanced metadata
+export const metadata = {
+  title: "Real Estate Application",
+  description: "A modern web platform for listing and exploring properties such as land plots, rentals, villas, and apartments.",
   openGraph: {
     title: 'Real Estate Application',
     description: 'Explore properties and real estate listings',
@@ -61,7 +69,6 @@ export const metadata = {
     index: true,
     follow: true,
   },
-  manifest: '/manifest.json'
 };
 
 export default function RootLayout({ children }) {
@@ -71,8 +78,7 @@ export default function RootLayout({ children }) {
       suppressHydrationWarning
       className={`${sigmar.variable} ${playwrite.variable} ${geistSans.variable} ${geistMono.variable} `}
     >
-      <head>
-        {/* Preconnect to external domains */}
+      {/* <head>
         <link
           rel="preconnect"
           href="https://fonts.googleapis.com"
@@ -84,32 +90,35 @@ export default function RootLayout({ children }) {
           crossOrigin="anonymous"
         />
         
-        {/* Preload critical assets */}
         <link 
           rel="preload" 
           href="/critical.css" 
           as="style"
         />
-      </head>
+      </head> */}
       <body className="antialiased font-barriecito">
-        <ErrorBoundary fallback={<div>Something went wrong</div>}>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="system"
-            enableSystem
-            disableTransitionOnChange
-            storageKey="real-estate-theme"
-          >
-              <main className="min-h-screen font-sans">
-                {children}
-              </main>
-            
-            {/* Toaster is rendered outside main content flow */}
-            <Suspense fallback={null}>
-              <Toaster />
-            </Suspense>
-          </ThemeProvider>
-        </ErrorBoundary>
+        <ToastProvider>
+          <ErrorBoundary fallback={<div>Something went wrong</div>}>
+            <Providers>
+              <ThemeProvider
+                attribute="class"
+                defaultTheme="system"
+                enableSystem
+                disableTransitionOnChange
+                storageKey="real-estate-theme"
+              >
+                <main className="min-h-screen font-sans">
+                  {children}
+                </main>
+              
+                {/* Toaster is rendered outside main content flow */}
+                <Suspense fallback={null}>
+                  <Toaster />
+                </Suspense>
+              </ThemeProvider>
+            </Providers>
+          </ErrorBoundary>
+        </ToastProvider>
 
         {/* Add performance monitoring in development */}
         {process.env.NODE_ENV === 'development' && (

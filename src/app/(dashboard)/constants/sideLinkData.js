@@ -40,11 +40,11 @@ const sidebarData = {
           },
           {
             title: "Pending Approvals",
-            url: "/admin/propertyList/pending",
+            url: "/admin/pending",
           },
           {
             title: "Categories & Types",
-            url: "/admin/propertyList/categories",
+            url: "/admin/categories",
           },
         ],
       },
@@ -60,31 +60,31 @@ const sidebarData = {
           },
           {
             title: "All Users Permissions",
-            url: "/admin/userList/permissions",
+            url: "/admin/permissions",
           },
           {
             title: "Admin & Roles",
-            url: "/admin/userList/roles",
+            url: "/admin/roles",
           },
         ],
       },
       {
         title: "Transactions & Payments",
-        url: "/admin/transactions/subscriptions",
+        url: "/admin/subscriptions",
         icon: BookOpen,
         isActive,
         items: [
           {
             title: "Subscription Plans",
-            url: "/admin/transactions/subscriptions",
+            url: "/admin/subscriptions",
           },
           {
             title: "Payments & Invoices",
-            url: "/admin/transactions/payments",
+            url: "/admin/payments",
           },
           {
             title: "Agent Commissions",
-            url: "/admin/transactions/commissions",
+            url: "/admin/commissions",
           },
         ],
       },
@@ -123,7 +123,7 @@ const sidebarData = {
           },
           {
             title: "Add New Property",
-            url: "/agent/agentProperties/addNewProp",
+            url: "/agent/addNewProp",
           },
         ],
       },
@@ -139,7 +139,7 @@ const sidebarData = {
           },
           {
             title: "Meeting Requests",
-            url: "/agent/meetings/request",
+            url: "/agent/request",
           },
         ],
       },

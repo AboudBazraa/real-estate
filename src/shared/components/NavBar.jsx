@@ -6,12 +6,20 @@ import { Mode } from "./ui/modetoggle";
 import { useToast } from "../hooks/use-toast";
 import { Button } from "./ui/button";
 import ToolbarExpandable from "./animation/ToolbarExpandable";
-import { MenuSquare, HomeIcon, Sun, Moon } from "lucide-react";
+import {
+  MenuSquare,
+  HomeIcon,
+  Sun,
+  Moon,
+  UserCircle,
+  LogOut,
+} from "lucide-react";
+import { useAuth } from "@/app/auth/hooks/useAuth";
 
-const ITEMS = [
+const getNavItems = (user, handleLogout) => [
   {
     id: 1,
-    label: "Messages",
+    label: "Menu",
     title: (
       <div className="space-x-2 w-32 flex items-center justify-center">
         <MenuSquare className="h-5 w-5" />
@@ -19,25 +27,54 @@ const ITEMS = [
       </div>
     ),
     content: (
-      <div className="flex flex-col space-y-1 w-full ">
-        <Link
-          href="/agent"
-          className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 focus-visible:ring-2 active:scale-[0.98]"
-        >
-          Dashboard
-        </Link>
+      <div className="flex flex-col space-y-1 w-full">
         <Link
           href="/"
           className="relative h-8 w-full scale-100 select-none appearance-none flex items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 focus-visible:ring-2 active:scale-[0.98]"
         >
           Home
         </Link>
-        <Link
-          href="/about"
-          className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 focus-visible:ring-2 active:scale-[0.98]"
-        >
-          About
-        </Link>
+        {user ? (
+          <>
+            {user.role === "Admin" ? (
+              <Link
+                href={"/admin"}
+                className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 focus-visible:ring-2 active:scale-[0.98]"
+              >
+                Dashboard
+              </Link>
+            ) : (
+              <Link
+                href={"/agent"}
+                className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 focus-visible:ring-2 active:scale-[0.98]"
+              >
+                Dashboard
+              </Link>
+            )}
+            <button
+              onClick={handleLogout}
+              className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-red-600 focus-visible:ring-2 active:scale-[0.98] gap-2"
+            >
+              <LogOut className="h-4 w-4" />
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link
+              href="/auth/login"
+              className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 focus-visible:ring-2 active:scale-[0.98]"
+            >
+              Login
+            </Link>
+            <Link
+              href="/auth/registration"
+              className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 focus-visible:ring-2 active:scale-[0.98]"
+            >
+              Register
+            </Link>
+          </>
+        )}
       </div>
     ),
   },
@@ -60,8 +97,27 @@ const ITEMS = [
 ];
 
 function NavBar() {
-  const [isOpen, setIsOpen] = useState(false);
+  const { user, logout } = useAuth();
   const { toast } = useToast();
+  const [isOpen, setIsOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Logged out successfully",
+        variant: "success",
+      });
+    } catch (error) {
+      toast({
+        title: "Logout failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const ITEMS = getNavItems(user, handleLogout);
 
   return (
     <motion.nav
@@ -84,8 +140,16 @@ function NavBar() {
               Almukalla
             </Link>
           </motion.div>
-          <div className="flex gap-14">
-            <ToolbarExpandable ITEMS={ITEMS} />
+          <div className="flex items-center gap-4">
+            {user && (
+              <div className="flex items-center gap-2 text-sm">
+                <UserCircle className="h-5 w-5" />
+                <span>{user.email}</span>
+              </div>
+            )}
+            <div className="flex gap-14">
+              <ToolbarExpandable ITEMS={ITEMS} />
+            </div>
           </div>
         </div>
       </div>

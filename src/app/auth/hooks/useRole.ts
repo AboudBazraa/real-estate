@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react';
-import { useAuth } from './useAuth';
-import Role from '../types/roles';
+import { useEffect, useState } from "react";
+import { useAuth } from "./useAuth";
+import Role from "../types/roles";
 
 /**
  * Hook to determine the user's role based on their token
@@ -8,18 +8,16 @@ import Role from '../types/roles';
  */
 export function useRole(): Role {
   const { user, isLoading } = useAuth();
-  const [role, setRole] = useState<Role>(Role.AGENT);
+  const [role, setRole] = useState<Role>(Role.USER);
 
   useEffect(() => {
     if (user && !isLoading) {
       // Get role from user object
       if (user.role === Role.ADMIN) {
         setRole(Role.ADMIN);
-      } 
-      else if (user.role === Role.AGENT) {
+      } else if (user.role === Role.AGENT) {
         setRole(Role.AGENT);
-      }
-      else {
+      } else {
         setRole(Role.USER);
       }
     }

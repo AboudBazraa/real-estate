@@ -1,15 +1,19 @@
+'use client';
+import { useState } from "react";
 import { Button } from "@/shared/components/ui/button"
 import {
   Card,
   CardContent,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/shared/components/ui/card"
 import { Badge } from "@/shared/components/ui/badge"
 import { Calendar, Clock, MapPin, Search, User } from "lucide-react"
 import { Input } from "@/shared/components/ui/input"
+import { useToast } from "@/shared/hooks/use-toast"
 
-const meetingRequests = [
+const initialMeetingRequests = [
   {
     id: "req-1",
     propertyTitle: "Modern Apartment in Downtown",
@@ -52,15 +56,50 @@ const meetingRequests = [
 ]
 
 export default function MeetingRequestsPage() {
-  const pendingRequestsCount = meetingRequests.filter(
-    (req) => req.status === "Pending"
-  ).length
+  const [meetingRequests, setMeetingRequests] = useState(initialMeetingRequests);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const { toast } = useToast();
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const filteredRequests = meetingRequests.filter((request) =>
+    request.propertyTitle.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  const handleAcceptRequest = (id) => {
+    setMeetingRequests((prev) =>
+      prev.map((request) =>
+        request.id === id ? { ...request, status: "Accepted" } : request
+      )
+    );
+    toast({ title: "Request Accepted", description: "You have accepted the request." });
+  };
+
+  const handleDeclineRequest = (id) => {
+    setMeetingRequests((prev) =>
+      prev.map((request) =>
+        request.id === id ? { ...request, status: "Declined" } : request
+      )
+    );
+    toast({ title: "Request Declined", description: "You have declined the request." });
+  };
+
+  const handleRequestClick = (request) => {
+    setSelectedRequest(request);
+  };
+
+  const handleModalClose = () => {
+    setSelectedRequest(null);
+  };
 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-          <h1 className="text-2xl font-bold tracking-tight">Meeting Requests</h1>
-        </div>
+        <h1 className="text-2xl font-bold tracking-tight">Meeting Requests</h1>
+      </div>
       <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
         <div className="relative w-full md:w-96">
           <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
@@ -68,22 +107,36 @@ export default function MeetingRequestsPage() {
             type="search"
             placeholder="Search requests..."
             className="w-full pl-8"
+            value={searchTerm}
+            onChange={handleSearchChange}
           />
+        </div>
+        <Badge className="w-fit">
+          {meetingRequests.filter((req) => req.status === "Pending").length} Pending Requests
+        </Badge>
       </div>
-        <Badge className="w-fit">{pendingRequestsCount} Pending Requests</Badge>
-              </div>
       <div className="space-y-4">
-        {meetingRequests.map((request) => (
-          <MeetingRequestCard key={request.id} request={request} />
+        {filteredRequests.map((request) => (
+          <MeetingRequestCard
+            key={request.id}
+            request={request}
+            onAccept={handleAcceptRequest}
+            onDecline={handleDeclineRequest}
+            onClick={handleRequestClick}
+          />
         ))}
       </div>
+
+      {selectedRequest && (
+        <RequestDetailsModal request={selectedRequest} onClose={handleModalClose} />
+      )}
     </div>
   )
 }
 
-function MeetingRequestCard({ request }) {
+function MeetingRequestCard({ request, onAccept, onDecline, onClick }) {
   return (
-    <Card>
+    <Card onClick={() => onClick(request)} className="cursor-pointer">
       <CardHeader className="pb-2">
         <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
           <CardTitle className="text-base">{request.propertyTitle}</CardTitle>
@@ -116,10 +169,12 @@ function MeetingRequestCard({ request }) {
             </div>
           </div>
           <div className="flex gap-2">
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={(e) => { e.stopPropagation(); onDecline(request.id); }}>
               Decline
             </Button>
-            <Button size="sm">Accept</Button>
+            <Button size="sm" onClick={(e) => { e.stopPropagation(); onAccept(request.id); }}>
+              Accept
+            </Button>
           </div>
         </div>
 
@@ -129,4 +184,27 @@ function MeetingRequestCard({ request }) {
       </CardContent>
     </Card>
   )
+}
+
+function RequestDetailsModal({ request, onClose }) {
+  return (
+    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
+      <Card className="w-96">
+        <CardHeader>
+          <CardTitle>{request.propertyTitle}</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <p><strong>Client Name:</strong> {request.clientName}</p>
+          <p><strong>Client Phone:</strong> {request.clientPhone}</p>
+          <p><strong>Client Email:</strong> {request.clientEmail}</p>
+          <p><strong>Requested Date:</strong> {request.requestedDate}</p>
+          <p><strong>Requested Time:</strong> {request.requestedTime}</p>
+          <p><strong>Message:</strong> {request.message}</p>
+        </CardContent>
+        <CardFooter>
+          <Button onClick={onClose}>Close</Button>
+        </CardFooter>
+      </Card>
+    </div>
+  );
 }

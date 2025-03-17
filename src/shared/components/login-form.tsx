@@ -9,32 +9,38 @@ import Link from "next/link";
 import { useState, useRef } from "react";
 import { useToast } from "../hooks/use-toast";
 
+interface LoginFormProps {
+  className?: string;
+  handleLogin: (username: string, password: string) => Promise<void>;
+  isLoading: boolean;
+}
+
 export function LoginForm({
   className,
+  handleLogin,
+  isLoading,
   ...props
-}: React.ComponentPropsWithoutRef<"div">) {
+}: LoginFormProps) {
   const [data, setData] = useState(false);
-  const phoneRef = useRef<HTMLInputElement>(null);
+  const [username, setUsername] = useState("");
+  const userNameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
 
-
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    const phoneValue = phoneRef.current?.value.trim();
-
     if (!data) {
-      if (!phoneValue) {
+      const username = userNameRef.current?.value.trim();
+      if (!username) {
         toast({
           title: "Error",
-          description: "Phone number is required",
+          description: "Username is required",
           variant: "destructive",
         });
         return;
       }
-
-      phoneValue === "123" && setData(true);
-      phoneRef.current!.value = "";
+      setUsername(username);
+      setData(true);
     } else {
       const password = passwordRef.current?.value.trim();
       if (!password) {
@@ -45,17 +51,7 @@ export function LoginForm({
         });
         return;
       }
-
-      if (password.length < 8) {
-        toast({
-          title: "Error",
-          description: "Password must be at least 8 characters",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      alert("Phone and Password submitted successfully!");
+      await handleLogin(username, password);
     }
   };
 
@@ -88,7 +84,7 @@ export function LoginForm({
             <Logininput
               data={data}
               setData={setData}
-              phoneRef={phoneRef}
+              userNameRef={userNameRef}
               passwordRef={passwordRef}
               handleSubmit={handleSubmit}
             />
@@ -106,7 +102,7 @@ export function LoginForm({
 const Logininput = ({
   data,
   setData,
-  phoneRef,
+  userNameRef,
   passwordRef,
   handleSubmit,
 }) => {
@@ -115,20 +111,32 @@ const Logininput = ({
   return (
     <>
       <div className="flex flex-col gap-6 transition-all duration-300">
-        <div className="relative">
-          <Label htmlFor={data ? "password" : "phone"}>
-            {data ? "Password" : "Phone Number"}
-          </Label>
+        {!data ? (
           <div className="relative">
-            <Input
-              id={data ? "password" : "phone"}
-              type={data ? (showPassword ? "text" : "password") : "tel"}
-              ref={data ? passwordRef : phoneRef}
-              placeholder={data ? "********" : "+1 (123) 456-7890"}
-              required
-              className="transition-all duration-300 opacity-70 ease-in-out "
-            />
-            {data && (
+            <Label htmlFor="username">Username</Label>
+            <div className="relative">
+              <Input
+                id="username"
+                type="text"
+                ref={userNameRef}
+                placeholder="Username"
+                required
+                className="transition-all duration-300 opacity-70 ease-in-out"
+              />
+            </div>
+          </div>
+        ) : (
+          <div className="relative">
+            <Label htmlFor="password">Password</Label>
+            <div className="relative">
+              <Input
+                id="password"
+                type={showPassword ? "text" : "password"}
+                ref={passwordRef}
+                placeholder="********"
+                required
+                className="transition-all duration-300 opacity-70 ease-in-out"
+              />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
@@ -166,9 +174,9 @@ const Logininput = ({
                   </svg>
                 )}
               </button>
-            )}
+            </div>
           </div>
-        </div>
+        )}
         <Button
           onClick={handleSubmit}
           type="submit"

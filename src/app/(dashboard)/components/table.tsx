@@ -35,11 +35,12 @@ import {
   TableHeader,
   TableRow,
 } from "@/shared/components/ui/table";
+import { PROPERTY_TYPES } from "@/app/(dashboard)/constants/propertype"; // Adjust the import path as necessary
 
 interface Property {
   id: string;
   title: string;
-  type: string;
+  type: number; // Change to number to match the PROPERTY_TYPES
   location: string;
   agent: string;
   price: number;
@@ -75,15 +76,21 @@ export const columns: ColumnDef<Property>[] = [
   {
     accessorKey: "type",
     header: "Type",
+    cell: ({ row }) => {
+      const typeLabel = Object.keys(PROPERTY_TYPES).find(
+        (key) => PROPERTY_TYPES[key] === row.getValue("type")
+      );
+      return <div>{typeLabel || "Unknown"}</div>; 
+    },
   },
   {
     accessorKey: "location",
     header: "Location",
   },
-  {
-    accessorKey: "agent",
-    header: "Agent",
-  },
+  // {
+  //   accessorKey: "agent",
+  //   header: "Agent",
+  // },
   {
     accessorKey: "price",
     header: "Price",
@@ -110,7 +117,7 @@ export const columns: ColumnDef<Property>[] = [
               <Button variant="ghost" className="h-8 w-8 p-0">
                 <span className="sr-only">Open menu</span>
                 <MoreHorizontal />
-          </Button>
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuLabel>Actions</DropdownMenuLabel>
@@ -120,16 +127,25 @@ export const columns: ColumnDef<Property>[] = [
             </DropdownMenuContent>
           </DropdownMenu>
         </div>
-  );
+      );
     },
   },
 ];
 
-export function DataTableDemo({data}) {
+export function DataTableDemo({ data }) {
   const [sorting, setSorting] = React.useState<SortingState>([]);
-  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>([]);
-  const [columnVisibility, setColumnVisibility] = React.useState<VisibilityState>({});
+  const [columnFilters, setColumnFilters] = React.useState<ColumnFiltersState>(
+    []
+  );
+  const [columnVisibility, setColumnVisibility] =
+    React.useState<VisibilityState>({});
   const [rowSelection, setRowSelection] = React.useState({});
+
+  // Count properties by type
+  const typeCounts = data.reduce((acc, property) => {
+    acc[property.type] = (acc[property.type] || 0) + 1;
+    return acc;
+  }, {});
 
   const table = useReactTable({
     data,
@@ -158,7 +174,7 @@ export function DataTableDemo({data}) {
           value={(table.getColumn("title")?.getFilterValue() as string) ?? ""}
           onChange={(event) =>
             table.getColumn("title")?.setFilterValue(event.target.value)
-}
+          }
           className="max-w-sm"
         />
         <DropdownMenu>

@@ -1,3 +1,4 @@
+"use client";
 import { Badge } from "@/shared/components/ui/badge";
 import { Button } from "@/shared/components/ui/button";
 import {
@@ -17,6 +18,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import CardDashboard from "@/app/(dashboard)/components/card";
+import { useState } from "react";
 
 interface CardDashboard {
   title: string;
@@ -105,6 +107,13 @@ const properties: Property[] = [
 ];
 
 export default function AgentDashboard() {
+  const [filter, setFilter] = useState("All");
+  const [showModal, setShowModal] = useState(false);
+
+  const filteredProperties = properties.filter(
+    (property) => filter === "All" || property.status === filter
+  );
+
   return (
     <div className="space-y-8">
       <div className="flex items-center justify-between">
@@ -116,14 +125,13 @@ export default function AgentDashboard() {
             </p>
           </div>
         </div>
-        <Button asChild>
-          <Link href="/properties/add">
+        <Button asChild onClick={() => setShowModal(true)}>
+          <Link href="#">
             <Plus className="mr-2 h-4 w-4" />
             Add Property
           </Link>
         </Button>
       </div>
-
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
         {CardDashboardData.map((card) => (
           <CardDashboard
@@ -135,8 +143,9 @@ export default function AgentDashboard() {
           />
         ))}
       </div>
-      <RecentProperties properties={properties} />
+      <RecentProperties properties={filteredProperties} />
       <UpcomingAppointmentsAndRecentActivity />
+      {showModal && <AddPropertyModal />}
     </div>
   );
 }
@@ -159,7 +168,7 @@ const RecentProperties = ({ properties }: { properties: Property[] }) => (
     </div>
 
     <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-      {properties.map((property) => (
+      {properties.slice(0, 3).map((property) => (
         <PropertyCard key={property.id} property={property} />
       ))}
     </div>
@@ -176,8 +185,13 @@ const UpcomingAppointmentsAndRecentActivity = () => (
 const UpcomingAppointments = () => (
   <Card className="col-span-full lg:col-span-8">
     <CardHeader>
-      <CardTitle className="text-lg font-semibold">Upcoming Appointments</CardTitle>
-      <Link href="/appointments/scheduled" className="text-sm font-medium text-primary hover:underline">
+      <CardTitle className="text-lg font-semibold">
+        Upcoming Appointments
+      </CardTitle>
+      <Link
+        href="/appointments/scheduled"
+        className="text-sm font-medium text-primary hover:underline"
+      >
         View all <ArrowUpRight className="h-4 w-4 inline-block ml-1" />
       </Link>
     </CardHeader>
@@ -228,3 +242,8 @@ const RecentActivity = () => (
     </CardContent>
   </Card>
 );
+
+const AddPropertyModal = () => {
+  // Implement modal logic here
+  return <div>{/* Modal content for adding a property */}</div>;
+};

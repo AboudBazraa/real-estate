@@ -1,3 +1,5 @@
+"use client";
+
 import { Suspense } from "react";
 import {
   CreditCard,
@@ -8,16 +10,12 @@ import {
   Shield,
   Users,
 } from "lucide-react";
-
-// import { MobileNav } from "@/components/layout/mobile-nav";
-// import { SidebarNav } from "@/components/layout/sidebar-nav";
-// import { SearchCommand } from "@/components/settings/search-command";
+import { Button } from "@/shared/components/ui/button";
+import { useToast } from "@/shared/hooks/use-toast";
 import { SectionCard } from "@/app/(dashboard)/admin/settings/components/section-card";
 import { SiteSettingsForm } from "@/app/(dashboard)/admin/settings/components/site-settings-form";
 import { SettingItem } from "@/app/(dashboard)/admin/settings/components/setting-item";
-// import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-// import { getSiteSettings } from "@/lib/actions";
-// import type { NavigationItem } from "@/types/settings";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/components/ui/tabs";
 
 const navigationItems = [
   {
@@ -58,26 +56,23 @@ const navigationItems = [
   },
 ];
 
-export default async function SettingsPage({ searchParams }) {
-  // const siteSettings = await getSiteSettings();
-  // const activeTab = searchParams.tab || "general";
+export default function SettingsPage() {
+  const { toast } = useToast();
+
+  const handleSaveSettings = () => {
+    // Simulate saving settings
+    toast({
+      title: "Settings Saved",
+      description: "Your settings have been saved successfully.",
+      variant: "success",
+    });
+  };
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar Navigation */}
-      {/* <aside className="hidden w-64 flex-col border-r bg-muted/40 lg:flex">
-        <div className="border-b p-6">
-          <h2 className="flex items-center gap-2 text-lg font-semibold">
-            <LayoutDashboard className="h-5 w-5" />
-            Admin Dashboard
-          </h2>
-        </div>
-        <SidebarNav items={navigationItems} />
-      </aside> */}
-
       {/* Main Content */}
-      <main className="flex-1">
-        <div className="container max-w-6xl space-y-8 p-6 pb-16">
+      <main className="flex-1 ">
+        <div className="container space-y-8 p-6 pb-16 ">
           {/* Header with Search */}
           <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
             <div className="space-y-0.5">
@@ -86,26 +81,27 @@ export default async function SettingsPage({ searchParams }) {
                 Manage your website settings and preferences
               </p>
             </div>
-            {/* <SearchCommand /> */}
           </div>
 
           {/* Settings Sections */}
-          {/* <Tabs defaultValue={activeTab} className="space-y-4">
-            <TabsList className="grid w-full grid-cols-2 lg:grid-cols-4">
+          <Tabs defaultValue="general" className="space-y-4 w-full flex flex-col gap-10">
+            <TabsList className="grid w-full grid-cols-3 lg:grid-cols-6 gap-4">
               <TabsTrigger value="general">General</TabsTrigger>
-              <TabsTrigger value="property">Property</TabsTrigger>
+              <TabsTrigger value="users">User Management</TabsTrigger>
               <TabsTrigger value="security">Security</TabsTrigger>
+              <TabsTrigger value="customization">Customization</TabsTrigger>
               <TabsTrigger value="integrations">Integrations</TabsTrigger>
-            </TabsList> */}
+              <TabsTrigger value="billing">Billing</TabsTrigger>
+            </TabsList>
 
             {/* General Settings */}
-            {/* <TabsContent value="general" className="space-y-4"> */}
+            <TabsContent value="general" className="space-y-4">
               <Suspense fallback={<div>Loading...</div>}>
                 <SectionCard
                   title="Site Information"
                   description="Configure your website details and branding"
                 >
-                  <SiteSettingsForm />
+                  <SiteSettingsForm onSave={handleSaveSettings} />
                 </SectionCard>
               </Suspense>
 
@@ -126,30 +122,31 @@ export default async function SettingsPage({ searchParams }) {
                   />
                 </div>
               </SectionCard>
-            {/* </TabsContent> */}
+            </TabsContent>
 
-            {/* Property Settings */}
-            {/* <TabsContent value="property" className="space-y-4">
+            {/* User Management Settings */}
+            <TabsContent value="users" className="space-y-4">
               <SectionCard
-                title="Property Configuration"
-                description="Manage property listing settings and workflows"
+                title="User Management"
+                description="Manage user accounts and permissions"
               >
                 <div className="space-y-4">
                   <SettingItem
-                    title="Property Approval"
-                    description="Require approval for new property listings"
+                    title="Enable User Registration"
+                    description="Allow users to register on the site"
+                    checked={true}
                   />
                   <SettingItem
-                    title="Featured Properties"
-                    description="Allow featured property listings"
-                    checked={true}
+                    title="Require Email Verification"
+                    description="Require users to verify their email addresses"
+                    checked={false}
                   />
                 </div>
               </SectionCard>
-            </TabsContent> */}
+            </TabsContent>
 
             {/* Security Settings */}
-            {/* <TabsContent value="security" className="space-y-4">
+            <TabsContent value="security" className="space-y-4">
               <SectionCard
                 title="Authentication"
                 description="Configure security and authentication settings"
@@ -167,10 +164,31 @@ export default async function SettingsPage({ searchParams }) {
                   />
                 </div>
               </SectionCard>
-            </TabsContent> */}
+            </TabsContent>
+
+            {/* Customization Settings */}
+            <TabsContent value="customization" className="space-y-4">
+              <SectionCard
+                title="Site Customization"
+                description="Customize the look and feel of your site"
+              >
+                <div className="space-y-4">
+                  <SettingItem
+                    title="Enable Dark Mode"
+                    description="Allow users to switch to dark mode"
+                    checked={false}
+                  />
+                  <SettingItem
+                    title="Custom Logo"
+                    description="Upload a custom logo for your site"
+                    checked={false}
+                  />
+                </div>
+              </SectionCard>
+            </TabsContent>
 
             {/* Integration Settings */}
-            {/* <TabsContent value="integrations" className="space-y-4">
+            <TabsContent value="integrations" className="space-y-4">
               <SectionCard
                 title="Payment Gateways"
                 description="Configure payment processing integrations"
@@ -184,11 +202,33 @@ export default async function SettingsPage({ searchParams }) {
                   <SettingItem
                     title="PayPal Integration"
                     description="Accept PayPal payments"
+                    checked={false}
                   />
                 </div>
               </SectionCard>
-            </TabsContent> */}
-          {/* </Tabs> */}
+            </TabsContent>
+
+            {/* Billing Settings */}
+            <TabsContent value="billing" className="space-y-4">
+              <SectionCard
+                title="Billing Information"
+                description="Manage billing and subscription settings"
+              >
+                <div className="space-y-4">
+                  <SettingItem
+                    title="Billing Address"
+                    description="Update your billing address"
+                    checked={false}
+                  />
+                  <SettingItem
+                    title="Payment Method"
+                    description="Manage your payment methods"
+                    checked={false}
+                  />
+                </div>
+              </SectionCard>
+            </TabsContent>
+          </Tabs>
         </div>
       </main>
     </div>

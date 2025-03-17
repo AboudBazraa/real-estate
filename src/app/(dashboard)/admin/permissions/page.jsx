@@ -2,6 +2,7 @@
 
 import * as React from "react";
 import { Button } from "@/shared/components/ui/button";
+import { useToast } from "@/shared/hooks/use-toast";
 import {
   Card,
   CardContent,
@@ -26,6 +27,7 @@ import {
 } from "@/shared/components/ui/tabs";
 import { Key, Save } from "lucide-react";
 
+// Static data
 const roles = [
   "super-admin",
   "property-admin",
@@ -55,17 +57,55 @@ const permissionGroups = [
   },
 ];
 
+// Static permission presets for each role
+const rolePermissions = {
+  "super-admin": {
+    "properties-view": true,
+    "properties-create": true,
+    "properties-edit": true,
+    "properties-delete": true,
+    "properties-approve": true,
+    "users-view": true,
+    "users-create": true,
+    "users-edit": true,
+    "users-delete": true,
+    "roles-view": true,
+    "roles-create": true,
+    "roles-edit": true,
+    "roles-delete": true,
+    "settings-view": true,
+    "settings-edit": true,
+  },
+  "property-admin": {
+    "properties-view": true,
+    "properties-create": true,
+    "properties-edit": true,
+    "properties-delete": false,
+    "properties-approve": true,
+    "users-view": true,
+    "users-create": false,
+    "users-edit": false,
+    "users-delete": false,
+    "roles-view": false,
+    "roles-create": false,
+    "roles-edit": false,
+    "roles-delete": false,
+    "settings-view": true,
+    "settings-edit": false,
+  },
+  // Add more role presets as needed
+};
+
 export default function PermissionsPage() {
+  const { toast } = useToast();
   const [selectedRole, setSelectedRole] = React.useState(roles[0]);
-  const [permissions, setPermissions] = React.useState(() => {
-    const initialPermissions = {};
-    permissionGroups.forEach((group) => {
-      group.permissions.forEach((permission) => {
-        initialPermissions[`${group.name.toLowerCase()}-${permission}`] = true;
-      });
-    });
-    return initialPermissions;
-  });
+  const [permissions, setPermissions] = React.useState(rolePermissions[roles[0]]);
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  // Update permissions when role changes
+  React.useEffect(() => {
+    setPermissions(rolePermissions[selectedRole] || {});
+  }, [selectedRole]);
 
   const handlePermissionChange = (group, permission, checked) => {
     setPermissions((prev) => ({
@@ -80,21 +120,38 @@ export default function PermissionsPage() {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(" ");
 
+  const handleSave = () => {
+    setIsLoading(true);
+    // Simulate API call
+    setTimeout(() => {
+      console.log("Saved permissions:", {
+        role: selectedRole,
+        permissions: permissions,
+      });
+      
+      toast({
+        variant: "success",
+        title: "Success",
+        description: `Permissions for ${formatRoleName(selectedRole)} have been updated`,
+      });
+      
+      setIsLoading(false);
+    }, 1000);
+  };
+
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between"><div className="flex flex-col "> 
-        <h1 className="text-3xl font-bold">Permissions Management</h1>
-        <p className="text-muted-foreground">
-          Configure permissions for different roles
-        </p>
+      <div className="flex items-center justify-between">
+        <div className="flex flex-col">
+          <h1 className="text-3xl font-bold">Permissions Management</h1>
+          <p className="text-muted-foreground">
+            Configure permissions for different roles
+          </p>
         </div>
-        <Button>
-          <Save className="mr-2 h-4 w-4" />
-          Save Changes
-        </Button>
       </div>
 
       <div className="grid gap-6 md:grid-cols-4">
+        {/* Role Selector Card */}
         <Card className="md:col-span-1">
           <CardHeader>
             <CardTitle>Select Role</CardTitle>
@@ -116,11 +173,12 @@ export default function PermissionsPage() {
           </CardContent>
         </Card>
 
+        {/* Permissions Card */}
         <Card className="md:col-span-3">
           <CardHeader>
-            <CardTitle>
-              <Key className="mr-2 h-5 w-5" /> Permissions for{" "}
-              {formatRoleName(selectedRole)}
+            <CardTitle className="flex items-center">
+              <Key className="mr-2 h-5 w-5" />
+              Permissions for {formatRoleName(selectedRole)}
             </CardTitle>
             <CardDescription>
               Configure what this role can do in the system
@@ -155,14 +213,10 @@ export default function PermissionsPage() {
                           checked={
                             permissions[
                               `${group.name.toLowerCase()}-${permission}`
-                            ]
+                            ] || false
                           }
-                          onChange={(e) =>
-                            handlePermissionChange(
-                              group,
-                              permission,
-                              e.target.checked
-                            )
+                          onCheckedChange={(checked) =>
+                            handlePermissionChange(group, permission, checked)
                           }
                         />
                         <Label
@@ -171,8 +225,7 @@ export default function PermissionsPage() {
                           {permission.charAt(0).toUpperCase() +
                             permission.slice(1)}{" "}
                           {group.name.slice(0, -1)}
-                        </Label>{" "}
-                        {/* Add space and singularize group name */}
+                        </Label>
                       </div>
                     ))}
                   </div>
@@ -184,9 +237,13 @@ export default function PermissionsPage() {
       </div>
 
       <div className="flex justify-end">
-        <Button className="w-full md:w-auto">
+        <Button
+          onClick={handleSave}
+          disabled={isLoading}
+          className="w-full md:w-auto"
+        >
           <Save className="mr-2 h-4 w-4" />
-          Save Permissions
+          {isLoading ? "Saving..." : "Save Permissions"}
         </Button>
       </div>
     </div>
