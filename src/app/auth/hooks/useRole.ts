@@ -1,31 +1,27 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "./useAuth";
-import Roles from "../types/roles";
+import Role from "../types/roles";
 
 /**
- * Hook to determine the user's role based on metadata from Supabase
- * @returns {Roles} The user's role
+ * Hook to determine the user's role based on their token
+ * @returns {Role} The user's role
  */
-export function useRole() {
-  const { user, loading } = useAuth();
-  const [role, setRole] = useState(Roles.GUEST);
+export function useRole(): Role {
+  const { user, isLoading } = useAuth();
+  const [role, setRole] = useState<Role>(Role.USER);
 
   useEffect(() => {
-    if (user && !loading) {
-      // Get role from user metadata
-      const userRole = (user.user_metadata?.role || Roles.USER).toLowerCase();
-
-      if (userRole === Roles.ADMIN.toLowerCase()) {
-        setRole(Roles.ADMIN);
-      } else if (userRole === Roles.AGENT.toLowerCase()) {
-        setRole(Roles.AGENT);
+    if (user && !isLoading) {
+      // Get role from user object
+      if (user.role === Role.ADMIN) {
+        setRole(Role.ADMIN);
+      } else if (user.role === Role.AGENT) {
+        setRole(Role.AGENT);
       } else {
-        setRole(Roles.USER);
+        setRole(Role.USER);
       }
-    } else {
-      setRole(Roles.GUEST);
     }
-  }, [user, loading]);
+  }, [user, isLoading]);
 
   return role;
 }

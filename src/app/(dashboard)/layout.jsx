@@ -1,5 +1,3 @@
-"use client";
-
 import { AppSidebar } from "@/shared/components/app-sidebar";
 import {
   Breadcrumb,
@@ -16,24 +14,20 @@ import {
 } from "@/shared/components/ui/sidebar";
 import DynamicBreadcrumb from "@/app/(dashboard)/components/breadcrumb";
 import { Suspense } from "react";
-import { UserProvider } from "@/shared/providers/UserProvider";
-import { SupabaseProvider } from "@/shared/providers/SupabaseProvider";
 // import Loading from "./loading";
 
 export default function DashboardLayout({ children }) {
   return (
-    <SupabaseProvider>
-      <UserProvider>
-        <SidebarProvider>
-          <AppSidebar />
-          <SidebarInset>
-            <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-              <DynamicBreadcrumb />
-              <Suspense fallback={<h1>Loading...</h1>}>{children}</Suspense>
-            </div>
-          </SidebarInset>
-        </SidebarProvider>
-      </UserProvider>
-    </SupabaseProvider>
+    <>
+      <SidebarProvider>
+        <AppSidebar />
+        <SidebarInset>
+          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
+            <DynamicBreadcrumb />
+            <Suspense fallback={<h1>Loading...</h1>}>{children}</Suspense>
+          </div>
+        </SidebarInset>
+      </SidebarProvider>
+    </>
   );
 }

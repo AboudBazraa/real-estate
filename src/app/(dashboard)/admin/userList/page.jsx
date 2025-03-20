@@ -36,80 +36,115 @@ import {
   Upload,
   UserPlus,
 } from "lucide-react";
+import { useApiQuery, useApiMutation } from "@/shared/hooks/useApi";
 import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/shared/components/ui/card";
-import { createClient } from "@/shared/utils/supabase/client";
-import {
-  Avatar,
-  AvatarFallback,
-  AvatarImage,
-} from "@/shared/components/ui/avatar";
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogOverlay,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import { renderUserCard } from "./renderUserCard";
 import { UserActionsDropdown } from "./UserActionsDropdown";
-import Roles from "@/app/auth/types/roles";
-import { useToast } from "@/shared/hooks/use-toast";
+
+const users = [
+  {
+    id: 1,
+    name: "John Smith",
+    email: "john.smith@example.com",
+    role: "Admin",
+    status: "active",
+    lastActive: "2 hours ago",
+    permissions: ["Full Access"],
+    avatar: "",
+  },
+  {
+    id: 2,
+    name: "Sarah Johnson",
+    email: "sarah.j@example.com",
+    role: "Senior Agent",
+    status: "active",
+    lastActive: "5 minutes ago",
+    permissions: ["Create", "Edit", "Delete", "Approve"],
+    avatar: "",
+  },
+  {
+    id: 3,
+    name: "Michael Chen",
+    email: "michael.c@example.com",
+    role: "Agent",
+    status: "active",
+    lastActive: "1 day ago",
+    permissions: ["Create", "Edit"],
+    avatar: "",
+  },
+  {
+    id: 4,
+    name: "Emily Rodriguez",
+    email: "emily.r@example.com",
+    role: "Agent",
+    status: "inactive",
+    lastActive: "2 weeks ago",
+    permissions: ["Create", "Edit"],
+    avatar: "",
+  },
+  {
+    id: 5,
+    name: "David Kim",
+    email: "david.k@example.com",
+    role: "Client",
+    status: "active",
+    lastActive: "3 days ago",
+    permissions: ["View"],
+    avatar: "",
+  },
+  {
+    id: 6,
+    name: "Jessica Lee",
+    email: "jessica.l@example.com",
+    role: "Admin",
+    status: "active",
+    lastActive: "1 hour ago",
+    permissions: ["Full Access"],
+    avatar: "",
+  },
+];
+
+const initialUserState = { id: null, username: "", email: "", role: "" };
 
 export default function UsersPage() {
   const [searchQuery, setSearchQuery] = React.useState("");
   const [selectedRole, setSelectedRole] = React.useState("all");
-  const [users, setUsers] = React.useState([]);
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [isError, setIsError] = React.useState(false);
-  const supabase = createClient();
-  const { toast } = useToast();
+  const [selectedStatus, setSelectedStatus] = React.useState("all");
+  const [isModalOpen, setIsModalOpen] = React.useState(false);
+  const [editingUser, setEditingUser] = React.useState(initialUserState);
 
-  // Fetch all users from Supabase
-  const fetchUsers = React.useCallback(async () => {
-    setIsLoading(true);
-    try {
-      // This requires admin privileges in Supabase
-      const { data, error } = await supabase.rpc("get_all_users");
+  const { data, isPending, isError, error } = useApiQuery(["users"], {
+    url: "/User/GetAll",
+  });
 
-      if (error) {
-        throw error;
-      }
+  // Convert data to array and handle undefined/null cases
+  const users = React.useMemo(() => {
+    if (!data) return [];
+    return Array.isArray(data)
+      ? data
+      : Array.isArray(data.data)
+      ? data.data
+      : Array.isArray(data.users)
+      ? data.users
+      : [];
+  }, [data]);
+  // console.log(users.id);
 
-      setUsers(data || []);
-      setIsError(false);
-    } catch (error) {
-      console.error("Error fetching users:", error);
-      setIsError(true);
-      toast({
-        title: "Error fetching users",
-        description:
-          error.message ||
-          "Could not load users. You might not have admin privileges.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  }, [supabase, toast]);
-
-  // Load users on component mount
-  React.useEffect(() => {
-    fetchUsers();
-  }, [fetchUsers]);
-
-  // Filter users based on search query and role
   const filteredUsers = React.useMemo(() => {
     return users.filter((user) => {
       if (!user) return false;
 
-      // Extract user metadata
-      const username =
-        user.user_metadata?.username || user.email?.split("@")[0] || "";
-      const role = user.user_metadata?.role || "";
-      const email = user.email || "";
-
-      const searchableFields = [username, email, role].map((field) =>
-        String(field).toLowerCase()
-      );
+      const searchableFields = [
+        user.username || "",
+        user.email || "",
+        user.role || "",
+      ].map((field) => String(field).toLowerCase());
 
       const searchWords = searchQuery.toLowerCase().split(" ").filter(Boolean);
 
@@ -118,82 +153,76 @@ export default function UsersPage() {
         searchWords.every((word) =>
           searchableFields.some((field) => field.includes(word))
         );
-
       const roleMatch =
         selectedRole === "all" ||
-        role.toLowerCase() === selectedRole.toLowerCase();
+        (user.role || "").toLowerCase() === selectedRole.toLowerCase();
 
       return searchMatch && roleMatch;
     });
   }, [users, searchQuery, selectedRole]);
 
-  // Helper function to count users by role
+  // Helper functions for counting users by role
   const countByRole = (roleType) => {
-    return users.filter(
-      (user) =>
-        user?.user_metadata?.role?.toLowerCase() === roleType.toLowerCase()
-    ).length;
+    return users.filter((user) => user?.role === roleType).length;
   };
 
-  const handleRefresh = () => {
-    fetchUsers();
+  // Function to handle closing the modal
+  const closeEditModal = () => {
+    setIsModalOpen(false);
+    setEditingUser(initialUserState);
   };
 
-  // Render user card
-  const renderUserCard = (user) => {
-    if (!user) return null;
+  // Function to handle role update
 
-    const username =
-      user.user_metadata?.username || user.email?.split("@")[0] || "User";
-    const role = user.user_metadata?.role || "user";
-    const userInitial = username ? username[0].toUpperCase() : "?";
-    const lastActive = user.last_sign_in_at
-      ? new Date(user.last_sign_in_at).toLocaleString()
-      : "Never";
-
-    return (
-      <Card key={user.id} className="overflow-hidden">
-        <CardHeader className="pb-2">
-          <CardTitle className="flex items-center justify-between text-base">
-            <span>{username}</span>
-            <UserActionsDropdown user={user} onRefresh={handleRefresh} />
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-12 w-12 rounded-full">
-              <AvatarImage src={user.user_metadata?.avatar} alt={username} />
-              <AvatarFallback className="bg-slate-200 dark:bg-slate-700 text-center text-2xl">
-                {userInitial}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-medium">{user.email}</p>
-              <div className="flex items-center gap-2">
-                <p className="text-sm text-muted-foreground capitalize">
-                  {role}
-                </p>
-                <div
-                  className={`h-1.5 w-1.5 rounded-full ${
-                    user.last_sign_in_at ? "bg-green-500" : "bg-red-500"
-                  }`}
-                ></div>
-                <span className="text-xs text-muted-foreground">
-                  {user.last_sign_in_at ? "active" : "inactive"}
-                </span>
-              </div>
-            </div>
-          </div>
-          <div className="mt-4 text-xs text-muted-foreground">
-            <p>Last active: {lastActive}</p>
-            <p>User ID: {user.id}</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
+  const roleMapping = {
+    admin: 0,
+    agent: 1,
+    user: 2,
   };
 
-  // Export and Import dropdown
+  const handleRoleChange = (value) => {
+    setEditingUser((prev) => ({ ...prev, role: value })); // Update the editingUser state
+  };
+
+  // const UserStatus = ({ role, status, lastActive }) => (
+  //   <div className="flex items-center gap-2">
+  //     <span className="text-sm text-muted-foreground">{role}</span>
+  //     <div
+  //       className={`h-1.5 w-1.5 rounded-full ${
+  //         status === "active" ? "bg-green-500" : "bg-red-500"
+  //       }`}
+  //     ></div>
+  //     <span className="text-xs capitalize text-muted-foreground">{status}</span>
+  //   </div>
+  // );
+
+  // const UserPermissions = ({ permissions }) => (
+  //   <div className="mt-4">
+  //     <p className="text-xs font-medium mb-1">Permissions:</p>
+  //     <div className="flex flex-wrap gap-1">
+  //       {permissions.map((permission, i) => (
+  //         <span
+  //           key={i}
+  //           className="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-semibold"
+  //         >
+  //           {permission}
+  //         </span>
+  //       ))}
+  //     </div>
+  //   </div>
+  // );
+
+  // const CardActions = ({ userId }) => (
+  //   <div className="flex gap-2">
+  //     <Button variant="outline" size="sm" className="flex-1">
+  //       Edit
+  //     </Button>
+  //     <Button variant="outline" size="sm" className="flex-1">
+  //       Permissions
+  //     </Button>
+  //   </div>
+  // );
+
   const ExportImportDropdown = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
@@ -221,122 +250,175 @@ export default function UsersPage() {
     </DropdownMenu>
   );
 
-  // Filter section
   const FilterSection = () => (
-    <div className="flex items-center gap-2">
-      <Label htmlFor="role-filter" className="sr-only">
-        Filter by role
-      </Label>
-      <Select value={selectedRole} onValueChange={setSelectedRole}>
-        <SelectTrigger id="role-filter" className="h-8 w-[150px] flex gap-1">
-          <Filter className="h-3.5 w-3.5" />
-          <span>Role: {selectedRole}</span>
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="all">All Roles</SelectItem>
-          <SelectItem value={Roles.ADMIN}>Admin</SelectItem>
-          <SelectItem value={Roles.AGENT}>Agent</SelectItem>
-          <SelectItem value={Roles.USER}>User</SelectItem>
-        </SelectContent>
-      </Select>
-    </div>
-  );
+    <div className="flex flex-col gap-4 md:flex-row md:items-center">
+      <div className="relative flex-1">
+        <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <Input
+          type="text"
+          placeholder="Search users..."
+          className="pl-8"
+          value={searchQuery}
+          onChange={() => setSearchQuery(e.target.value)}
+          autoComplete="off"
+        />
+      </div>
+      <div className="flex gap-2">
+        <Select value={selectedRole} onValueChange={setSelectedRole}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Filter by role" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Roles</SelectItem>
+            <SelectItem value="admin">Admin</SelectItem>
+            <SelectItem value="senior agent">Senior Agent</SelectItem>
+            <SelectItem value="agent">Agent</SelectItem>
+            <SelectItem value="client">Client</SelectItem>
+          </SelectContent>
+        </Select>
 
-  // Search section
-  const SearchSection = () => (
-    <div className="relative">
-      <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-      <Input
-        type="search"
-        placeholder="Search users..."
-        className="w-full bg-background pl-8 text-sm"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
+        <Select value={selectedStatus} onValueChange={setSelectedStatus}>
+          <SelectTrigger className="w-[160px]">
+            <SelectValue placeholder="Filter by status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Status</SelectItem>
+            <SelectItem value="active">Active</SelectItem>
+            <SelectItem value="inactive">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+
+        <Button variant="outline" size="icon">
+          <Filter className="h-4 w-4" />
+        </Button>
+      </div>
     </div>
   );
 
   return (
-    <div className="flex h-full flex-1 flex-col gap-4 p-4 md:p-8">
+    <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-semibold">Users</h1>
-        <Button>
-          <UserPlus className="mr-2 h-4 w-4" />
-          Add User
-        </Button>
-      </div>
-
-      <Tabs defaultValue="all" className="h-full">
-        <div className="flex items-center justify-between">
-          <TabsList className="grid w-fit grid-cols-4">
-            <TabsTrigger value="all" className="px-4">
-              All Users ({users.length})
-            </TabsTrigger>
-            <TabsTrigger value="admin" className="px-4">
-              Admins ({countByRole(Roles.ADMIN)})
-            </TabsTrigger>
-            <TabsTrigger value="agent" className="px-4">
-              Agents ({countByRole(Roles.AGENT)})
-            </TabsTrigger>
-            <TabsTrigger value="user" className="px-4">
-              Users ({countByRole(Roles.USER)})
-            </TabsTrigger>
-          </TabsList>
+        <div>
+          <h1 className="text-3xl font-bold">User Management</h1>
+          <p className="text-muted-foreground">
+            Manage users and their access to the system
+          </p>
+        </div>
+        <div className="flex gap-2">
           <ExportImportDropdown />
         </div>
+      </div>
 
-        <div className="mt-4 flex flex-col gap-4 md:flex-row">
-          <SearchSection />
-          <FilterSection />
-        </div>
+      <FilterSection />
 
-        <TabsContent
-          value="all"
-          className="h-full flex-1 data-[state=active]:flex data-[state=active]:flex-col"
-        >
-          {isLoading ? (
-            <div className="flex h-40 items-center justify-center">
-              <p>Loading users...</p>
-            </div>
-          ) : isError ? (
-            <div className="flex h-40 items-center justify-center">
-              <p>Error loading users. Please try again.</p>
-            </div>
-          ) : filteredUsers.length === 0 ? (
-            <div className="flex h-40 items-center justify-center">
-              <p>No users found.</p>
-            </div>
-          ) : (
-            <div className="grid gap-4 pt-4 md:grid-cols-2 lg:grid-cols-3">
-              {filteredUsers.map((user) => renderUserCard(user))}
-            </div>
-          )}
-        </TabsContent>
+      <Tabs defaultValue="all" className="space-y-4">
+        <TabsList>
+          <TabsTrigger value="all">All Users ({users.length})</TabsTrigger>
+          <TabsTrigger value="admins">
+            Admins ({countByRole("Admin")})
+          </TabsTrigger>
+          <TabsTrigger value="agents">
+            Agents ({countByRole("Agent")})
+          </TabsTrigger>
+          <TabsTrigger value="users">Users ({countByRole("User")})</TabsTrigger>
+        </TabsList>
 
-        <TabsContent value="admin">
-          <div className="grid gap-4 pt-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredUsers
-              .filter((user) => user?.user_metadata?.role === Roles.ADMIN)
-              .map((user) => renderUserCard(user))}
+        {isPending ? (
+          <div className="flex justify-center items-center min-h-[200px]">
+            <p className="text-muted-foreground">Loading users...</p>
           </div>
-        </TabsContent>
-
-        <TabsContent value="agent">
-          <div className="grid gap-4 pt-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredUsers
-              .filter((user) => user?.user_metadata?.role === Roles.AGENT)
-              .map((user) => renderUserCard(user))}
+        ) : isError ? (
+          <div className="flex justify-center items-center min-h-[200px]">
+            <p className="text-destructive">Error: {error?.message}</p>
           </div>
-        </TabsContent>
+        ) : (
+          <>
+            <TabsContent value="all" className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-3">
+                {filteredUsers.map((user) => renderUserCard(user))}
+              </div>
+            </TabsContent>
 
-        <TabsContent value="user">
-          <div className="grid gap-4 pt-4 md:grid-cols-2 lg:grid-cols-3">
-            {filteredUsers
-              .filter((user) => user?.user_metadata?.role === Roles.USER)
-              .map((user) => renderUserCard(user))}
-          </div>
-        </TabsContent>
+            <TabsContent value="admins" className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-3">
+                {filteredUsers
+                  .filter((user) => user?.role === "Admin")
+                  .map(renderUserCard)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="agents" className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-3">
+                {filteredUsers
+                  .filter((user) => user?.role === "Agent")
+                  .map(renderUserCard)}
+              </div>
+            </TabsContent>
+
+            <TabsContent value="users" className="space-y-4">
+              <div className="grid gap-4 md:grid-cols-3">
+                {filteredUsers
+                  .filter((user) => user?.role === "User")
+                  .map(renderUserCard)}
+              </div>
+            </TabsContent>
+          </>
+        )}
       </Tabs>
+      {/* <Dialog open={isModalOpen} onOpenChange={closeEditModal}>
+        <DialogOverlay className="fixed inset-0 bg-black opacity-30" />
+        <DialogContent className="p-4">
+          <DialogTitle className="text-lg font-bold">Edit User</DialogTitle>
+          <div className="flex flex-col space-y-4">
+            <Input
+              label="Username"
+              value={editingUser.username || ""}
+              onChange={(e) =>
+                setEditingUser({ ...editingUser, username: e.target.value })
+              }
+              placeholder="Enter username"
+            />
+            <Input
+              label="Email"
+              value={editingUser.email || ""}
+              onChange={(e) =>
+                setEditingUser({ ...editingUser, email: e.target.value })
+              }
+              placeholder="Enter email"
+            />
+            <Select
+              value={editingUser.role || ""}
+              onValueChange={handleRoleChange}
+            >
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="admin">Admin</SelectItem>
+                <SelectItem value="agent">Agent</SelectItem>
+                <SelectItem value="user">User</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter className="flex justify-end space-x-2">
+            <Button variant="outline" onClick={closeEditModal}>
+              Cancel
+            </Button>
+            <Button
+              onClick={() => {
+                if (editingUser.id) {
+                  updateUserRole(editingUser.id, editingUser.role);
+                } else {
+                  console.error("User ID is undefined");
+                }
+                closeEditModal();
+              }}
+            >
+              Save
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog> */}
     </div>
   );
 }
