@@ -34,6 +34,8 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardDescription,
+  CardFooter,
 } from "@/shared/components/ui/card";
 import {
   Tabs,
@@ -66,7 +68,7 @@ import {
   formatCurrency,
   formatDate,
   timeAgo,
-} from "@/shared/utils/property-utils";
+} from "@/shared/utils/property-util";
 
 // Extend the DashboardStats interface to include additional properties
 interface ExtendedDashboardStats extends DashboardStats {
@@ -189,6 +191,65 @@ const ActivitySkeleton = () => (
   </div>
 );
 
+// Add getAgentStats function or modify existing one
+async function getAgentStats(supabase, userId) {
+  const stats = {
+    totalMeetings: 0,
+    pendingRequests: 0,
+    completedDeals: 0,
+    propertyCount: 0,
+  };
+
+  try {
+    // Get meetings count
+    const { data: meetings, error: meetingsError } = await supabase
+      .from("meetings")
+      .select("*", { count: "exact" })
+      .eq("agent_id", userId);
+
+    if (!meetingsError) {
+      stats.totalMeetings = meetings?.length || 0;
+    }
+
+    // Get pending requests count
+    const { data: requests, error: requestsError } = await supabase
+      .from("agent_requests")
+      .select("*", { count: "exact" })
+      .eq("agent_id", userId)
+      .eq("status", "pending");
+
+    if (!requestsError) {
+      stats.pendingRequests = requests?.length || 0;
+    }
+
+    // Get completed deals count
+    const { data: deals, error: dealsError } = await supabase
+      .from("agent_deals")
+      .select("*", { count: "exact" })
+      .eq("agent_id", userId)
+      .eq("status", "completed");
+
+    if (!dealsError) {
+      stats.completedDeals = deals?.length || 0;
+    }
+
+    // Get property count
+    const { data: properties, error: propertiesError } = await supabase
+      .from("properties")
+      .select("*", { count: "exact" })
+      .eq("agent_id", userId);
+
+    if (!propertiesError) {
+      stats.propertyCount = properties?.length || 0;
+    }
+
+    return stats;
+  } catch (error) {
+    console.error("Error fetching agent stats:", error);
+    return stats;
+  }
+}
+
 export default function AgentDashboard() {
   const { user, isLoading: userLoading } = useUser();
   const { supabase } = useSupabase();
@@ -221,10 +282,20 @@ export default function AgentDashboard() {
       try {
         setIsLoading(true);
         const dashboardStats = await fetchDashboardStats(supabase, user.id);
+        const { data: propertyCount, error: propertyError } = await supabase
+          .from("properties")
+          .select("id")
+          .eq("agent_id", user.id);
+
+        if (propertyError) {
+          console.error("Error fetching properties:", propertyError);
+        }
+
         setStats({
           ...dashboardStats,
           availablePercentage: 0,
           scheduledViewings: dashboardStats.upcomingAppointments.length,
+          totalProperties: propertyCount?.length || 0,
         });
       } catch (error: any) {
         console.error("Error loading dashboard data:", error);
@@ -316,9 +387,10 @@ export default function AgentDashboard() {
       <div className="flex items-center justify-between space-y-2">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
         <div className="flex items-center space-x-2">
-          <Button asChild>
+          <Button variant="outline" asChild>
             <Link href="/agent/addNewProp">
-              <Plus className="mr-2 h-4 w-4" /> Add Property
+              <Plus className="mr-2 h-4 w-4" />
+              Add Property
             </Link>
           </Button>
         </div>
@@ -458,6 +530,27 @@ export default function AgentDashboard() {
               </Link>
             </div>
           </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Properties</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {stats.totalProperties || 0}
+            </div>
+            <p className="text-xs text-muted-foreground">Listed properties</p>
+          </CardContent>
+          <CardFooter>
+            <Link href="/agent/agentProperties" className="w-full">
+              <Button variant="outline" className="w-full">
+                <span>Manage Properties</span>
+                <ArrowRight className="ml-2 h-4 w-4" />
+              </Button>
+            </Link>
+          </CardFooter>
         </Card>
       </div>
 

@@ -1,11 +1,7 @@
 {
   "compilerOptions": {
     "target": "ES2017",
-    "lib": [
-      "dom",
-      "dom.iterable",
-      "esnext"
-    ],
+    "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
     "strict": false,
@@ -25,9 +21,7 @@
     "strictNullChecks": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ]
+      "@/*": ["src/*"]
     }
   },
   "include": [
@@ -38,9 +32,15 @@
     "src/app/properties/layout.jsx",
     "src/app/properties/page.js",
     "src/app/interactive-map/layout.jsx",
-    "src/app/interactive-map/page.jsx"
-, "src/app/(dashboard)/page.jsx", "src/shared/components/ThemeProvider.jsx", "src/app/(dashboard)/admin/settings/components/site-settings-form.jsx", "src/app/(dashboard)/agent/components/propertyCard.jsx", "src/app/(dashboard)/agent/addNewProp/page.jsx", "src/app/auth/hooks/useAut.js", "src/app/auth/hooks/useRole.ts"  ],
-  "exclude": [
-    "node_modules"
-  ]
+    "src/app/interactive-map/page.jsx",
+    "src/app/(dashboard)/page.jsx",
+    "src/shared/components/ThemeProvider.jsx",
+    "src/app/(dashboard)/admin/settings/components/site-settings-form.jsx",
+    "src/app/(dashboard)/agent/components/propertyCard.jsx",
+    "src/app/(dashboard)/agent/addNewProp/page.jsx",
+    "src/app/auth/hooks/useAut.js",
+    "src/app/auth/hooks/useRole.ts",
+    "src/app/(dashboard)/agent/agentProperties/page.jsx"
+  ],
+  "exclude": ["node_modules"]
 }
