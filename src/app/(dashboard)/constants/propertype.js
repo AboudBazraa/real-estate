@@ -1,10 +1,10 @@
 export const PROPERTY_TYPES = {
-    HOUSE: 0,
-    APARTMENT: 1,
-    CONDO: 2,
-    TOWNHOUSE: 3,
-    VILLA: 4,
-    COMMERCIAL: 5,
+    HOUSE: 'HOUSE',
+    APARTMENT: 'APARTMENT',
+    VILLA: 'VILLA',
+    LAND: 'LAND',
+    COMMERCIAL: 'COMMERCIAL',
+    OTHER: 'OTHER',
 };
 
 export const PropertyTypeLabels = {
@@ -13,5 +13,7 @@ export const PropertyTypeLabels = {
     2: "CONDO",
     3: "TOWNHOUSE",
     4: "VILLA",
-    5: "COMMERCIAL",
+    5: "LAND",
+    6: "COMMERCIAL",
+    7: "OTHER",
 };

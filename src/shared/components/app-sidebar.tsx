@@ -53,7 +53,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       <SidebarContent>
         <NavMain items={data[role]?.navMain || []} />
         <NavProjects projects={data[role]?.projects || []} />
-        <NavSecondary items={ data[role]?.navSecondary || [] } />
+        <NavSecondary items={data[role]?.navSecondary || []} />
       </SidebarContent>
       <SidebarFooter>
         <NavUser user={data[role]?.user || []} />

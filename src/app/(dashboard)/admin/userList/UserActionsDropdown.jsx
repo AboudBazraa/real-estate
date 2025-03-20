@@ -24,50 +24,100 @@ import {
   Dialog,
   DialogContent,
   DialogFooter,
+  DialogHeader,
   DialogOverlay,
   DialogTitle,
 } from "@/shared/components/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/components/ui/select";
-
-import { useApiMutation } from "@/shared/hooks/useApi";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
+import { useUpdateUserRole } from "@/app/auth/hooks/useUpdateUserRole";
+import Roles from "@/app/auth/types/roles";
+import { useToast } from "@/shared/hooks/use-toast";
+import { updateUserRole, deleteUser } from "./utils/supabaseAdmin";
 
 // UserActionsDropdown ///////////////////////////////////
-export function UserActionsDropdown({ user, onEdit }) {
+export function UserActionsDropdown({ user, onRefresh }) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [formData, setFormData] = useState({
-    role: user.role,
-    username: user.username,
-    email: user.email,
-  });
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const { toast } = useToast();
+  const [selectedRole, setSelectedRole] = useState(
+    user.user_metadata?.role || Roles.USER
+  );
 
-  const authHeaders = {
-    headers: {
-      Authorization: `Bearer ${localStorage.getItem('token')}`, // Adjust this line based on how you store the token
-    },
+  const handleRoleChange = (value) => {
+    setSelectedRole(value);
   };
 
-  const updateUserRoleMutation = useApiMutation(
-    ["updateUserRole"],
-    { url: `/User/Update/${user.id}`, ...authHeaders },
-    "PUT"
-  );
+  const handleUpdateUserRole = async () => {
+    if (selectedRole === user.user_metadata?.role) {
+      setIsDialogOpen(false);
+      return;
+    }
 
-  const deleteUserMutation = useApiMutation(
-    ["deleteUser"],
-    { url: `/User/Delete/${user.id}`, ...authHeaders },
-    "DELETE"
-  );
+    setIsUpdating(true);
+    try {
+      const { data, error } = await updateUserRole(user.id, selectedRole);
 
-  const handleUpdateUser = async (e) => {
-    e.preventDefault();
-    await updateUserRoleMutation.mutateAsync(formData);
-    setIsDialogOpen(false);
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Role updated",
+        description: `User role has been updated to ${selectedRole}`,
+      });
+
+      if (onRefresh) {
+        onRefresh(); // Refresh the user list after successful update
+      }
+    } catch (error) {
+      console.error("Failed to update user role:", error);
+      toast({
+        title: "Update failed",
+        description: error.message || "Failed to update user role",
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+      setIsDialogOpen(false);
+    }
   };
 
   const handleDeleteUser = async () => {
-    await deleteUserMutation.mutateAsync();
-    setIsDeleteDialogOpen(false);
+    setIsDeleting(true);
+    try {
+      const { data, error } = await deleteUser(user.id);
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "User deleted",
+        description: "The user has been deleted",
+      });
+
+      if (onRefresh) {
+        onRefresh(); // Refresh the user list after successful deletion
+      }
+    } catch (error) {
+      console.error("Failed to delete user:", error);
+      toast({
+        title: "Delete failed",
+        description: error.message || "Failed to delete user",
+        variant: "destructive",
+      });
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+    }
   };
 
   return (
@@ -81,16 +131,15 @@ export function UserActionsDropdown({ user, onEdit }) {
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
           <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={onEdit}>
-            <Pencil className="mr-2 h-4 w-4" />
-            Edit User
-          </DropdownMenuItem>
           <DropdownMenuItem onClick={() => setIsDialogOpen(true)}>
             <Shield className="mr-2 h-4 w-4" />
             Update User Role
           </DropdownMenuItem>
           <DropdownMenuSeparator />
-          <DropdownMenuItem className="text-destructive" onClick={() => setIsDeleteDialogOpen(true)}>
+          <DropdownMenuItem
+            className="text-destructive"
+            onClick={() => setIsDeleteDialogOpen(true)}
+          >
             <Trash2 className="mr-2 h-4 w-4" />
             Delete User
           </DropdownMenuItem>
@@ -100,44 +149,68 @@ export function UserActionsDropdown({ user, onEdit }) {
       <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
         <DialogOverlay />
         <DialogContent>
-          <DialogTitle>Update User Role</DialogTitle>
-          <form onSubmit={handleUpdateUser}>
-            <div>
-              <Select
-                value={formData.role}
-                onValueChange={(value) => setFormData({ ...formData, role: value })}
-                className="text-gray-500"
-              >
-                <SelectTrigger className="w-[180px]">
-                  <SelectValue placeholder="Role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={0}>Admin</SelectItem>
-                  <SelectItem value={1}>Agent</SelectItem>
-                  <SelectItem value={2}>User</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-            <DialogFooter>
-              <Button type="submit">Update</Button>
-              <Button variant="ghost" onClick={() => setIsDialogOpen(false)}>
-                Cancel
-              </Button>
-            </DialogFooter>
-          </form>
+          <DialogHeader>
+            <DialogTitle>Update User Role</DialogTitle>
+          </DialogHeader>
+          <div className="py-4">
+            <p className="mb-2">User: {user.email}</p>
+            <p className="mb-4 text-sm text-muted-foreground">
+              Current role:{" "}
+              <span className="capitalize">
+                {user.user_metadata?.role || "Not set"}
+              </span>
+            </p>
+            <Select value={selectedRole} onValueChange={handleRoleChange}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Select a role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={Roles.USER}>User</SelectItem>
+                <SelectItem value={Roles.AGENT}>Agent</SelectItem>
+                <SelectItem value={Roles.ADMIN}>Admin</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+          <DialogFooter>
+            <Button
+              onClick={handleUpdateUserRole}
+              disabled={isUpdating || selectedRole === user.user_metadata?.role}
+            >
+              {isUpdating ? "Updating..." : "Update Role"}
+            </Button>
+            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
+              Cancel
+            </Button>
+          </DialogFooter>
         </DialogContent>
       </Dialog>
 
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
         <DialogOverlay />
         <DialogContent>
-          <DialogTitle>Confirm Delete</DialogTitle>
-          <p>Are you sure you want to delete this user?</p>
+          <DialogHeader>
+            <DialogTitle>Confirm Delete</DialogTitle>
+          </DialogHeader>
+          <p className="py-4">
+            Are you sure you want to delete the user{" "}
+            <strong>{user.email}</strong>?
+            <br />
+            <span className="text-sm text-muted-foreground">
+              This action cannot be undone.
+            </span>
+          </p>
           <DialogFooter>
-            <Button variant="destructive" onClick={handleDeleteUser}>
-              Delete
+            <Button
+              variant="destructive"
+              onClick={handleDeleteUser}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Deleting..." : "Delete"}
             </Button>
-            <Button variant="ghost" onClick={() => setIsDeleteDialogOpen(false)}>
+            <Button
+              variant="outline"
+              onClick={() => setIsDeleteDialogOpen(false)}
+            >
               Cancel
             </Button>
           </DialogFooter>
