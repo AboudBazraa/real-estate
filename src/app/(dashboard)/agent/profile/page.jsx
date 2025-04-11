@@ -1,7 +1,8 @@
 "use client";
 
 import { useAuth } from "@/app/auth/hooks/useAuth";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/shared/components/ui/button";
 import {
   Card,
@@ -25,7 +26,6 @@ import {
 } from "@/shared/components/ui/tabs";
 import { useRole } from "@/app/auth/hooks/useRole";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   Dialog,
   DialogContent,
@@ -37,18 +37,57 @@ import {
 } from "@/shared/components/ui/dialog";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
-import { LoaderCircle } from "lucide-react";
+import {
+  LoaderCircle,
+  SunMoon,
+  User,
+  Mail,
+  Key,
+  Calendar,
+  Shield,
+  BellRing,
+  LogOut,
+  Lock,
+  Upload,
+  ArrowRightLeft,
+} from "lucide-react";
 import {
   Alert,
   AlertDescription,
   AlertTitle,
 } from "@/shared/components/ui/alert";
+import { useTheme } from "next-themes";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/shared/components/ui/tooltip";
+import { Skeleton } from "@/shared/components/ui/skeleton";
+import { Switch } from "@/shared/components/ui/switch";
+import { Separator } from "@/shared/components/ui/separator";
+import { Badge } from "@/shared/components/ui/badge";
+
+const fadeIn = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { duration: 0.4 } },
+  exit: { opacity: 0, transition: { duration: 0.2 } },
+};
+
+const fadeInUp = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.4 } },
+  exit: { opacity: 0, y: -20, transition: { duration: 0.2 } },
+};
 
 export default function ProfilePage() {
   const { user, loading, logout, updatePassword } = useAuth();
   const currentRole = useRole();
   const router = useRouter();
+  const { theme, setTheme } = useTheme();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
+  const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
+  const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -59,6 +98,26 @@ export default function ProfilePage() {
     success: false,
     error: null,
   });
+
+  const [notifications, setNotifications] = useState({
+    email: true,
+    app: true,
+    marketing: false,
+    updates: true,
+  });
+
+  // Simulate initial loading
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setIsInitialLoad(false);
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, []);
+
+  const toggleTheme = () => {
+    setTheme(theme === "dark" ? "light" : "dark");
+  };
 
   const handlePasswordChange = async (e) => {
     e.preventDefault();
@@ -146,11 +205,30 @@ export default function ProfilePage() {
     setPasswordChangeStatus({ loading: false, success: false, error: null });
   };
 
-  if (loading) {
+  if (loading || isInitialLoad) {
     return (
-      <div className="flex min-h-screen items-center justify-center">
-        <LoaderCircle className="h-8 w-8 animate-spin text-primary" />
-      </div>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        className="flex min-h-screen items-center justify-center"
+      >
+        <div className="flex flex-col items-center gap-4">
+          <motion.div
+            animate={{ rotate: 360 }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "linear" }}
+          >
+            <LoaderCircle className="h-10 w-10 text-primary" />
+          </motion.div>
+          <motion.p
+            className="text-muted-foreground font-medium"
+            animate={{ opacity: [0.6, 1, 0.6] }}
+            transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+          >
+            Loading your profile...
+          </motion.p>
+        </div>
+      </motion.div>
     );
   }
 
@@ -165,223 +243,535 @@ export default function ProfilePage() {
   const role = user.user_metadata?.role || "user";
   const userInitial = username ? username[0].toUpperCase() : "?";
 
+  // Simulate user stats
+  const userStats = {
+    propertiesListed: 12,
+    propertiesSold: 8,
+    totalRating: 4.8,
+    profileCompletion: 85,
+  };
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial="hidden"
+      animate="visible"
       transition={{ duration: 0.4 }}
-      className="container mx-auto"
+      variants={fadeIn}
+      className="container mx-auto p-2 "
     >
-      <div className="mb-5 flex flex-col md:flex-row md:items-center gap-6">
-        <Avatar className="h-20 w-20">
-          <AvatarImage src={user.user_metadata?.avatar} alt={username} />
-          <AvatarFallback className="text-2xl">{userInitial}</AvatarFallback>
-        </Avatar>
-        <div>
-          <h1 className="text-3xl font-bold">{username}</h1>
-          <p className="text-muted-foreground">
-            {user.email} · {role.charAt(0).toUpperCase() + role.slice(1)}
-          </p>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeInUp}
+        className="mb-8 rounded-xl border bg-card p-6 shadow-sm"
+      >
+        <div className="flex flex-col md:flex-row md:items-center gap-6">
+          <div className="relative">
+            <Avatar className="h-24 w-24 border-4 border-background">
+              <AvatarImage src={user.user_metadata?.avatar} alt={username} />
+              <AvatarFallback className="text-3xl">
+                {userInitial}
+              </AvatarFallback>
+            </Avatar>
+            <Dialog
+              open={isUploadModalOpen}
+              onOpenChange={setIsUploadModalOpen}
+            >
+              <DialogTrigger asChild>
+                <Button
+                  size="icon"
+                  className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full shadow-md"
+                  variant="secondary"
+                >
+                  <Upload className="h-4 w-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Upload Profile Picture</DialogTitle>
+                  <DialogDescription>
+                    Choose an image to use as your profile picture
+                  </DialogDescription>
+                </DialogHeader>
+                <div className="space-y-4 py-4">
+                  <div className="flex justify-center">
+                    <Avatar className="h-36 w-36 border-4 border-background">
+                      <AvatarImage
+                        src={user.user_metadata?.avatar}
+                        alt={username}
+                      />
+                      <AvatarFallback className="text-5xl">
+                        {userInitial}
+                      </AvatarFallback>
+                    </Avatar>
+                  </div>
+                  <div className="grid w-full items-center gap-1.5">
+                    <Label htmlFor="picture">Profile Picture</Label>
+                    <Input id="picture" type="file" accept="image/*" />
+                  </div>
+                </div>
+                <DialogFooter>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsUploadModalOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="button">Upload</Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </div>
+
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <h1 className="text-3xl font-bold">{username}</h1>
+              <Badge variant="outline" className="ml-2 flex items-center gap-1">
+                <Shield className="h-3 w-3" />
+                {role.charAt(0).toUpperCase() + role.slice(1)}
+              </Badge>
+            </div>
+            <p className="text-muted-foreground flex items-center gap-1.5">
+              <Mail className="h-4 w-4" /> {user.email}
+            </p>
+            <div className="flex flex-wrap gap-4 mt-4">
+              <div className="flex flex-col items-center">
+                <span className="text-lg font-semibold">
+                  {userStats.propertiesListed}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Properties Listed
+                </span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-lg font-semibold">
+                  {userStats.propertiesSold}
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Properties Sold
+                </span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-lg font-semibold">
+                  {userStats.totalRating}
+                </span>
+                <span className="text-xs text-muted-foreground">Rating</span>
+              </div>
+              <div className="flex flex-col items-center">
+                <span className="text-lg font-semibold">
+                  {userStats.profileCompletion}%
+                </span>
+                <span className="text-xs text-muted-foreground">
+                  Profile Completion
+                </span>
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
+      </motion.div>
 
       <Tabs defaultValue="account" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="account">Account</TabsTrigger>
-          <TabsTrigger value="security">Security</TabsTrigger>
+        <TabsList className="grid grid-cols-3 md:w-[400px]">
+          <TabsTrigger value="account" className="flex items-center gap-2">
+            <User className="h-4 w-4" />
+            <span className="hidden sm:inline">Account</span>
+          </TabsTrigger>
+          <TabsTrigger value="security" className="flex items-center gap-2">
+            <Lock className="h-4 w-4" />
+            <span className="hidden sm:inline">Security</span>
+          </TabsTrigger>
+          <TabsTrigger
+            value="notifications"
+            className="flex items-center gap-2"
+          >
+            <BellRing className="h-4 w-4" />
+            <span className="hidden sm:inline">Notifications</span>
+          </TabsTrigger>
         </TabsList>
 
         <TabsContent value="account" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Account Information</CardTitle>
-              <CardDescription>
-                View and manage your account details
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm font-medium">User ID:</p>
-                <p className="text-sm text-muted-foreground break-all">
-                  {user.id}
-                </p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Email:</p>
-                <p className="text-sm text-muted-foreground">{user.email}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Username:</p>
-                <p className="text-sm text-muted-foreground">{username}</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">Last Sign In:</p>
-                <p className="text-sm text-muted-foreground">
-                  {user.last_sign_in_at
-                    ? new Date(user.last_sign_in_at).toLocaleString()
-                    : "Never"}
-                </p>
-              </div>
-            </CardContent>
-            <CardFooter>
-              <Button variant="outline" onClick={handleLogout}>
-                Sign Out
-              </Button>
-            </CardFooter>
-          </Card>
+          <AnimatePresence mode="wait">
+            <motion.div
+              key="account-tab"
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={fadeInUp}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Account Information</CardTitle>
+                  <CardDescription>
+                    View and manage your personal account details
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1">
+                      <Label className="text-muted-foreground text-xs">
+                        User ID
+                      </Label>
+                      <div className="p-2 rounded-md bg-muted font-mono text-xs break-all">
+                        {user.id}
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label className="text-muted-foreground text-xs">
+                        Email Address
+                      </Label>
+                      <div className="flex justify-between items-center">
+                        <div className="p-2 rounded-md bg-muted text-sm w-full overflow-hidden">
+                          {user.email}
+                        </div>
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="ml-2"
+                          disabled
+                        >
+                          <ArrowRightLeft className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label className="text-muted-foreground text-xs">
+                        Username
+                      </Label>
+                      <div className="flex justify-between items-center">
+                        <Input value={username} className="h-9" readOnly />
+                        <Button variant="ghost" size="icon" className="ml-2">
+                          <ArrowRightLeft className="h-4 w-4" />
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label className="text-muted-foreground text-xs">
+                        Last Sign In
+                      </Label>
+                      <div className="flex items-center gap-2 p-2 rounded-md bg-muted text-sm">
+                        <Calendar className="h-4 w-4 text-muted-foreground" />
+                        {user.last_sign_in_at
+                          ? new Date(user.last_sign_in_at).toLocaleString()
+                          : "Never"}
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <Label className="text-muted-foreground text-xs">
+                      Profile Completion
+                    </Label>
+                    <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
+                      <div
+                        className="h-full bg-primary transition-all"
+                        style={{ width: `${userStats.profileCompletion}%` }}
+                      />
+                    </div>
+                    <p className="text-xs text-muted-foreground">
+                      Your profile is {userStats.profileCompletion}% complete.
+                      Add more details to improve your visibility.
+                    </p>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-between border-t p-6">
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                    onClick={handleLogout}
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign Out
+                  </Button>
+                  <Button>Save Changes</Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
+          </AnimatePresence>
         </TabsContent>
 
         <TabsContent value="security" className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Security Settings</CardTitle>
-              <CardDescription>Manage your account security</CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div>
-                <p className="text-sm font-medium">Password:</p>
-                <p className="text-sm text-muted-foreground">••••••••••</p>
-              </div>
-              <div>
-                <p className="text-sm font-medium">
-                  Two-Factor Authentication:
-                </p>
-                <p className="text-sm text-muted-foreground">Not enabled</p>
-              </div>
-            </CardContent>
-            <CardFooter className="flex flex-col items-start space-y-2">
-              <Dialog
-                open={isPasswordModalOpen}
-                onOpenChange={(open) => {
-                  setIsPasswordModalOpen(open);
-                  if (!open) handleModalClose();
-                }}
-              >
-                <DialogTrigger asChild>
-                  <Button variant="outline">Change Password</Button>
-                </DialogTrigger>
-                <DialogContent className="sm:max-w-[425px]">
-                  <DialogHeader>
-                    <DialogTitle>Change Password</DialogTitle>
-                    <DialogDescription>
-                      Update your password to maintain account security
-                    </DialogDescription>
-                  </DialogHeader>
-
-                  <form
-                    onSubmit={handlePasswordChange}
-                    className="space-y-4 py-4"
-                  >
-                    <AnimatePresence>
-                      {passwordChangeStatus.error && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                        >
-                          <Alert variant="destructive">
-                            <AlertTitle>Error</AlertTitle>
-                            <AlertDescription>
-                              {passwordChangeStatus.error}
-                            </AlertDescription>
-                          </Alert>
-                        </motion.div>
-                      )}
-
-                      {passwordChangeStatus.success && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: "auto" }}
-                          exit={{ opacity: 0, height: 0 }}
-                        >
-                          <Alert className="bg-green-50 text-green-800 border-green-200">
-                            <AlertTitle>Success</AlertTitle>
-                            <AlertDescription>
-                              Your password has been updated successfully!
-                            </AlertDescription>
-                          </Alert>
-                        </motion.div>
-                      )}
-                    </AnimatePresence>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="current-password">Current Password</Label>
-                      <Input
-                        id="current-password"
-                        name="currentPassword"
-                        type="password"
-                        value={passwordData.currentPassword}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="new-password">New Password</Label>
-                      <Input
-                        id="new-password"
-                        name="newPassword"
-                        type="password"
-                        value={passwordData.newPassword}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="confirm-password">
-                        Confirm New Password
-                      </Label>
-                      <Input
-                        id="confirm-password"
-                        name="confirmPassword"
-                        type="password"
-                        value={passwordData.confirmPassword}
-                        onChange={handleInputChange}
-                        required
-                      />
-                    </div>
-
-                    <DialogFooter className="pt-4">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key="security-tab"
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={fadeInUp}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Security Settings</CardTitle>
+                  <CardDescription>
+                    Manage your account security and preferences
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div className="space-y-0.5">
+                        <div className="font-medium">Password</div>
+                        <div className="text-sm text-muted-foreground">
+                          Change your password for improved security
+                        </div>
+                      </div>
                       <Button
-                        type="button"
+                        onClick={() => setIsPasswordModalOpen(true)}
                         variant="outline"
-                        onClick={() => setIsPasswordModalOpen(false)}
-                        disabled={passwordChangeStatus.loading}
+                        className="flex items-center gap-2"
                       >
-                        Cancel
+                        <Key className="h-4 w-4" />
+                        Change Password
                       </Button>
-                      <Button
-                        type="submit"
-                        disabled={
-                          passwordChangeStatus.loading ||
-                          passwordChangeStatus.success
-                        }
-                        className="relative"
-                      >
-                        {passwordChangeStatus.loading ? (
-                          <>
-                            <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />
-                            Updating...
-                          </>
-                        ) : passwordChangeStatus.success ? (
-                          "Updated!"
-                        ) : (
-                          "Update Password"
-                        )}
-                      </Button>
-                    </DialogFooter>
-                  </form>
-                </DialogContent>
-              </Dialog>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <div className="space-y-0.5">
+                        <div className="font-medium">
+                          Two-Factor Authentication
+                        </div>
+                        <div className="text-sm text-muted-foreground">
+                          Add an extra layer of security to your account
+                        </div>
+                      </div>
+                      <Button variant="outline">Set Up</Button>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <div className="space-y-0.5">
+                        <div className="font-medium">Active Sessions</div>
+                        <div className="text-sm text-muted-foreground">
+                          Manage devices where you're currently logged in
+                        </div>
+                      </div>
+                      <Button variant="outline">Manage</Button>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <div className="space-y-0.5">
+                        <div className="font-medium">Account Activity Logs</div>
+                        <div className="text-sm text-muted-foreground">
+                          View a log of activities and events on your account
+                        </div>
+                      </div>
+                      <Button variant="outline">View Logs</Button>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          </AnimatePresence>
+        </TabsContent>
 
-              <Button variant="outline" disabled>
-                Enable Two-Factor Authentication
-              </Button>
-            </CardFooter>
-          </Card>
+        <TabsContent value="notifications" className="space-y-6">
+          <AnimatePresence mode="wait">
+            <motion.div
+              key="notifications-tab"
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={fadeInUp}
+            >
+              <Card>
+                <CardHeader>
+                  <CardTitle>Notification Preferences</CardTitle>
+                  <CardDescription>
+                    Manage how and when you receive notifications
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center">
+                      <div className="space-y-0.5">
+                        <div className="font-medium">Email Notifications</div>
+                        <div className="text-sm text-muted-foreground">
+                          Receive notifications via email
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notifications.email}
+                        onCheckedChange={(checked) =>
+                          setNotifications((prev) => ({
+                            ...prev,
+                            email: checked,
+                          }))
+                        }
+                      />
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <div className="space-y-0.5">
+                        <div className="font-medium">In-App Notifications</div>
+                        <div className="text-sm text-muted-foreground">
+                          Receive notifications within the application
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notifications.app}
+                        onCheckedChange={(checked) =>
+                          setNotifications((prev) => ({
+                            ...prev,
+                            app: checked,
+                          }))
+                        }
+                      />
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <div className="space-y-0.5">
+                        <div className="font-medium">Marketing Emails</div>
+                        <div className="text-sm text-muted-foreground">
+                          Receive emails about new features and promotions
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notifications.marketing}
+                        onCheckedChange={(checked) =>
+                          setNotifications((prev) => ({
+                            ...prev,
+                            marketing: checked,
+                          }))
+                        }
+                      />
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <div className="space-y-0.5">
+                        <div className="font-medium">System Updates</div>
+                        <div className="text-sm text-muted-foreground">
+                          Receive notifications about system changes and updates
+                        </div>
+                      </div>
+                      <Switch
+                        checked={notifications.updates}
+                        onCheckedChange={(checked) =>
+                          setNotifications((prev) => ({
+                            ...prev,
+                            updates: checked,
+                          }))
+                        }
+                      />
+                    </div>
+                  </div>
+                </CardContent>
+                <CardFooter className="flex justify-end">
+                  <Button>Save Preferences</Button>
+                </CardFooter>
+              </Card>
+            </motion.div>
+          </AnimatePresence>
         </TabsContent>
       </Tabs>
+
+      <Dialog
+        open={isPasswordModalOpen}
+        onOpenChange={(open) => {
+          setIsPasswordModalOpen(open);
+          if (!open) handleModalClose();
+        }}
+      >
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Password</DialogTitle>
+            <DialogDescription>
+              Update your password to maintain account security
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            <AnimatePresence>
+              {passwordChangeStatus.error && (
+                <motion.div
+                  key="error"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                >
+                  <Alert variant="destructive">
+                    <AlertTitle>Error</AlertTitle>
+                    <AlertDescription>
+                      {passwordChangeStatus.error}
+                    </AlertDescription>
+                  </Alert>
+                </motion.div>
+              )}
+
+              {passwordChangeStatus.success && (
+                <motion.div
+                  key="success"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{ opacity: 1, height: "auto" }}
+                  exit={{ opacity: 0, height: 0 }}
+                >
+                  <Alert className="bg-green-50 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800">
+                    <AlertTitle>Success</AlertTitle>
+                    <AlertDescription>
+                      Your password has been successfully updated.
+                    </AlertDescription>
+                  </Alert>
+                </motion.div>
+              )}
+            </AnimatePresence>
+
+            <div className="space-y-2">
+              <Label htmlFor="currentPassword">Current Password</Label>
+              <Input
+                id="currentPassword"
+                name="currentPassword"
+                type="password"
+                value={passwordData.currentPassword}
+                onChange={handleInputChange}
+                required
+                autoComplete="current-password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="newPassword">New Password</Label>
+              <Input
+                id="newPassword"
+                name="newPassword"
+                type="password"
+                value={passwordData.newPassword}
+                onChange={handleInputChange}
+                required
+                autoComplete="new-password"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Input
+                id="confirmPassword"
+                name="confirmPassword"
+                type="password"
+                value={passwordData.confirmPassword}
+                onChange={handleInputChange}
+                required
+                autoComplete="new-password"
+              />
+            </div>
+            <DialogFooter>
+              <Button
+                type="submit"
+                disabled={
+                  passwordChangeStatus.loading || passwordChangeStatus.success
+                }
+                className="w-full"
+              >
+                {passwordChangeStatus.loading ? (
+                  <span className="flex items-center">
+                    <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />{" "}
+                    Changing...
+                  </span>
+                ) : (
+                  "Update Password"
+                )}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }
