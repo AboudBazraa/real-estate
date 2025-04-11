@@ -9,7 +9,6 @@ import React, {
 } from "react";
 import { Session, User } from "@supabase/supabase-js";
 import { createClient } from "@/shared/utils/supabase/client";
-import { refreshSession } from "@/shared/utils/supabase/client";
 import { useToast } from "@/shared/hooks/use-toast";
 
 // Define the types for our context
@@ -59,70 +58,32 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
     const initializeAuth = async () => {
       setIsLoading(true);
       try {
-        console.log("SupabaseProvider: Initializing auth");
-
-        // First try to get the session
+        // Get initial session
         const {
           data: { session: initialSession },
           error: sessionError,
         } = await supabase.auth.getSession();
 
-        // If there's a session error, try to refresh the session
-        if (sessionError && sessionError.message === "Auth session missing!") {
-          console.warn(
-            "SupabaseProvider: Session missing, attempting to refresh"
-          );
-          const {
-            isAuthenticated,
-            session: refreshedSession,
-            user: refreshedUser,
-          } = await refreshSession(supabase);
-
-          if (isAuthenticated && refreshedSession) {
-            console.log("SupabaseProvider: Session refreshed successfully");
-            setSession(refreshedSession);
-            setUser(refreshedUser);
-            setUserRole(refreshedUser.user_metadata?.role || null);
-            setIsLoading(false);
-            return;
-          } else {
-            console.log("SupabaseProvider: No session after refresh attempt");
-            // Continue with the null session flow
-          }
-        } else if (sessionError) {
-          console.error("SupabaseProvider: Session error", sessionError);
+        if (sessionError) {
           throw sessionError;
         }
 
         if (initialSession) {
-          console.log(
-            "SupabaseProvider: Session found, user ID:",
-            initialSession.user.id
-          );
           setSession(initialSession);
           setUser(initialSession.user);
           setUserRole(initialSession.user.user_metadata?.role || null);
-        } else {
-          console.log("SupabaseProvider: No session found");
-          // Clear session state, but don't show an error - this is expected for non-logged in users
-          setSession(null);
-          setUser(null);
-          setUserRole(null);
         }
       } catch (error) {
-        console.error("SupabaseProvider: Error initializing auth:", error);
+        console.error("Error initializing auth:", error);
         // Clear any invalid session data
         setSession(null);
         setUser(null);
         setUserRole(null);
-        // Only show toast for errors that aren't just missing session
-        if (error.message !== "Auth session missing!") {
-          toast({
-            title: "Authentication Error",
-            description: "Failed to initialize authentication",
-            variant: "destructive",
-          });
-        }
+        toast({
+          title: "Authentication Error",
+          description: "Failed to initialize authentication",
+          variant: "destructive",
+        });
       } finally {
         setIsLoading(false);
       }
@@ -135,26 +96,14 @@ export function SupabaseProvider({ children }: { children: ReactNode }) {
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange(async (event, newSession) => {
-      console.log("SupabaseProvider: Auth state change:", event);
-
       if (event === "SIGNED_OUT") {
         setSession(null);
         setUser(null);
         setUserRole(null);
       } else if (event === "SIGNED_IN" || event === "TOKEN_REFRESHED") {
-        if (newSession) {
-          console.log(
-            "SupabaseProvider: New session established, user ID:",
-            newSession.user.id
-          );
-          setSession(newSession);
-          setUser(newSession.user);
-          setUserRole(newSession.user?.user_metadata?.role || null);
-        } else {
-          console.warn(
-            "SupabaseProvider: Auth state change event but no session provided"
-          );
-        }
+        setSession(newSession);
+        setUser(newSession?.user || null);
+        setUserRole(newSession?.user?.user_metadata?.role || null);
       }
       setIsLoading(false);
     });

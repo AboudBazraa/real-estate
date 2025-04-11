@@ -1,15 +1,21 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { useSupabase } from "@/shared/providers/SupabaseProvider";
-import { useUser } from "@/shared/providers/UserProvider";
-import { useToast } from "@/shared/hooks/use-toast";
 import { Button } from "@/shared/components/ui/button";
+import { PropertyCard } from "@/app/(dashboard)/agent/components/propertyCard";
+import { SidebarTrigger } from "@/shared/components/ui/sidebar";
 import { Input } from "@/shared/components/ui/input";
-import { PlusCircle, Search, Filter, SlidersHorizontal } from "lucide-react";
-import { PropertyFormModal } from "../components/PropertyFormModal";
-import { PropertyCard } from "../components/PropertyCard";
-import { DeleteConfirmationModal } from "../components/DeleteConfirmationModal";
+import Link from "next/link";
+import { useState, useEffect } from "react";
+import {
+  useSupabaseList,
+  useSupabaseDelete,
+  useSupabaseSubscription,
+} from "@/shared/hooks/useSupabase";
+import { useToast } from "@/shared/hooks/use-toast";
+import { useSearchParams, useRouter } from "next/navigation";
+import { Loader2, Plus, Search, SlidersHorizontal } from "lucide-react";
+import { useUser } from "@/app/providers/UserProvider";
+import { Badge } from "@/shared/components/ui/badge";
 import {
   Select,
   SelectContent,
@@ -18,376 +24,371 @@ import {
   SelectValue,
 } from "@/shared/components/ui/select";
 import {
-  uploadPropertyImage,
-  createPropertyImage,
-} from "@/shared/utils/property-utils.js";
-import {
-  PROPERTY_TYPES,
-  PROPERTY_STATUS,
-} from "@/app/(dashboard)/constants/propertype";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
 
-export default function AgentPropertiesPage() {
-  const { supabase } = useSupabase();
-  const { user } = useUser();
+export default function PropertiesPage() {
   const { toast } = useToast();
+  const { user } = useUser();
+  const router = useRouter();
+  const [searchTerm, setSearchTerm] = useState("");
+  const searchParams = useSearchParams();
+  const filterType = searchParams.get("type");
+  const filterStatus = searchParams.get("status");
+  const sortBy = searchParams.get("sort") || "created_at";
+  const sortOrder = searchParams.get("order") || "desc";
+  const featured = searchParams.get("featured") === "true";
 
-  const [properties, setProperties] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [filterType, setFilterType] = useState("");
-  const [filterStatus, setFilterStatus] = useState("");
-
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [currentProperty, setCurrentProperty] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDeleting, setIsDeleting] = useState(false);
-
-  // Fetch properties on component mount
-  useEffect(() => {
-    fetchProperties();
-
-    // Set up real-time subscription
-    const channel = supabase
-      .channel("agent-properties")
-      .on(
-        "postgres_changes",
-        {
-          event: "*",
-          schema: "public",
-          table: "properties",
-          filter: `agent_id=eq.${user?.id}`,
-        },
-        (payload) => {
-          console.log("Change received!", payload);
-          fetchProperties();
-        }
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [user?.id]);
-
-  // Fetch properties from Supabase
-  const fetchProperties = async () => {
-    if (!user?.id) return;
-
-    setIsLoading(true);
-    try {
-      const { data, error } = await supabase
-        .from("properties")
-        .select(
-          `
-          *,
-          property_images(*)
-        `
-        )
-        .eq("agent_id", user.id)
-        .order("created_at", { ascending: false });
-
-      if (error) throw error;
-
-      // Process the properties to include images array
-      const processedProperties = data.map((property) => {
-        const images =
-          property.property_images?.map((img) => img.image_url) || [];
-        return {
-          ...property,
-          images: images,
-          primaryImage: images[0] || null,
-        };
-      });
-
-      setProperties(processedProperties);
-    } catch (error) {
-      console.error("Error fetching properties:", error);
-      toast({
-        title: "Error",
-        description: "Failed to load properties",
-        variant: "destructive",
-      });
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  // Filter properties based on search query and filters
-  const filteredProperties = properties.filter((property) => {
-    const matchesSearch =
-      !searchQuery ||
-      property.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      property.location.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      property.description.toLowerCase().includes(searchQuery.toLowerCase());
-
-    const matchesType =
-      !filterType ||
-      filterType === "all" ||
-      property.property_type === filterType;
-    const matchesStatus =
-      !filterStatus ||
-      filterStatus === "all" ||
-      property.status === filterStatus;
-
-    return matchesSearch && matchesType && matchesStatus;
+  // Fetch properties with Supabase
+  const {
+    data: properties,
+    isLoading,
+    isError,
+    refetch,
+  } = useSupabaseList("properties", {
+    filters: searchTerm
+      ? [{ column: "title", operator: "ilike", value: `%${searchTerm}%` }]
+      : undefined,
+    eq: [
+      ...(user?.id ? [{ column: "agent_id", value: user.id }] : []),
+      ...(filterType ? [{ column: "property_type", value: filterType }] : []),
+      ...(filterStatus ? [{ column: "status", value: filterStatus }] : []),
+      ...(featured ? [{ column: "featured", value: true }] : []),
+    ],
+    order: { column: sortBy, ascending: sortOrder === "asc" },
   });
 
-  // Handle property submission (add/edit)
-  const handlePropertySubmit = async (propertyData) => {
-    setIsSubmitting(true);
-    try {
-      const isEditing = !!propertyData.id;
-
-      // Prepare the property data
-      const propertyRecord = {
-        title: propertyData.title,
-        description: propertyData.description,
-        price: propertyData.price,
-        property_type: propertyData.type,
-        status: propertyData.status,
-        bedrooms: propertyData.bedrooms,
-        bathrooms: propertyData.bathrooms,
-        area: propertyData.area,
-        location: propertyData.location,
-        agent_id: user.id,
-        ...(isEditing ? {} : { created_at: new Date().toISOString() }),
-        updated_at: new Date().toISOString(),
-      };
-
-      let propertyId;
-
-      if (isEditing) {
-        // Update existing property
-        const { data, error } = await supabase
-          .from("properties")
-          .update(propertyRecord)
-          .eq("id", propertyData.id)
-          .select();
-
-        if (error) throw error;
-        propertyId = propertyData.id;
-      } else {
-        // Insert new property
-        const { data, error } = await supabase
-          .from("properties")
-          .insert(propertyRecord)
-          .select();
-
-        if (error) throw error;
-        propertyId = data[0].id;
-      }
-
-      // Handle image upload if new image is provided
-      if (propertyData.newImage) {
-        // Upload the image
-        const imageUrl = await uploadPropertyImage(
-          propertyData.newImage,
-          supabase,
-          propertyId
-        );
-
-        // Create image record in database
-        await createPropertyImage(
-          supabase,
-          propertyId,
-          imageUrl,
-          true // set as primary image
-        );
-      }
-
-      toast({
-        title: isEditing ? "Property Updated" : "Property Added",
-        description: isEditing
-          ? "Your property has been successfully updated"
-          : "Your new property has been successfully added",
-      });
-
-      // Close the modal and refresh properties
-      isEditing ? setIsEditModalOpen(false) : setIsAddModalOpen(false);
-      fetchProperties();
-    } catch (error) {
-      console.error("Error saving property:", error);
-      toast({
-        title: "Error",
-        description: "Failed to save property",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+  // Setup delete mutation
+  const deleteProperty = useSupabaseDelete("properties", {
+    invalidateQueries: [["properties"]],
+  });
 
   // Handle property deletion
   const handleDeleteProperty = async (propertyId) => {
-    setIsDeleting(true);
     try {
-      // Delete property from Supabase
-      const { error } = await supabase
-        .from("properties")
-        .delete()
-        .eq("id", propertyId);
-
-      if (error) throw error;
-
+      await deleteProperty.mutateAsync({ id: propertyId });
       toast({
-        title: "Property Deleted",
-        description: "Your property has been successfully deleted",
+        title: "Success",
+        description: "Property deleted successfully.",
       });
-
-      // Close the modal and refresh properties
-      setIsDeleteModalOpen(false);
-      setCurrentProperty(null);
-      fetchProperties();
     } catch (error) {
       console.error("Error deleting property:", error);
       toast({
         title: "Error",
-        description: "Failed to delete property",
+        description: "Failed to delete property.",
         variant: "destructive",
       });
-    } finally {
-      setIsDeleting(false);
     }
   };
 
-  // Open edit modal with property data
-  const handleEditProperty = (property) => {
-    setCurrentProperty(property);
-    setIsEditModalOpen(true);
+  // Setup real-time subscription for property changes
+  useSupabaseSubscription("properties", { event: "*" }, (payload) => {
+    refetch();
+  });
+
+  // Apply additional filtering if needed
+  const filteredProperties =
+    properties?.filter((property) => {
+      if (searchTerm) {
+        return (
+          property.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          property.description
+            ?.toLowerCase()
+            .includes(searchTerm.toLowerCase()) ||
+          property.location?.toLowerCase().includes(searchTerm.toLowerCase())
+        );
+      }
+      return true;
+    }) || [];
+
+  const handleSortChange = (value) => {
+    const [sort, order] = value.split("-");
+    const params = new URLSearchParams(searchParams);
+    params.set("sort", sort);
+    params.set("order", order);
+    router.push(`?${params.toString()}`);
   };
 
-  // Open delete confirmation modal
-  const handleDeleteConfirm = (property) => {
-    setCurrentProperty(property);
-    setIsDeleteModalOpen(true);
+  const applyFilter = (param, value) => {
+    const params = new URLSearchParams(searchParams);
+    if (value) {
+      params.set(param, value);
+    } else {
+      params.delete(param);
+    }
+    router.push(`?${params.toString()}`);
   };
+
+  const clearFilters = () => {
+    router.push("");
+  };
+
+  if (isError) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-center">
+          <p className="text-red-500 font-medium mb-2">
+            Failed to load properties
+          </p>
+          <Button variant="outline" onClick={() => refetch()}>
+            Try Again
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  const hasActiveFilters = filterType || filterStatus || featured;
 
   return (
-    <div className="container mx-auto p-4 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <h1 className="text-2xl font-bold">My Properties</h1>
-        <Button onClick={() => setIsAddModalOpen(true)}>
-          <PlusCircle className="mr-2 h-4 w-4" />
-          Add New Property
+    <div className="space-y-8">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <SidebarTrigger />
+          <h1 className="text-2xl font-bold tracking-tight">My Properties</h1>
+          {filteredProperties.length > 0 && (
+            <Badge variant="outline" className="ml-2">
+              {filteredProperties.length}{" "}
+              {filteredProperties.length === 1 ? "property" : "properties"}
+            </Badge>
+          )}
+        </div>
+        <Button asChild>
+          <Link href="/agent/addNewProp">
+            <Plus className="mr-2 h-4 w-4" />
+            Add Property
+          </Link>
         </Button>
       </div>
 
-      {/* Search and Filter Section */}
-      <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-        <div className="relative col-span-1 sm:col-span-2">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Search properties..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+      <div className="flex flex-col md:flex-row gap-4 items-start md:items-center">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+      <Input
+            placeholder="Search by title, description or location..."
+        value={searchTerm}
+        onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
           />
         </div>
 
-        <Select value={filterType} onValueChange={setFilterType}>
-          <SelectTrigger>
-            <SelectValue placeholder="Property Type" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Types</SelectItem>
-            {Object.entries(PROPERTY_TYPES).map(([key, value]) => (
-              <SelectItem key={value} value={value}>
-                {key.charAt(0) + key.slice(1).toLowerCase()}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <div className="flex gap-2 items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-1"
+              >
+                <SlidersHorizontal className="h-4 w-4" />
+                <span>Filters</span>
+                {hasActiveFilters && (
+                  <Badge
+                    variant="secondary"
+                    className="ml-1 h-5 w-5 p-0 flex items-center justify-center rounded-full"
+                  >
+                    !
+                  </Badge>
+                )}
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-56">
+              <DropdownMenuLabel>Filter Properties</DropdownMenuLabel>
+              <DropdownMenuSeparator />
 
-        <Select value={filterStatus} onValueChange={setFilterStatus}>
-          <SelectTrigger>
-            <SelectValue placeholder="Status" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">All Status</SelectItem>
-            {Object.values(PROPERTY_STATUS).map((status) => (
-              <SelectItem key={status} value={status}>
-                {status}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+              <div className="p-2">
+                <label className="text-xs font-medium mb-1 block">
+                  Property Type
+                </label>
+                <Select
+                  value={filterType || ""}
+                  onValueChange={(value) => applyFilter("type", value)}
+                >
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="All Types" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Types</SelectItem>
+                    <SelectItem value="1">House</SelectItem>
+                    <SelectItem value="2">Apartment</SelectItem>
+                    <SelectItem value="3">Condo</SelectItem>
+                    <SelectItem value="4">Townhouse</SelectItem>
+                    <SelectItem value="5">Villa</SelectItem>
+                    <SelectItem value="6">Commercial</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="p-2">
+                <label className="text-xs font-medium mb-1 block">Status</label>
+                <Select
+                  value={filterStatus || ""}
+                  onValueChange={(value) => applyFilter("status", value)}
+                >
+                  <SelectTrigger className="h-8">
+                    <SelectValue placeholder="All Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="">All Status</SelectItem>
+                    <SelectItem value="for-sale">Available</SelectItem>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="sold">Sold</SelectItem>
+                    <SelectItem value="rented">Rented</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="p-2 flex items-center space-x-2">
+                <input
+                  type="checkbox"
+                  id="featured-filter"
+                  checked={featured}
+                  onChange={(e) =>
+                    applyFilter("featured", e.target.checked ? "true" : "")
+                  }
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary"
+                />
+                <label htmlFor="featured-filter" className="text-sm">
+                  Featured Properties Only
+                </label>
+              </div>
+
+              <DropdownMenuSeparator />
+              <DropdownMenuItem
+                onClick={clearFilters}
+                disabled={!hasActiveFilters}
+                className="justify-center font-medium"
+              >
+                Clear All Filters
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          <Select
+            value={`${sortBy}-${sortOrder}`}
+            onValueChange={handleSortChange}
+          >
+            <SelectTrigger className="w-[180px]">
+              <SelectValue placeholder="Sort by" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="created_at-desc">Newest First</SelectItem>
+              <SelectItem value="created_at-asc">Oldest First</SelectItem>
+              <SelectItem value="price-desc">Price (High to Low)</SelectItem>
+              <SelectItem value="price-asc">Price (Low to High)</SelectItem>
+              <SelectItem value="title-asc">Title (A-Z)</SelectItem>
+              <SelectItem value="title-desc">Title (Z-A)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      {/* Properties Grid */}
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array(6)
-            .fill(0)
-            .map((_, index) => (
-              <div
-                key={index}
-                className="h-80 bg-muted rounded-lg animate-pulse"
-              />
-            ))}
-        </div>
-      ) : filteredProperties.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProperties.map((property) => (
-            <PropertyCard
-              key={property.id}
-              property={property}
-              onEdit={() => handleEditProperty(property)}
-              onDelete={() => handleDeleteConfirm(property)}
-              variant="grid"
-            />
-          ))}
-        </div>
-      ) : (
-        <div className="flex flex-col items-center justify-center py-12 text-center">
-          <div className="bg-muted rounded-full p-4 mb-4">
-            <SlidersHorizontal className="h-8 w-8 text-muted-foreground" />
-          </div>
-          <h3 className="text-lg font-medium">No properties found</h3>
-          <p className="text-muted-foreground mt-1 mb-4">
-            {searchQuery || filterType || filterStatus
-              ? "Try adjusting your filters or search query"
-              : "Add your first property to get started"}
-          </p>
-          <Button onClick={() => setIsAddModalOpen(true)}>
-            <PlusCircle className="mr-2 h-4 w-4" />
-            Add New Property
+      {hasActiveFilters && (
+        <div className="flex flex-wrap gap-2 items-center">
+          <span className="text-sm text-muted-foreground">Active filters:</span>
+          {filterType && (
+            <Badge variant="secondary" className="flex gap-1 items-center">
+              Type:{" "}
+              {filterType === "1"
+                ? "House"
+                : filterType === "2"
+                ? "Apartment"
+                : filterType === "3"
+                ? "Condo"
+                : filterType === "4"
+                ? "Townhouse"
+                : filterType === "5"
+                ? "Villa"
+                : filterType === "6"
+                ? "Commercial"
+                : filterType}
+              <button
+                onClick={() => applyFilter("type", "")}
+                className="ml-1 hover:bg-muted rounded-full"
+              >
+                ×
+              </button>
+            </Badge>
+          )}
+          {filterStatus && (
+            <Badge variant="secondary" className="flex gap-1 items-center">
+              Status:{" "}
+              {filterStatus === "for-sale"
+                ? "Available"
+                : filterStatus === "pending"
+                ? "Pending"
+                : filterStatus === "sold"
+                ? "Sold"
+                : filterStatus === "rented"
+                ? "Rented"
+                : filterStatus}
+              <button
+                onClick={() => applyFilter("status", "")}
+                className="ml-1 hover:bg-muted rounded-full"
+              >
+                ×
+              </button>
+            </Badge>
+          )}
+          {featured && (
+            <Badge variant="secondary" className="flex gap-1 items-center">
+              Featured Only
+              <button
+                onClick={() => applyFilter("featured", "")}
+                className="ml-1 hover:bg-muted rounded-full"
+              >
+                ×
+              </button>
+            </Badge>
+          )}
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={clearFilters}
+            className="text-xs"
+          >
+            Clear All
           </Button>
         </div>
       )}
 
-      {/* Add/Edit Property Modal */}
-      <PropertyFormModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        onSubmit={handlePropertySubmit}
-        isSubmitting={isSubmitting}
-      />
-
-      <PropertyFormModal
-        isOpen={isEditModalOpen}
-        onClose={() => {
-          setIsEditModalOpen(false);
-          setCurrentProperty(null);
-        }}
-        property={currentProperty}
-        onSubmit={handlePropertySubmit}
-        isSubmitting={isSubmitting}
-      />
-
-      {/* Delete Confirmation Modal */}
-      <DeleteConfirmationModal
-        isOpen={isDeleteModalOpen}
-        onClose={() => {
-          setIsDeleteModalOpen(false);
-          setCurrentProperty(null);
-        }}
-        onConfirm={() => handleDeleteProperty(currentProperty?.id)}
-        isLoading={isDeleting}
-        title="Delete Property"
-        description="Are you sure you want to delete this property? This action cannot be undone and all associated data will be permanently removed."
-      />
+        {isLoading ? (
+        <div className="flex items-center justify-center h-64">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+        ) : (
+        <>
+          {filteredProperties.length > 0 ? (
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 w-full">
+            {filteredProperties.map((property) => (
+                <PropertyCard
+                  key={property.id}
+                  property={property}
+                  onDelete={handleDeleteProperty}
+                />
+              ))}
+            </div>
+          ) : (
+            <div className="text-center p-12 border rounded-lg bg-background">
+              <div className="mb-3 text-4xl">🏠</div>
+              <h3 className="text-lg font-medium mb-2">No properties found</h3>
+              <p className="text-muted-foreground mb-4">
+                {searchTerm || hasActiveFilters
+                  ? "Try changing your search or filter criteria"
+                  : "Start by adding your first property"}
+              </p>
+              <Button asChild>
+                <Link href="/agent/addNewProp">Add New Property</Link>
+              </Button>
+          </div>
+        )}
+        </>
+      )}
     </div>
   );
 }
