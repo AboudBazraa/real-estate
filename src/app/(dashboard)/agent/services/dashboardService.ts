@@ -27,12 +27,7 @@ export const fetchDashboardStats = async (
 
     // Get available properties (status = 'available' or 'for_sale' or 'for_rent')
     const availableProperties =
-      properties?.filter(
-        (prop) =>
-          prop.status === "available" ||
-          prop.status === "for_sale" ||
-          prop.status === "for_rent"
-      ) || [];
+      properties?.filter((prop) => prop.featured === true) || [];
 
     // Fetch recent properties (last 5)
     const recentProperties = properties?.slice(0, 5) || [];

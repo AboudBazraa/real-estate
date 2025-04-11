@@ -49,6 +49,7 @@ import {
   AvatarFallback,
 } from "@/shared/components/ui/avatar";
 import { Badge } from "@/shared/components/ui/badge";
+import { ScrollArea, ScrollBar } from "@/shared/components/ui/scroll-area";
 
 // Providers & Hooks
 import { useUser } from "@/shared/providers/UserProvider";
@@ -67,6 +68,12 @@ import {
   formatDate,
   timeAgo,
 } from "@/shared/utils/property-utils";
+
+// New Dashboard Components
+import { DashboardStats as DashboardStatsComponent } from "./components/DashboardStats";
+import { RecentProperties } from "./components/RecentProperties";
+import { UpcomingAppointments } from "./components/UpcomingAppointments";
+import { RecentActivity } from "./components/RecentActivity";
 
 // Extend the DashboardStats interface to include additional properties
 interface ExtendedDashboardStats extends DashboardStats {
@@ -223,7 +230,7 @@ export default function AgentDashboard() {
         const dashboardStats = await fetchDashboardStats(supabase, user.id);
         setStats({
           ...dashboardStats,
-          availablePercentage: 0,
+          availablePercentage: 3.5, // Example value for demo
           scheduledViewings: dashboardStats.upcomingAppointments.length,
         });
       } catch (error: any) {
@@ -241,17 +248,9 @@ export default function AgentDashboard() {
     loadDashboardData();
   }, [supabase, user, userLoading, toast]);
 
-  const handleDeleteProperty = (propertyId) => {
-    setPropertyToDelete(propertyId);
-    setIsDeleteModalOpen(true);
-  };
-
-  const confirmDelete = async () => {
-    if (!propertyToDelete) return;
-
-    setIsDeleting(true);
+  const handleDeleteProperty = async (propertyId: string) => {
     try {
-      const result = await deleteProperty(propertyToDelete);
+      const result = await deleteProperty(propertyId);
 
       if (result) {
         // Update local state to remove the deleted property
@@ -259,7 +258,7 @@ export default function AgentDashboard() {
           ...prevStats,
           totalProperties: prevStats.totalProperties - 1,
           recentProperties: prevStats.recentProperties.filter(
-            (property) => property.id !== propertyToDelete
+            (property) => property.id !== propertyId
           ),
         }));
 
@@ -275,10 +274,6 @@ export default function AgentDashboard() {
         description: error.message || "Failed to delete property",
         variant: "destructive",
       });
-    } finally {
-      setIsDeleting(false);
-      setIsDeleteModalOpen(false);
-      setPropertyToDelete(null);
     }
   };
 
@@ -290,8 +285,8 @@ export default function AgentDashboard() {
   // If user not loaded or not authenticated
   if (!user) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <Card className="w-[400px]">
+      <div className="flex items-center justify-center min-h-screen p-4">
+        <Card className="w-full max-w-md">
           <CardHeader>
             <CardTitle className="text-center">Access Denied</CardTitle>
           </CardHeader>
@@ -312,9 +307,15 @@ export default function AgentDashboard() {
   }
 
   return (
-    <div className="h-full flex-1 space-y-8 p-8 pt-6">
-      <div className="flex items-center justify-between space-y-2">
-        <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+    <div className="h-full flex-1 space-y-8 p-4">
+      {/* Dashboard Header */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 gap-4">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <p className="text-muted-foreground">
+            Manage your properties and appointments
+          </p>
+        </div>
         <div className="flex items-center space-x-2">
           <Button asChild>
             <Link href="/agent/addNewProp">
@@ -325,350 +326,141 @@ export default function AgentDashboard() {
       </div>
 
       {/* Dashboard Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <Card className="bg-gradient-to-br from-blue-50 to-blue-100 border-blue-200 hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-blue-600">
-                  Total Properties
-                </p>
-                <h3 className="text-3xl font-bold mt-1">
-                  {isLoading ? (
-                    <Skeleton className="h-9 w-16" />
-                  ) : (
-                    stats.totalProperties
-                  )}
-                </h3>
-              </div>
-              <div className="p-3 bg-blue-500/10 rounded-full">
-                <Building2 className="h-6 w-6 text-blue-600" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <Link
-                href="/agent/agentProperties"
-                className="text-blue-600 font-medium hover:underline flex items-center"
-              >
-                View all properties
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
+      <DashboardStatsComponent
+        totalProperties={stats.totalProperties}
+        availableProperties={stats.availableProperties}
+        scheduledViewings={stats.scheduledViewings}
+        newInquiries={stats.newInquiries}
+        availablePercentage={stats.availablePercentage}
+        isLoading={isLoading}
+      />
 
-        <Card className="bg-gradient-to-br from-green-50 to-green-100 border-green-200 hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-green-600">
-                  Available Properties
-                </p>
-                <h3 className="text-3xl font-bold mt-1">
-                  {isLoading ? (
-                    <Skeleton className="h-9 w-16" />
-                  ) : (
-                    stats.availableProperties
-                  )}
-                </h3>
-              </div>
-              <div className="p-3 bg-green-500/10 rounded-full">
-                <Check className="h-6 w-6 text-green-600" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <div
-                className={
-                  stats.availablePercentage >= 0
-                    ? "text-green-600"
-                    : "text-red-600"
-                }
-                title="Compared to last month"
-              >
-                <span className="font-medium flex items-center">
-                  {stats.availablePercentage >= 0 ? (
-                    <TrendingUp className="mr-1 h-4 w-4" />
-                  ) : (
-                    <TrendingDown className="mr-1 h-4 w-4" />
-                  )}
-                  {Math.abs(stats.availablePercentage)}%
-                </span>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-amber-50 to-amber-100 border-amber-200 hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-amber-600">
-                  Scheduled Viewings
-                </p>
-                <h3 className="text-3xl font-bold mt-1">
-                  {isLoading ? (
-                    <Skeleton className="h-9 w-16" />
-                  ) : (
-                    stats.scheduledViewings
-                  )}
-                </h3>
-              </div>
-              <div className="p-3 bg-amber-500/10 rounded-full">
-                <Calendar className="h-6 w-6 text-amber-600" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <Link
-                href="/agent/meetings"
-                className="text-amber-600 font-medium hover:underline flex items-center"
-              >
-                View schedule
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-gradient-to-br from-purple-50 to-purple-100 border-purple-200 hover:shadow-md transition-shadow">
-          <CardContent className="p-6">
-            <div className="flex justify-between items-start">
-              <div>
-                <p className="text-sm font-medium text-purple-600">
-                  New Inquiries
-                </p>
-                <h3 className="text-3xl font-bold mt-1">
-                  {isLoading ? (
-                    <Skeleton className="h-9 w-16" />
-                  ) : (
-                    stats.newInquiries
-                  )}
-                </h3>
-              </div>
-              <div className="p-3 bg-purple-500/10 rounded-full">
-                <MessageSquareText className="h-6 w-6 text-purple-600" />
-              </div>
-            </div>
-            <div className="mt-4 flex items-center text-sm">
-              <Link
-                href="/agent/request"
-                className="text-purple-600 font-medium hover:underline flex items-center"
-              >
-                View inquiries
-                <ArrowRight className="ml-1 h-4 w-4" />
-              </Link>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Recent Properties & Activity Section */}
-      <div className="grid gap-4 md:grid-cols-7">
-        <div className="col-span-7 md:col-span-4 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold">Recent Properties</h3>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/agent/agentProperties" className="text-sm">
-                View all
-              </Link>
-            </Button>
+      {/* Properties & Appointments Section */}
+      <div className="grid gap-4 md:grid-cols-7 grid-cols-1 bg-slate-100 dark:bg-slate-900 rounded-xl p-4">
+        {/* Recent Properties */}
+        <div className="col-span-7 md:col-span-4 h-full">
+          <div className="flex flex-col h-full">
+            <RecentProperties
+              properties={stats.recentProperties}
+              isLoading={isLoading}
+              onDelete={handleDeleteProperty}
+            />
           </div>
-
-          {/* Recent Properties List */}
-          {isLoading ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {[...Array(2)].map((_, index) => (
-                <Card key={index} className="overflow-hidden">
-                  <div className="h-48 bg-gray-200 animate-pulse" />
-                  <CardContent className="p-4">
-                    <Skeleton className="h-5 w-3/4 mb-2" />
-                    <Skeleton className="h-4 w-1/2 mb-4" />
-                    <div className="flex justify-between">
-                      <Skeleton className="h-4 w-1/4" />
-                      <Skeleton className="h-4 w-1/4" />
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : stats.recentProperties.length === 0 ? (
-            <Card className="p-6 text-center border-dashed">
-              <div className="flex flex-col items-center justify-center py-6">
-                <div className="p-3 bg-blue-100 rounded-full mb-3">
-                  <Building2 className="h-6 w-6 text-blue-600" />
-                </div>
-                <h3 className="text-lg font-medium mb-2">No properties yet</h3>
-                <p className="text-gray-500 mb-4">
-                  Add your first property to see it here
-                </p>
-                <Button asChild>
-                  <Link href="/agent/addNewProp">
-                    <Plus className="mr-2 h-4 w-4" /> Add Property
-                  </Link>
-                </Button>
-              </div>
-            </Card>
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {stats.recentProperties.map((property) => (
-                <Card key={property.id} className="overflow-hidden">
-                  <div className="relative h-48">
-                    {property.primaryImage ? (
-                      <Image
-                        src={property.primaryImage}
-                        alt={property.title}
-                        fill
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-muted">
-                        <Building2 className="h-8 w-8 text-muted-foreground" />
-                      </div>
-                    )}
-                  </div>
-                  <CardContent className="p-4">
-                    <h4 className="font-medium mb-2">{property.title}</h4>
-                    <p className="text-sm text-muted-foreground mb-4">
-                      {formatCurrency(property.price)}
-                    </p>
-                    <div className="flex justify-between items-center">
-                      <div className="flex gap-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() =>
-                            router.push(`/agent/properties/edit/${property.id}`)
-                          }
-                        >
-                          <Edit className="h-4 w-4 mr-1" /> Edit
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="sm"
-                          onClick={() => handleDeleteProperty(property.id)}
-                        >
-                          <Trash2 className="h-4 w-4 mr-1" /> Delete
-                        </Button>
-                      </div>
-                      <Button variant="ghost" size="sm" asChild>
-                        <Link href={`/agent/properties/${property.id}`}>
-                          <Eye className="h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          )}
         </div>
 
-        <div className="col-span-7 md:col-span-3 space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-xl font-semibold">Upcoming Appointments</h3>
-            <Button variant="ghost" size="sm" asChild>
-              <Link href="/agent/meetings" className="text-sm">
-                View all
-              </Link>
-            </Button>
-          </div>
-
-          {/* Upcoming Appointments List */}
-          {isLoading ? (
-            <AppointmentsSkeleton />
-          ) : stats.upcomingAppointments.length > 0 ? (
-            <div className="space-y-4">
-              {stats.upcomingAppointments.map((appointment) => (
-                <Card key={appointment.id}>
-                  <CardContent className="p-4">
-                    <div className="flex items-start gap-4">
-                      <div className="rounded-full bg-primary/10 p-2">
-                        <Calendar className="h-4 w-4 text-primary" />
-                      </div>
-                      <div className="flex-1 space-y-1">
-                        <p className="font-medium">
-                          {appointment.property_title}
-                        </p>
-                        <div className="flex justify-between text-sm">
-                          <span>
-                            {formatDate(appointment.date)} at {appointment.time}
-                          </span>
-                          <span className="capitalize">
-                            {appointment.status}
-                          </span>
-                        </div>
-                        <p className="text-sm text-muted-foreground">
-                          With {appointment.client_name}
-                        </p>
-                      </div>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          ) : (
-            <Card className="p-6 text-center border-dashed">
-              <div className="flex flex-col items-center justify-center py-6">
-                <div className="p-3 bg-amber-100 rounded-full mb-3">
-                  <Calendar className="h-6 w-6 text-amber-600" />
-                </div>
-                <h3 className="text-lg font-medium mb-2">
-                  No upcoming appointments
-                </h3>
-                <p className="text-gray-500">
-                  Your scheduled appointments will appear here
-                </p>
-              </div>
-            </Card>
-          )}
+        {/* Upcoming Appointments */}
+        <div className="col-span-7 md:col-span-3 ">
+          <UpcomingAppointments
+            appointments={stats.upcomingAppointments}
+            isLoading={isLoading}
+          />
         </div>
 
         {/* Recent Activity */}
-        <Card>
-          <CardHeader>
-            <CardTitle>Recent Activity</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {isLoading ? (
-              <ActivitySkeleton />
-            ) : stats.recentActivity.length > 0 ? (
-              <div className="space-y-6">
-                {stats.recentActivity.map((activity) => (
-                  <div key={activity.id} className="flex items-start gap-4">
-                    <div className="rounded-full bg-primary/10 p-2">
-                      {activity.type === "new_inquiry" ? (
-                        <MessageSquareText className="h-4 w-4 text-primary" />
-                      ) : activity.type === "property_viewed" ? (
-                        <Eye className="h-4 w-4 text-primary" />
-                      ) : (
-                        <Building2 className="h-4 w-4 text-primary" />
-                      )}
-                    </div>
-                    <div className="flex-1 space-y-1">
+        <div className="col-span-7 md:col-span-7 lg:col-span-4">
+          <RecentActivity
+            activities={stats.recentActivity}
+            isLoading={isLoading}
+          />
+        </div>
+
+        {/* Analytics Overview - New section */}
+        <div className="col-span-7 lg:col-span-3">
+          <Card className="h-full">
+            <CardHeader>
+              <CardTitle>Analytics Overview</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <div className="space-y-4">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="space-y-2">
                       <div className="flex justify-between">
-                        <p className="font-medium">{activity.message}</p>
-                        <span className="text-sm text-muted-foreground">
-                          {timeAgo(activity.timestamp)}
-                        </span>
+                        <div className="w-1/3">
+                          <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                        </div>
+                        <div className="w-1/5">
+                          <div className="h-4 w-full bg-gray-200 rounded animate-pulse"></div>
+                        </div>
                       </div>
-                      <p className="text-sm text-muted-foreground">
-                        {activity.property_title}
-                      </p>
+                      <div className="h-2 bg-gray-200 rounded animate-pulse"></div>
                     </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-6">
+                  <AnalyticsItem
+                    label="Property Views"
+                    value={127}
+                    change={12}
+                    isPositive={true}
+                  />
+                  <AnalyticsItem
+                    label="Inquiries"
+                    value={5}
+                    change={3}
+                    isPositive={true}
+                  />
+                  <AnalyticsItem
+                    label="Listing Clicks"
+                    value={68}
+                    change={-5}
+                    isPositive={false}
+                  />
+                  <div className="pt-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      asChild
+                      className="w-full"
+                    >
+                      <Link href="/agent/analytics">
+                        View Detailed Analytics
+                      </Link>
+                    </Button>
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="flex flex-col items-center justify-center py-8 text-center">
-                <MessageSquareText className="h-12 w-12 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-medium">No recent activity</h3>
-                <p className="text-sm text-muted-foreground mt-2">
-                  Recent property activity will appear here
-                </p>
-              </div>
-            )}
-          </CardContent>
-        </Card>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
       </div>
+    </div>
+  );
+}
+
+interface AnalyticsItemProps {
+  label: string;
+  value: number;
+  change: number;
+  isPositive: boolean;
+}
+
+function AnalyticsItem({
+  label,
+  value,
+  change,
+  isPositive,
+}: AnalyticsItemProps) {
+  return (
+    <div className="space-y-1.5">
+      <div className="flex justify-between items-center">
+        <span className="text-sm font-medium">{label}</span>
+        <span
+          className={`text-sm font-medium flex items-center ${
+            isPositive ? "text-green-600" : "text-red-600"
+          }`}
+        >
+          {isPositive ? "↑" : "↓"} {Math.abs(change)}%
+        </span>
+      </div>
+      <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
+        <div
+          className={`h-full ${isPositive ? "bg-green-600" : "bg-red-600"}`}
+          style={{ width: `${Math.min(100, (value / 150) * 100)}%` }}
+        ></div>
+      </div>
+      <p className="text-xs text-muted-foreground">Total: {value}</p>
     </div>
   );
 }

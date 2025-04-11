@@ -41,5 +41,7 @@ export function useAuth() {
     login: authService.login,
     register: authService.register,
     logout: authService.logout,
+    updatePassword: authService.updatePassword,
+    resetPassword: authService.resetPassword,
   };
 }

@@ -1,13 +1,13 @@
 "use client";
 import { useState, useEffect } from "react";
 import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/shared/components/ui/dialog";
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetDescription,
+  SheetFooter,
+} from "@/shared/components/ui/sheet";
 import { Button } from "@/shared/components/ui/button";
 import { Input } from "@/shared/components/ui/input";
 import { Label } from "@/shared/components/ui/label";
@@ -422,14 +422,17 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
   };
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Property</DialogTitle>
-          <DialogDescription>
+    <Sheet open={isOpen} onOpenChange={onClose}>
+      <SheetContent
+        side="right"
+        className="w-full sm:max-w-xl md:max-w-2xl overflow-y-auto p-4"
+      >
+        <SheetHeader className="px-1">
+          <SheetTitle>Edit Property</SheetTitle>
+          <SheetDescription>
             Make changes to your property details below.
-          </DialogDescription>
-        </DialogHeader>
+          </SheetDescription>
+        </SheetHeader>
 
         {isLoading ? (
           <div className="py-6 flex justify-center">
@@ -440,7 +443,7 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
             Error loading property data
           </div>
         ) : (
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 px-1">
             <div className="space-y-2">
               <Label htmlFor="title">Title</Label>
               <Input
@@ -484,7 +487,7 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
                     formData.property_type !== undefined &&
                     formData.property_type !== null
                       ? formData.property_type.toString()
-                      : "0"
+                      : "HOUSE"
                   }
                   onValueChange={handleTypeChange}
                 >
@@ -507,7 +510,7 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
               <div className="space-y-2">
                 <Label htmlFor="status">Listing Status</Label>
                 <Select
-                  value={formData.status}
+                  value={formData.status || "For Sale"}
                   onValueChange={handleStatusChange}
                 >
                   <SelectTrigger>
@@ -526,7 +529,7 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
               <div className="space-y-2">
                 <Label htmlFor="listing_type">Listing Type</Label>
                 <Select
-                  value={formData.listing_type}
+                  value={formData.listing_type || "Sale"}
                   onValueChange={handleListingTypeChange}
                 >
                   <SelectTrigger>
@@ -727,7 +730,7 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
                     <p className="text-sm text-muted-foreground mb-2">
                       Existing Images:
                     </p>
-                    <div className="grid grid-cols-3 gap-3">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       {propertyImages
                         .filter((img) => !localImagesToDelete.includes(img.id))
                         .map((image) => (
@@ -784,7 +787,7 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
                   <p className="text-sm text-muted-foreground mb-2">
                     New Images:
                   </p>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                     {newImages.map((image, index) => (
                       <div
                         key={index}
@@ -857,7 +860,7 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
               )}
             </div>
 
-            <DialogFooter className="mt-6">
+            <SheetFooter className="mt-6 sm:justify-between gap-2">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
@@ -874,10 +877,10 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
                   "Save Changes"
                 )}
               </Button>
-            </DialogFooter>
+            </SheetFooter>
           </form>
         )}
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   );
 }

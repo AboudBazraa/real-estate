@@ -78,6 +78,55 @@ export const authService = {
       return null;
     }
   },
+
+  async updatePassword(currentPassword: string, newPassword: string) {
+    try {
+      // First verify the current password by trying to sign in
+      const { error: signInError } = await supabase.auth.signInWithPassword({
+        email: (await supabase.auth.getUser()).data.user?.email || "",
+        password: currentPassword,
+      });
+
+      if (signInError) {
+        throw new Error("Current password is incorrect");
+      }
+
+      // If verification passed, update the password
+      const { data, error } = await supabase.auth.updateUser({
+        password: newPassword,
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error: any) {
+      console.error("Password update error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Initiates a password reset for a user
+   * @param email The email address of the user
+   * @param redirectTo Optional URL to redirect to after password reset
+   */
+  async resetPassword(email: string, redirectTo?: string) {
+    try {
+      // Configure the password reset with an optional redirect URL
+      const options = redirectTo ? { redirectTo } : undefined;
+
+      // Send the password reset email
+      const { data, error } = await supabase.auth.resetPasswordForEmail(
+        email,
+        options
+      );
+
+      if (error) throw error;
+      return data;
+    } catch (error: any) {
+      console.error("Password reset error:", error);
+      throw error;
+    }
+  },
 };
 
 // import axios, { AxiosError } from "axios";

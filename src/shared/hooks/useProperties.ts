@@ -8,12 +8,17 @@ import {
   PropertySort,
 } from "@/shared/types/property";
 
-export type { Property, PropertyImage } from "@/shared/types/property";
+export type {
+  Property,
+  PropertyImage,
+  PropertyFilters,
+  PropertySort,
+} from "@/shared/types/property";
 
 export const useProperties = () => {
   const { supabase, user } = useSupabase();
   const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [properties, setProperties] = useState<Property[]>([]);
   const [totalCount, setTotalCount] = useState(0);
@@ -233,6 +238,15 @@ export const useProperties = () => {
           throw new Error("You must be logged in to create a property");
         }
 
+        // Validate required fields
+        if (!propertyData.title) {
+          throw new Error("Property title is required");
+        }
+
+        if (propertyData.price <= 0) {
+          throw new Error("Property price must be greater than 0");
+        }
+
         // Ensure location is set (required field)
         if (!propertyData.location) {
           propertyData.location =
@@ -258,30 +272,47 @@ export const useProperties = () => {
 
         if (propertyError) throw propertyError;
 
+        if (!newProperty) {
+          throw new Error("Failed to create property record");
+        }
+
         // Handle image uploads if there are any
-        if (imageFiles.length > 0) {
+        if (imageFiles && imageFiles.length > 0) {
           // Track successful uploads
           let uploadSuccessCount = 0;
+          const uploadErrors: string[] = [];
 
           // Upload each image
           for (let i = 0; i < imageFiles.length; i++) {
             try {
               const file = imageFiles[i];
 
-              // Create a unique filename
-              const fileName = `${Date.now()}-${file.name}`;
-              const filePath = `${newProperty.id}/${fileName}`;
+              // Skip invalid files
+              if (!file || !(file instanceof File)) {
+                console.warn("Invalid file object, skipping", file);
+                continue;
+              }
+
+              // Create a unique filename with extension
+              const fileExt = file.name.split(".").pop() || "jpg";
+              const fileName = `${Date.now()}-${i}.${fileExt}`;
+              const filePath = `properties/${newProperty.id}/${fileName}`;
 
               // Upload to storage
-              const { error: uploadError } = await supabase.storage
-                .from("properties")
-                .upload(filePath, file, {
-                  cacheControl: "3600",
-                  upsert: true,
-                });
+              const { data: uploadData, error: uploadError } =
+                await supabase.storage
+                  .from("properties")
+                  .upload(filePath, file, {
+                    contentType: file.type || `image/${fileExt}`,
+                    cacheControl: "3600",
+                    upsert: false,
+                  });
 
               if (uploadError) {
-                console.error("Error uploading image:", uploadError);
+                console.error(`Error uploading image ${i}:`, uploadError);
+                uploadErrors.push(
+                  `Failed to upload image ${i + 1}: ${uploadError.message}`
+                );
                 continue; // Skip to next image on error
               }
 
@@ -290,14 +321,29 @@ export const useProperties = () => {
                 .from("properties")
                 .getPublicUrl(filePath);
 
+              if (!publicUrlData || !publicUrlData.publicUrl) {
+                console.error("Failed to get public URL for uploaded image");
+                continue;
+              }
+
               // Insert image record
-              await supabase.from("property_images").insert({
-                property_id: newProperty.id,
-                image_url: publicUrlData.publicUrl,
-                is_primary: i === 0, // First image is primary
-                display_order: i,
-                created_at: new Date().toISOString(),
-              });
+              const { error: imageInsertError } = await supabase
+                .from("property_images")
+                .insert({
+                  property_id: newProperty.id,
+                  image_url: publicUrlData.publicUrl,
+                  is_primary: i === 0, // First image is primary
+                  display_order: i,
+                  created_at: new Date().toISOString(),
+                });
+
+              if (imageInsertError) {
+                console.error(
+                  "Error inserting image record:",
+                  imageInsertError
+                );
+                continue;
+              }
 
               uploadSuccessCount++;
             } catch (uploadErr) {
@@ -310,8 +356,21 @@ export const useProperties = () => {
           if (uploadSuccessCount > 0) {
             toast({
               title: "Images Uploaded",
-              description: `${uploadSuccessCount} images uploaded successfully`,
+              description: `${uploadSuccessCount} of ${imageFiles.length} images uploaded successfully`,
             });
+          }
+
+          // Show upload errors if any
+          if (uploadErrors.length > 0) {
+            console.warn("Some images failed to upload:", uploadErrors);
+            if (uploadSuccessCount === 0) {
+              toast({
+                title: "Image Upload Failed",
+                description:
+                  "Failed to upload any images. The property was created without images.",
+                variant: "destructive",
+              });
+            }
           }
         }
 
@@ -459,7 +518,9 @@ export const useProperties = () => {
               const file = newImageFiles[i];
 
               // Create a unique filename
-              const fileName = `${Date.now()}-${file.name}`;
+              const fileName = `${Date.now()}-${i}.${
+                file.name.split(".").pop() || "jpg"
+              }`;
               const filePath = `${propertyId}/${fileName}`;
 
               // Upload to storage
@@ -618,7 +679,7 @@ export const useProperties = () => {
 
         // Check if the property is already favorited
         const { data: existingFavorite } = await supabase
-          .from("property_favorites")
+          .from("favorites")
           .select("id")
           .eq("property_id", propertyId)
           .eq("user_id", user.id)
@@ -627,7 +688,7 @@ export const useProperties = () => {
         if (existingFavorite) {
           // Remove from favorites
           await supabase
-            .from("property_favorites")
+            .from("favorites")
             .delete()
             .eq("id", existingFavorite.id);
 
@@ -639,7 +700,7 @@ export const useProperties = () => {
           return false; // Not favorited
         } else {
           // Add to favorites
-          await supabase.from("property_favorites").insert({
+          await supabase.from("favorites").insert({
             property_id: propertyId,
             user_id: user.id,
             created_at: new Date().toISOString(),
@@ -672,7 +733,7 @@ export const useProperties = () => {
 
       try {
         const { data, error } = await supabase
-          .from("property_favorites")
+          .from("favorites")
           .select("id")
           .eq("property_id", propertyId)
           .eq("user_id", user.id)
@@ -816,7 +877,7 @@ export const useProperties = () => {
           error: favError,
           count,
         } = await supabase
-          .from("property_favorites")
+          .from("favorites")
           .select("property_id", { count: "exact" })
           .eq("user_id", user.id)
           .order("created_at", { ascending: false })
@@ -908,6 +969,73 @@ export const useProperties = () => {
     };
   }, [supabase, fetchProperties]);
 
+  const getPropertyById = useCallback(
+    async (id: string): Promise<Property> => {
+      try {
+        if (!id) {
+          throw new Error("Property ID is required");
+        }
+
+        // First, get the property data
+        const { data: propertyData, error: propertyError } = await supabase
+          .from("properties")
+          .select("*")
+          .eq("id", id)
+          .single();
+
+        if (propertyError) {
+          console.error("Supabase error:", propertyError);
+          throw new Error(propertyError.message || "Failed to fetch property");
+        }
+
+        if (!propertyData) {
+          throw new Error("Property not found");
+        }
+
+        // Get property images
+        const { data: imagesData, error: imagesError } = await supabase
+          .from("property_images")
+          .select("*")
+          .eq("property_id", id)
+          .order("display_order", { ascending: true });
+
+        if (imagesError) {
+          console.error("Error fetching property images:", imagesError);
+        }
+
+        // Get user data (poster) from profiles table
+        let userData: { name: string; email: string } | null = null;
+        if (propertyData.user_id) {
+          const { data: profile, error: profileError } = await supabase
+            .from("profiles")
+            .select("name, email")
+            .eq("id", propertyData.user_id)
+            .single();
+
+          if (!profileError && profile) {
+            userData = {
+              name: profile.name || "Unknown User",
+              email: profile.email || "No email provided",
+            };
+          }
+        }
+
+        return {
+          ...propertyData,
+          images: imagesData || [],
+          agent: userData, // Using agent field to store the poster's info
+          features: propertyData.features || [],
+        };
+      } catch (err) {
+        console.error("Error fetching property:", err);
+        throw err instanceof Error
+          ? err
+          : new Error("Failed to fetch property");
+      }
+    },
+    [supabase]
+  );
+
   return {
     properties,
     loading,
@@ -923,5 +1051,6 @@ export const useProperties = () => {
     setPrimaryImage,
     reorderImages,
     getFavoritedProperties,
+    getPropertyById,
   };
 };

@@ -150,14 +150,14 @@ export function BasicInfoForm({ data, onChange, onTypeChange }) {
           />
         </div>
 
-        <div className="flex items-center space-x-2">
+        {/* <div className="flex items-center space-x-2">
           <Switch
             id="featured"
             checked={data.featured}
             onCheckedChange={handleFeaturedChange}
           />
           <Label htmlFor="featured">Featured Property</Label>
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );

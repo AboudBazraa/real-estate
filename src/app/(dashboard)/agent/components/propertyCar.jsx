@@ -8,6 +8,8 @@ import {
   CardContent,
   CardHeader,
   CardFooter,
+  CardTitle,
+  CardDescription,
 } from "@/shared/components/ui/card";
 import {
   DropdownMenu,
@@ -15,6 +17,7 @@ import {
   DropdownMenuItem,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuLabel,
 } from "@/shared/components/ui/dropdown-menu";
 import {
   Bed,
@@ -42,7 +45,7 @@ import {
   useSupabaseUpdate,
 } from "@/shared/hooks/useSupabase";
 import { useToast } from "@/shared/hooks/use-toast";
-import { useUser } from "@/app/providers/UserProvider";
+import { useUser } from "@/shared/providers/UserProvider";
 import Link from "next/link";
 import {
   formatCurrency,
@@ -118,8 +121,8 @@ export function PropertyCard({
 
   // Fetch favorites status from Supabase
   const { data: favoriteData } = useSupabaseQuery(
-    ["property_favorites", property.id, user?.id],
-    "property_favorites",
+    ["favorites", property.id, user?.id],
+    "favorites",
     {
       eq: [
         { column: "property_id", value: property.id },
@@ -137,8 +140,8 @@ export function PropertyCard({
   }, [favoriteData]);
 
   // Setup favorite mutation
-  const updateFavorite = useSupabaseUpdate("property_favorites", {
-    invalidateQueries: [["property_favorites", property.id, user?.id]],
+  const updateFavorite = useSupabaseUpdate("favorites", {
+    invalidateQueries: [["favorites", property.id, user?.id]],
   });
 
   // Toggle favorite status
@@ -193,10 +196,22 @@ export function PropertyCard({
   };
 
   // Handle property deletion
-  const handleDelete = async () => {
+  const handleDelete = async (e) => {
+    if (e) {
+      e.preventDefault();
+      e.stopPropagation();
+    }
+
+    // Show confirmation modal first
+    setIsDeleteModalOpen(true);
+  };
+
+  // This will be called when the user confirms deletion in the modal
+  const confirmDelete = async () => {
     try {
       // Use the parent component's delete function
       onDelete?.(property.id);
+      setIsDeleteModalOpen(false);
     } catch (error) {
       console.error("Delete error:", error);
       toast({
@@ -221,13 +236,13 @@ export function PropertyCard({
   const handleEdit = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onEdit) onEdit(property);
+    setIsEditModalOpen(true);
   };
 
   const handleView = (e) => {
     e.preventDefault();
     e.stopPropagation();
-    if (onView) onView(property);
+    setIsViewModalOpen(true);
   };
 
   const propertyImage = primaryImage || "/placeholder-property.jpg";
@@ -322,9 +337,10 @@ export function PropertyCard({
           <div className="relative w-1/3 min-w-[120px]">
             {isImageLoading && <Skeleton className="absolute inset-0 z-10" />}
             <Image
-              src={property.images?.[0] || "/images/house-placeholder.png"}
-              alt={property.title}
+              src={propertyImage || "/images/house-placeholder.png"}
+              alt={property.title || "Property image"}
               fill
+              sizes="(max-width: 768px) 33vw, 120px"
               className={cn(
                 "object-cover transition-opacity duration-300",
                 isImageLoading ? "opacity-0" : "opacity-100"
@@ -388,7 +404,7 @@ export function PropertyCard({
                       onClick={handleDelete}
                       className="text-destructive focus:text-destructive"
                     >
-                      <Trash className="mr-2 h-4 w-4" /> Delete
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -407,9 +423,10 @@ export function PropertyCard({
           <div className="relative aspect-[4/3] w-full overflow-hidden rounded-t-lg">
             {isImageLoading && <Skeleton className="absolute inset-0 z-10" />}
             <Image
-              src={property.images?.[0] || "/images/house-placeholder.png"}
-              alt={property.title}
+              src={propertyImage || "/images/house-placeholder.png"}
+              alt={property.title || "Property image"}
               fill
+              sizes="(max-width: 768px) 100vw, 400px"
               className={cn(
                 "object-cover transition-opacity duration-300",
                 isImageLoading ? "opacity-0" : "opacity-100"
@@ -501,7 +518,7 @@ export function PropertyCard({
                       onClick={handleDelete}
                       className="text-destructive focus:text-destructive"
                     >
-                      <Trash className="mr-2 h-4 w-4" /> Delete
+                      <Trash2 className="mr-2 h-4 w-4" /> Delete
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -554,9 +571,10 @@ export function PropertyCard({
           <div className="relative col-span-12 sm:col-span-4 min-h-[200px] sm:min-h-[180px] rounded-lg overflow-hidden">
             {isImageLoading && <Skeleton className="absolute inset-0 z-10" />}
             <Image
-              src={property.images?.[0] || "/images/house-placeholder.png"}
-              alt={property.title}
+              src={propertyImage || "/images/house-placeholder.png"}
+              alt={property.title || "Property image"}
               fill
+              sizes="(max-width: 768px) 33vw, 120px"
               className={cn(
                 "object-cover transition-opacity duration-300",
                 isImageLoading ? "opacity-0" : "opacity-100"
@@ -639,7 +657,7 @@ export function PropertyCard({
                         onClick={handleDelete}
                         className="text-destructive focus:text-destructive"
                       >
-                        <Trash className="mr-2 h-4 w-4" /> Delete
+                        <Trash2 className="mr-2 h-4 w-4" /> Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>
@@ -693,22 +711,7 @@ export function PropertyCard({
   };
 
   const CardComponent = ({ children, onClick }) => {
-    // If onView is provided, make the entire card clickable
-    if (onClick) {
-      return (
-        <Card
-          className={cn(
-            "overflow-hidden hover:shadow-md transition-shadow",
-            variant === "compact" ? "h-[120px]" : "",
-            className
-          )}
-          onClick={onClick}
-        >
-          {children}
-        </Card>
-      );
-    }
-    // Otherwise, just render a regular card
+    // Wrapper component for the card
     return (
       <Card
         className={cn(
@@ -716,11 +719,46 @@ export function PropertyCard({
           variant === "compact" ? "h-[120px]" : "",
           className
         )}
+        onClick={onClick}
       >
         {children}
       </Card>
     );
   };
 
-  return <CardComponent onClick={onView}>{renderCardContent()}</CardComponent>;
+  return (
+    <>
+      <CardComponent onClick={handleView}>{renderCardContent()}</CardComponent>
+
+      {/* Property Edit Modal */}
+      {isEditModalOpen && (
+        <PropertyEditForm
+          propertyId={property.id}
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+        />
+      )}
+
+      {/* Property View Modal */}
+      {isViewModalOpen && (
+        <PropertyDetailsModal
+          propertyId={property.id}
+          isOpen={isViewModalOpen}
+          onClose={() => setIsViewModalOpen(false)}
+        />
+      )}
+
+      {/* Delete Confirmation Modal */}
+      {isDeleteModalOpen && (
+        <DeleteConfirmationModal
+          isOpen={isDeleteModalOpen}
+          onClose={() => setIsDeleteModalOpen(false)}
+          onConfirm={confirmDelete}
+          title="Delete Property"
+          description="Are you sure you want to delete this property? This action cannot be undone."
+          itemName={property.title}
+        />
+      )}
+    </>
+  );
 }

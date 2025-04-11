@@ -26,37 +26,48 @@ const getNavItems = (user, handleLogout) => [
     title: (
       <div className="space-x-2 w-32 flex items-center justify-center">
         <MenuSquare className="h-5 w-5" />
-        <p className="">Menu</p>
+        <p className="font-semibold text-sm">User Menu</p>
       </div>
     ),
     content: (
       <div className="flex flex-col space-y-1 w-full">
+        {user ? (
+          <div className="py-1 px-3 text-xs text-zinc-400 flex items-center gap-2 mt-1">
+            <UserCircle className="h-4 w-4" />
+            <span className="truncate">{user.email}</span>
+          </div>
+        ) : null}
         <Link
           href="/"
-          className="relative h-8 w-full scale-100 select-none appearance-none flex items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 focus-visible:ring-2 active:scale-[0.98]"
+          className="relative h-8 w-full scale-100 select-none appearance-none flex items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 focus-visible:ring-2 active:scale-[0.98] gap-2"
         >
+          <HomeIcon className="h-4 w-4" />
           Home
         </Link>
         {user ? (
           <>
-            {user.user_metadata?.role === "Admin" ? (
+            {user.user_metadata?.role &&
+            user.user_metadata.role.toLowerCase() === "admin" ? (
               <Link
                 href={"/admin"}
-                className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 focus-visible:ring-2 active:scale-[0.98]"
+                className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 focus-visible:ring-2 active:scale-[0.98] gap-2"
               >
-                Dashboard
+                <MenuSquare className="h-4 w-4" />
+                Admin Dashboard
               </Link>
-            ) : (
+            ) : user.user_metadata?.role?.toLowerCase() === "agent" ? (
               <Link
                 href={"/agent"}
-                className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 focus-visible:ring-2 active:scale-[0.98]"
+                className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 focus-visible:ring-2 active:scale-[0.98] gap-2"
               >
-                Dashboard
+                <MenuSquare className="h-4 w-4" />
+                Agent Dashboard
               </Link>
-            )}
+            ) : null}
+
             <button
               onClick={handleLogout}
-              className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-red-600 focus-visible:ring-2 active:scale-[0.98] gap-2"
+              className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-red-600 dark:hover:bg-zinc-800 dark:hover:text-red-400 focus-visible:ring-2 active:scale-[0.98] gap-2 mt-1"
             >
               <LogOut className="h-4 w-4" />
               Logout
@@ -66,16 +77,22 @@ const getNavItems = (user, handleLogout) => [
           <>
             <Link
               href="/auth/login"
-              className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 focus-visible:ring-2 active:scale-[0.98]"
+              className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 focus-visible:ring-2 active:scale-[0.98] gap-2"
             >
+              <UserCircle className="h-4 w-4" />
               Login
             </Link>
             <Link
               href="/auth/registration"
-              className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 focus-visible:ring-2 active:scale-[0.98]"
+              className="relative flex h-8 w-full scale-100 select-none appearance-none items-center justify-center rounded-lg border border-zinc-950/10 text-sm text-zinc-500 transition-colors hover:bg-zinc-100 hover:text-zinc-800 dark:hover:bg-zinc-800 dark:hover:text-zinc-100 focus-visible:ring-2 active:scale-[0.98] gap-2"
             >
+              <UserCircle className="h-4 w-4" />
               Register
             </Link>
+            <div className="py-1 px-3 text-xs text-zinc-400 mt-1 flex items-center gap-2">
+              <UserCircle className="h-4 w-4" />
+              <span>Sign in to access your account</span>
+            </div>
           </>
         )}
       </div>
@@ -85,9 +102,9 @@ const getNavItems = (user, handleLogout) => [
     id: 2,
     label: "Theme",
     title: (
-      <div className="flex items-center justify-center w-9 h-9">
-        <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-        <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+      <div className="flex items-center justify-center w-9 h-9 relative">
+        <Sun className="h-[1.2rem] w-[1.2rem] absolute transition-all transform rotate-0 scale-100 dark:rotate-0 dark:scale-0 opacity-100 dark:opacity-0" />
+        <Moon className="h-[1.2rem] w-[1.2rem] absolute transition-all transform rotate-0 scale-0 dark:rotate-0 dark:scale-100 opacity-0 dark:opacity-100" />
         <span className="sr-only">Toggle theme</span>
       </div>
     ),
@@ -130,7 +147,7 @@ function NavBar() {
     }
   };
 
-  const ITEMS = getNavItems(user, handleLogout);
+  const ITEMS = getNavItems(user || null, handleLogout);
 
   return (
     <motion.nav
@@ -180,7 +197,7 @@ function NavBar() {
               Properties
             </Link>
             <Link
-              href="/interactive-map"
+              href="/interactive-map/search"
               className="text-sm hover:text-zinc-800 dark:hover:text-white transition-colors"
             >
               Map
@@ -202,7 +219,8 @@ function NavBar() {
                   </div>
                   <div className="flex flex-col">
                     <span className="text-sm font-medium">
-                      {user.user_metadata?.username || user.email.split("@")[0]}
+                      {user.user_metadata?.username ||
+                        (user.email ? user.email.split("@")[0] : "User")}
                     </span>
                     <span className="text-xs text-zinc-500 dark:text-zinc-400">
                       {user.user_metadata?.role || "User"}
@@ -318,7 +336,8 @@ function NavBar() {
 
                   {user ? (
                     <>
-                      {user.user_metadata?.role === "Admin" ? (
+                      {user.user_metadata?.role &&
+                      user.user_metadata.role.toLowerCase() === "admin" ? (
                         <Link
                           href="/admin"
                           className="text-sm p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-md"
@@ -383,7 +402,7 @@ function NavBar() {
                 className="flex items-center gap-2 text-sm"
               >
                 <div className="h-7 w-7 rounded-full bg-gradient-to-b from-blue-400 to-blue-600 flex items-center justify-center text-white font-medium">
-                  {user.email && user.email[0].toUpperCase()}
+                  {user.email ? user.email[0].toUpperCase() : "U"}
                 </div>
               </motion.div>
             )}
@@ -398,3 +417,129 @@ function NavBar() {
 }
 
 export default NavBar;
+
+const menuItems = [
+  { name: "Buy", href: "/search" },
+  { name: "Rent", href: "/search" },
+  { name: "Sell", href: "/search" },
+  { name: "Agents", href: "/agents" },
+  { name: "About", href: "/about" },
+];
+
+export function MainNav() {
+  const { user, logout } = useAuth();
+  const { toast } = useToast();
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  const handleLogout = async () => {
+    try {
+      await logout();
+      toast({
+        title: "Logged out successfully",
+        variant: "success",
+      });
+    } catch (error) {
+      toast({
+        title: "Logout failed",
+        description: error.message,
+        variant: "destructive",
+      });
+    }
+  };
+
+  const ITEMS = getNavItems(user || null, handleLogout);
+
+  return (
+    <nav
+      data-state={menuOpen ? "active" : undefined}
+      className="fixed z-20 w-full h-16 border-b border-dashed  border-zinc-300 dark:border-zinc-800 bg-white backdrop-blur md:relative dark:bg-zinc-950/50 lg:dark:bg-transparent "
+    >
+      <div className="m-auto max-w-5xl px-6">
+        <div className="flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
+          <div className="flex w-full justify-between lg:w-auto">
+            <Link
+              href="/"
+              aria-label="EstateFind Home"
+              className="flex items-center space-x-2"
+            >
+              <p>Logo</p>
+              {/* <span className="font-semibold text-lg">EstateFind</span> */}
+            </Link>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => setMenuOpen(!menuOpen)}
+                aria-label={menuOpen ? "Close Menu" : "Open Menu"}
+                aria-expanded={menuOpen}
+                className="relative z-20 -m-2.5 -mr-4 block cursor-pointer p-2.5 lg:hidden"
+              >
+                <Menu
+                  className={`m-auto size-6 duration-200 ${
+                    menuOpen ? "rotate-180 scale-0 opacity-0" : ""
+                  }`}
+                />
+                <X
+                  className={`absolute inset-0 m-auto size-6 duration-200 ${
+                    menuOpen
+                      ? "rotate-0 scale-100 opacity-100"
+                      : "-rotate-180 scale-0 opacity-0"
+                  }`}
+                />
+              </button>
+            </div>
+          </div>
+
+          <div
+            className={`bg-background mb-6 w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent ${
+              menuOpen ? "block" : "hidden lg:flex"
+            }`}
+          >
+            <div className="lg:pr-4">
+              <ul className="space-y-6 text-base lg:flex lg:gap-8 lg:space-y-0 lg:text-sm">
+                {menuItems.map((item, index) => (
+                  <li key={index}>
+                    <Link
+                      href={item.href}
+                      className="text-muted-foreground hover:text-accent-foreground block duration-150"
+                    >
+                      <span>{item.name}</span>
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            {/* auth //////////////////// */}
+            <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit lg:border-l lg:pl-6  lg:dark:border-l-zinc-800">
+              {user ? (
+                <div className="flex items-center gap-2 w-36 relative hidden lg:block">
+                  <ToolbarExpandable ITEMS={ITEMS} />
+                </div>
+              ) : (
+                <div className="flex items-center gap-2 w-44">
+                  <Button
+                    asChild
+                    variant="outline"
+                    size="sm"
+                    className="px-4 py-1 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                  >
+                    <Link href="/auth/login">
+                      <span>Sign In</span>
+                    </Link>
+                  </Button>
+                  <Button
+                    asChild
+                    size="sm"
+                    className="px-3 py-1 hover:bg-slate-800 dark:hover:bg-zinc-800"
+                  >
+                    <Link href="/auth/registration">
+                      <span>Register</span>
+                    </Link>
+                  </Button>
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </nav>
+  );
+}

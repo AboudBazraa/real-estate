@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import NavBar from "../shared/components/NavBar";
+import {MainNav} from "../shared/components/NavBar";
 import Section from "@/app/components/SectionHero";
 import SectionAnmation from "@/app/components/SectionAnmation";
 import { GlowEffectButton } from "@/shared/components/animation/GlowEffectButton";
@@ -18,7 +18,7 @@ export default function Home() {
 
   return (
     <div className="h-dvh w-screen relative bg-background text-foreground transition-colors duration-300 dark:bg-black">
-      <NavBar />
+      <MainNav />
       {/* this is section hero */}
       <section className="flex items-center justify-between justify-items-stretch h-full w-full font-geist-sans absolute top-0">
         {/* <ParallaxSection /> */}

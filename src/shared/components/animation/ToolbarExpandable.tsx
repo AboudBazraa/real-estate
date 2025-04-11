@@ -33,10 +33,10 @@ export default function ToolbarExpandable({ ITEMS }) {
 
   return (
     <MotionConfig transition={transition}>
-      <div className="top-2 absolute right-0 w-fit " ref={ref}>
-        <div className="h-full w-full rounded-xl border border-zinc-950/20 bg-white dark:bg-zinc-900 dark:border-zinc-700">
+      <div className="w-fit absolute -top-5 right-0" ref={ref}>
+        <div className="h-full w-full rounded-xl border border-zinc-950/20 bg-white dark:bg-zinc-900 dark:border-zinc-700 shadow-sm">
           <div
-            className="flex space-x-2 p-1 w-fit justify-center items-center"
+            className="flex space-x-2 w-fit justify-center items-center p-1"
             ref={menuRef}
           >
             {ITEMS.map((item) => (

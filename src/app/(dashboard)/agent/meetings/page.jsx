@@ -8,7 +8,7 @@ import {
   CardTitle,
   CardFooter,
 } from "@/shared/components/ui/card";
-import AppointmentCard from "@/app/(dashboard)/agent/components/appointmentCard";
+import {AppointmentCard} from "@/app/(dashboard)/agent/components/appointmentCard";
 import { Plus, Search } from "lucide-react";
 import { Input } from "@/shared/components/ui/input";
 import {

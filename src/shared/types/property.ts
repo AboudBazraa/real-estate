@@ -42,6 +42,12 @@ export interface Property {
   updated_at: string;
   images?: PropertyImage[];
   primaryImage?: string; // URL to primary image, for dashboard view
+  features: string[];
+  agent?: {
+    name: string;
+    phone: string;
+    email: string;
+  };
 }
 
 /**

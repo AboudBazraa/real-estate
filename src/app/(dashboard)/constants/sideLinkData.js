@@ -169,21 +169,21 @@ const sidebarData = {
       },
     ],
     projects: [
-      {
-        name: "Design Engineering",
-        url: "#",
-        icon: Frame,
-      },
-      {
-        name: "Sales & Marketing",
-        url: "#",
-        icon: PieChart,
-      },
-      {
-        name: "Travel",
-        url: "#",
-        icon: Map,
-      },
+      // {
+      //   name: "Design Engineering",
+      //   url: "#",
+      //   icon: Frame,
+      // },
+      // {
+      //   name: "Sales & Marketing",
+      //   url: "#",
+      //   icon: PieChart,
+      // },
+      // {
+      //   name: "Travel",
+      //   url: "#",
+      //   icon: Map,
+      // },
     ],
   },
 };

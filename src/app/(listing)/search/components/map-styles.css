@@ -1,0 +1,36 @@
+/* Custom styles for map popups */
+.leaflet-popup-content-wrapper {
+  padding: 0;
+  overflow: hidden;
+  border-radius: 0.5rem;
+}
+
+.leaflet-popup-content {
+  margin: 0;
+  width: auto !important;
+}
+
+.property-popup .leaflet-popup-content-wrapper {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+}
+
+.leaflet-container a.leaflet-popup-close-button {
+  top: 8px;
+  right: 8px;
+  padding: 4px;
+  width: 24px;
+  height: 24px;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.4);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10;
+}
+
+.leaflet-container a.leaflet-popup-close-button:hover {
+  background: rgba(0, 0, 0, 0.6);
+  color: #fff;
+}
+
