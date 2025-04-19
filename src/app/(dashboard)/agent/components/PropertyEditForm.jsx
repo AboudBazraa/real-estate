@@ -62,10 +62,13 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
     area: 0,
     lot_size: 0,
     year_built: "",
-    status: "For Sale",
-    listing_type: "Sale",
+    status: "FOR_SALE",
+    listing_type: "SALE",
     featured: false,
     user_id: "",
+    created_at: "",
+    updated_at: "",
+    location: "",
   });
 
   const [isUploading, setIsUploading] = useState(false);
@@ -81,6 +84,13 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
   } = useSupabaseItem("properties", propertyId, {
     enabled: isOpen && !!propertyId,
   });
+
+  // Debug property data received
+  useEffect(() => {
+    if (property) {
+      console.log("Property data received:", property);
+    }
+  }, [property]);
 
   // Fetch property images
   const {
@@ -100,6 +110,13 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
     }
   );
 
+  // Debug images received
+  useEffect(() => {
+    if (propertyImages) {
+      console.log("Property images received:", propertyImages);
+    }
+  }, [propertyImages]);
+
   const isLoading = propertyLoading || imagesLoading;
   const isError = propertyError || imagesError;
 
@@ -116,6 +133,7 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
   // Populate form when data is loaded
   useEffect(() => {
     if (property) {
+      console.log("Populating form with data:", property);
       setFormData({
         id: property.id || propertyId,
         title: property.title || "",
@@ -134,10 +152,13 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
         area: property.area || 0,
         lot_size: property.lot_size || 0,
         year_built: property.year_built || "",
-        status: property.status || "For Sale",
-        listing_type: property.listing_type || "Sale",
-        featured: property.featured || false,
+        status: property.status || "FOR_SALE",
+        listing_type: property.listing_type || "SALE",
+        featured: property.featured !== undefined ? property.featured : false,
         user_id: property.user_id,
+        created_at: property.created_at,
+        updated_at: property.updated_at,
+        location: property.location || "",
       });
     }
   }, [property, propertyId]);
@@ -495,12 +516,11 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
                     <SelectValue placeholder="Select type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="HOUSE">House</SelectItem>
-                    <SelectItem value="APARTMENT">Apartment</SelectItem>
-                    <SelectItem value="CONDO">Condo</SelectItem>
-                    <SelectItem value="TOWNHOUSE">Townhouse</SelectItem>
-                    <SelectItem value="VILLA">Villa</SelectItem>
-                    <SelectItem value="COMMERCIAL">Commercial</SelectItem>
+                    {Object.entries(PROPERTY_TYPES).map(([key, value]) => (
+                      <SelectItem key={key} value={value}>
+                        {key.charAt(0) + key.slice(1).toLowerCase()}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -510,34 +530,34 @@ export function PropertyEditForm({ propertyId, isOpen, onClose }) {
               <div className="space-y-2">
                 <Label htmlFor="status">Listing Status</Label>
                 <Select
-                  value={formData.status || "For Sale"}
+                  value={formData.status || "FOR_SALE"}
                   onValueChange={handleStatusChange}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select status" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="For Sale">For Sale</SelectItem>
-                    <SelectItem value="For Rent">For Rent</SelectItem>
-                    <SelectItem value="Sold">Sold</SelectItem>
-                    <SelectItem value="Rented">Rented</SelectItem>
-                    <SelectItem value="Pending">Pending</SelectItem>
+                    <SelectItem value="FOR_SALE">For Sale</SelectItem>
+                    <SelectItem value="FOR_RENT">For Rent</SelectItem>
+                    <SelectItem value="SOLD">Sold</SelectItem>
+                    <SelectItem value="RENTED">Rented</SelectItem>
+                    <SelectItem value="PENDING">Pending</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
 
-              <div className="space-y-2">
+              <div className="space-y-2">       
                 <Label htmlFor="listing_type">Listing Type</Label>
                 <Select
-                  value={formData.listing_type || "Sale"}
+                  value={formData.listing_type || "SALE"}
                   onValueChange={handleListingTypeChange}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select listing type" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Sale">Sale</SelectItem>
-                    <SelectItem value="Rent">Rent</SelectItem>
+                    <SelectItem value="SALE">Sale</SelectItem>
+                    <SelectItem value="RENT">Rent</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

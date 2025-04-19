@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef } from "react";
+import { useEffect, useMemo, useRef, useState, ReactElement } from "react";
 import { MapContainer, TileLayer, Marker, Popup, useMap } from "react-leaflet";
 import type { Map as LeafletMap } from "leaflet";
 import { Card, CardContent } from "@/shared/components/ui/card";
@@ -173,135 +173,105 @@ function MapControls() {
 
 // Separate component for markers to handle client-side icon creation
 function MapMarkers({ properties }: { properties: MapProperty[] }) {
-  // Create custom icon using homemark.svg
+  // Use useEffect to create icons client-side to avoid SSR issues
+  const [mounted, setMounted] = useState(false);
+  const markersRef = useRef<ReactElement[]>([]);
+
   useEffect(() => {
-    let mounted = true;
+    setMounted(true);
 
-    async function setupCustomIcon() {
-      if (!mounted) return;
-
+    if (typeof window !== "undefined") {
       try {
-        const L = await import("leaflet");
+        // Create markers only when client-side
+        // Import directly to access TS definitions properly
+        import("leaflet").then((L) => {
+          // Extend the MarkerOptions interface to include the icon property
+          markersRef.current = properties.map((property) => {
+            // Create a price badge div icon
+            const priceBadge = L.divIcon({
+              className: "price-badge-marker",
+              html: `<div class="price-badge">${formatCurrency(
+                property.pricePerMonth
+              )}</div>`,
+              iconSize: [80, 30],
+              iconAnchor: [40, 15],
+            });
 
-        // Make sure the image is fully loaded before creating the icon
-        const preloadImage = (src: string): Promise<boolean> => {
-          return new Promise((resolve) => {
-            const img = new window.Image();
-            img.onload = () => resolve(true);
-            img.onerror = () => {
-              console.error(`Failed to load image: ${src}`);
-              resolve(false);
+            // Create marker options with the icon
+            const markerOptions = {
+              icon: priceBadge,
             };
-            img.src = src;
+
+            return (
+              <Marker
+                key={property.id}
+                position={property.coordinates}
+                // @ts-ignore - icon is valid but type defs don't include it
+                icon={priceBadge}
+              >
+                <Popup>
+                  <div className="property-popup w-72">
+                    <Card className="border-0 shadow-none">
+                      <CardContent className="px-2 space-x-3 flex gap-2 justify-between items-center">
+                        <div className="relative aspect-[3/2] w-24 overflow-hidden rounded-md">
+                          <Image
+                            src={
+                              property.images[0] ||
+                              "/placeholder.svg?height=600&width=800"
+                            }
+                            alt={property.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-sm truncate">
+                            {property.name}
+                          </h3>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {property.location}
+                          </p>
+                          <div className="flex items-center gap-2 mt-1">
+                            <Badge variant="outline" className="text-xs">
+                              {property.beds} beds
+                            </Badge>
+                            <Badge variant="outline" className="text-xs">
+                              {property.baths} baths
+                            </Badge>
+                          </div>
+                          <div className="flex items-center justify-between mt-2">
+                            <p className="font-semibold text-sm">
+                              {formatCurrency(property.pricePerMonth)}
+                            </p>
+                            <Link href={`/search/${property.id}`}>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                className="h-7 px-2"
+                              >
+                                <ArrowUpRight className="h-3 w-3 mr-1" />
+                                View
+                              </Button>
+                            </Link>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                </Popup>
+              </Marker>
+            );
           });
-        };
-
-        // Preload the icon image
-        const iconLoaded = await preloadImage("/homemark.svg");
-
-        if (iconLoaded) {
-          // Create custom icon using homemark.svg
-          const customIcon = L.icon({
-            iconUrl: "/homemark.svg",
-            iconSize: [24, 24],
-            iconAnchor: [12, 24],
-            popupAnchor: [0, -24],
-            // Add shadow URL with a transparent pixel if needed
-            shadowUrl:
-              "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7",
-            shadowSize: [0, 0],
-          });
-
-          // Only apply if component is still mounted
-          if (mounted) {
-            // Make this icon available globally for all markers
-            L.Marker.prototype.options.icon = customIcon;
-          }
-        } else {
-          // Fallback to default marker
-          console.warn("Using default marker: custom icon failed to load");
-        }
+        });
       } catch (error) {
-        console.error("Error setting up custom marker:", error);
+        console.error("Error creating map markers:", error);
       }
     }
+  }, [properties]);
 
-    setupCustomIcon();
+  if (!mounted) return null;
 
-    // Cleanup function
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  return (
-    <>
-      {properties.map((property) => (
-        <Marker key={property.id} position={property.coordinates}>
-          <Popup>
-            <div className="property-popup w-96">
-              <Card className="border-0 shadow-none">
-                <CardContent className="px-2 space-x-3 flex gap-2 justify-between items-center">
-                  <div className="relative aspect-[3/2] w-24 overflow-hidden rounded-md">
-                    <Image
-                      src={
-                        property.images[0] ||
-                        "/placeholder.svg?height=600&width=800"
-                      }
-                      alt={property.name}
-                      fill
-                      className="object-cover w-full h-full"
-                    />
-                    {property.featured && (
-                      <Badge className="absolute top-2 left-2 bg-primary">
-                        Featured
-                      </Badge>
-                    )}
-                  </div>
-
-                  <div>
-                    <h4 className="font-medium text-sm">{property.name}</h4>
-                    <div className="text-xs text-muted-foreground mt-1">
-                      {property.location}, Yemen
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {property.beds} bed{property.beds !== 1 ? "s" : ""} •{" "}
-                      {property.baths} bath
-                      {property.baths !== 1 ? "s" : ""}
-                    </div>
-                  </div>
-
-                  <div className="flex flex-col justify-between items-center">
-                    <Badge
-                      variant="outline"
-                      className="text-md px-4 py-1 font-semibold"
-                    >
-                      {formatCurrency(property.pricePerMonth)}/mo
-                    </Badge>
-                    <Button
-                      asChild
-                      size="sm"
-                      className="w-28 mt-3 gap-1 rounded-xl text-white hover:bg-primary"
-                    >
-                      <Link
-                        href={`/property/${property.id}`}
-                        className="hover:bg-zinc-800 text-xs font-semibold "
-                      >
-                        <p className="text-xs font-semibold text-white">
-                          View details
-                        </p>
-                        <ArrowUpRight className="h-3.5 w-3.5" />
-                      </Link>
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-    </>
-  );
+  return <>{markersRef.current}</>;
 }
 
 // Component to update map bounds when properties change

@@ -1,7 +1,7 @@
 "use client";
 
 import { useProperties } from "@/shared/hooks/useProperties";
-import { PropertyCard } from "./property-card";
+import PropertyCard from "./property-card";
 import { Skeleton } from "@/shared/components/ui/skeleton";
 import type { PropertyFilters } from "@/shared/hooks/useProperties";
 import { Button } from "@/shared/components/ui/button";
@@ -13,6 +13,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/components/ui/dropdown-menu";
+import { Property } from "@/shared/types/property";
+import { motion, AnimatePresence } from "framer-motion";
 
 interface ListingsProps {
   filters: PropertyFilters;
@@ -39,7 +41,7 @@ export default function Listings({ filters, viewMode }: ListingsProps) {
 
   // Fetch properties when filters change
   useEffect(() => {
-    fetchProperties(0, 100, filters);
+    fetchProperties(0, 100, filters, undefined, false, true);
   }, [filters, fetchProperties]);
 
   // Update properties when fetchedProperties changes
@@ -94,22 +96,24 @@ export default function Listings({ filters, viewMode }: ListingsProps) {
 
   if (loading) {
     return (
-      <div className="space-y-6 p-4">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+      <div className="space-y-4 p-4 overflow-hidden">
+        <div className="flex justify-between items-center mb-6">
+          <Skeleton className="h-7 w-32" />
           <Skeleton className="h-8 w-40" />
-          <Skeleton className="h-9 w-32" />
         </div>
         <div
-          className={`${
-            viewMode === "grid"
-              ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6"
-              : "space-y-6"
-          }`}
+          className={`grid ${
+            viewMode === "grid" ? "grid-cols-2" : "grid-cols-1"
+          } gap-4`}
         >
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div key={i} className="space-y-2">
-              <Skeleton className="h-48 sm:h-64 w-full rounded-lg" />
-            </div>
+          {Array.from({ length: viewMode === "grid" ? 4 : 2 }).map((_, i) => (
+            <Skeleton
+              key={i}
+              className={`${
+                viewMode === "list" ? "h-28" : "h-64"
+              } w-full rounded-xl animate-pulse`}
+              // Using CSS classes instead of inline style for animations
+            />
           ))}
         </div>
       </div>
@@ -118,44 +122,58 @@ export default function Listings({ filters, viewMode }: ListingsProps) {
 
   if (error) {
     return (
-      <div className="text-center py-12 px-4">
-        <div className="bg-destructive/10 rounded-lg p-6">
-          <h3 className="text-lg font-medium text-destructive">
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-center py-12 px-4"
+      >
+        <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-6">
+          <Filter className="mx-auto h-10 w-10 text-red-500 mb-2" />
+          <h3 className="text-lg font-medium text-red-600 dark:text-red-400">
             Error loading properties
           </h3>
-          <p className="text-muted-foreground mt-2">Please try again later</p>
-          <Button variant="outline" className="mt-4">
+          <p className="text-red-500/80 dark:text-red-300/80 mt-2">
+            Please try again later
+          </p>
+          <Button
+            variant="outline"
+            className="mt-4 border-red-200 text-red-600"
+          >
             Retry
           </Button>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   if (!properties || properties.length === 0) {
     return (
-      <div className="text-center py-12 px-4">
-        <div className="bg-muted/40 rounded-lg p-6">
-          <Filter className="mx-auto h-10 w-10 text-muted-foreground mb-2" />
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        className="text-center py-12 px-4"
+      >
+        <div className="bg-gray-50 dark:bg-slate-800/50 rounded-xl p-6 border border-gray-100 dark:border-gray-700">
+          <Filter className="mx-auto h-10 w-10 text-gray-400 mb-2" />
           <h3 className="text-lg font-medium">No properties found</h3>
-          <p className="text-muted-foreground mt-2">
+          <p className="text-gray-500 dark:text-gray-400 mt-2">
             Try adjusting your filters or expanding your search area
           </p>
         </div>
-      </div>
+      </motion.div>
     );
   }
 
   return (
-    <div className="p-4 space-y-6">
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+    <div className="p-4 h-full overflow-y-auto">
+      <div className="flex justify-between items-center mb-4 sticky top-0 z-10 bg-white dark:bg-slate-900 py-2">
         <div>
-          <h3 className="text-lg font-semibold">
+          <h3 className="text-base font-medium text-gray-900 dark:text-white">
             {properties.length}{" "}
             {properties.length === 1 ? "property" : "properties"}
           </h3>
           {filters.search_term && (
-            <div className="flex items-center text-sm text-muted-foreground mt-1">
+            <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-0.5">
               <MapPin className="h-3 w-3 mr-1" />
               <span>{filters.search_term}</span>
             </div>
@@ -164,8 +182,12 @@ export default function Listings({ filters, viewMode }: ListingsProps) {
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" className="h-9">
-              <ArrowUpDown className="h-3.5 w-3.5 mr-2" />
+            <Button
+              variant="outline"
+              size="sm"
+              className="h-8 text-xs px-3 border-gray-200 dark:border-gray-700"
+            >
+              <ArrowUpDown className="h-3 w-3 mr-2" />
               {sortBy === "price-asc" && "Price: Low to High"}
               {sortBy === "price-desc" && "Price: High to Low"}
               {sortBy === "beds-desc" && "Most Bedrooms"}
@@ -191,31 +213,31 @@ export default function Listings({ filters, viewMode }: ListingsProps) {
 
       <div
         className={`${
-          viewMode === "grid"
-            ? "grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-6"
-            : "space-y-6"
-        }`}
+          viewMode === "grid" ? "grid grid-cols-2 gap-4" : "space-y-4"
+        } pb-4`}
       >
-        {properties.map((property) => (
-          <PropertyCard
-            key={property.id}
-            property={{
-              ...property,
-              name: property.title,
-              beds: property.bedrooms,
-              baths: property.bathrooms,
-              squareFeet: property.area,
-              pricePerMonth: property.price,
-              propertyType: property.property_type,
-              images:
-                property.images?.map((img) => img.image_url) ||
-                ([property.primaryImage].filter(Boolean) as string[]),
-            }}
-            isFavorite={favoriteStates[property.id] || false}
-            onFavoriteToggle={() => handleFavoriteToggle(property.id)}
-            isCompact={viewMode === "list"}
-          />
-        ))}
+        <AnimatePresence>
+          {properties.map((property, index) => (
+            <motion.div
+              key={property.id}
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{
+                duration: 0.3,
+                delay: index * 0.05,
+              }}
+              className={viewMode === "list" ? "flex w-full" : ""}
+            >
+              <PropertyCard
+                property={property}
+                isFavorite={favoriteStates[property.id] || false}
+                onFavoriteToggle={() => handleFavoriteToggle(property.id)}
+                viewMode={viewMode}
+              />
+            </motion.div>
+          ))}
+        </AnimatePresence>
       </div>
     </div>
   );

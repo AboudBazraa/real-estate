@@ -97,7 +97,7 @@ export default function PendingApprovalsPage() {
       setLoading(true);
       try {
         // We pass a large page size to get all pending properties
-        await fetchProperties(0, 100, filters);
+        await fetchProperties(0, 100, filters, undefined, false, false);
       } catch (error) {
         console.error("Failed to fetch pending properties:", error);
         toast({

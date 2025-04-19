@@ -1,221 +1,244 @@
 "use client";
 
-import { Property as BaseProperty } from "@/shared/hooks/useProperties";
-import { Card, CardContent, CardFooter } from "@/shared/components/ui/card";
-import { Badge } from "@/shared/components/ui/badge";
-import { Button } from "@/shared/components/ui/button";
-import {
-  Heart,
-  BedDouble,
-  Bath,
-  Home,
-  MapPin,
-  ArrowUpRight,
-  Bed,
-} from "lucide-react";
-import { formatCurrency } from "@/shared/lib/utils";
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
+import { Heart, Bed, Bath, Square, MapPin } from "lucide-react";
+import { useState, useEffect } from "react";
+import { formatCurrency } from "@/shared/lib/utils";
+import { Button } from "@/shared/components/ui/button";
+import { Badge } from "@/shared/components/ui/badge";
+import type { Property } from "@/shared/types/property";
+import { motion } from "framer-motion";
 import { cn } from "@/shared/lib/utils";
 
-// UI Property with additional display fields
-interface UIProperty {
-  id: string;
-  name: string;
-  description: string;
-  location: string;
-  featured: boolean;
-  beds: number;
-  baths: number;
-  squareFeet: number;
-  pricePerMonth: number;
-  propertyType: string;
-  images: string[];
-}
-
 interface PropertyCardProps {
-  property: UIProperty;
-  isFavorite: boolean;
-  onFavoriteToggle: () => void;
-  isCompact?: boolean;
+  property: Property;
+  isFavorite?: boolean;
+  onFavoriteToggle?: () => void;
+  viewMode?: "grid" | "list";
 }
 
-export function PropertyCard({
+export default function PropertyCard({
   property,
-  isFavorite,
+  isFavorite = false,
   onFavoriteToggle,
-  isCompact = false,
+  viewMode = "grid",
 }: PropertyCardProps) {
-  if (isCompact) {
+  const [isLiked, setIsLiked] = useState(isFavorite);
+  const [imageLoaded, setImageLoaded] = useState(false);
+
+  // Update internal state when prop changes
+  useEffect(() => {
+    setIsLiked(isFavorite);
+  }, [isFavorite]);
+
+  const toggleLike = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    if (onFavoriteToggle) {
+      onFavoriteToggle();
+    } else {
+      setIsLiked(!isLiked);
+    }
+  };
+
+  const imageUrl =
+    property.primaryImage ||
+    property.images?.[0]?.image_url ||
+    "/placeholder.svg?height=600&width=800";
+
+  // List view card
+  if (viewMode === "list") {
     return (
-      <Card className="overflow-hidden hover:shadow-md transition-all duration-300 rounded-xl border-0 p-0 h-44 bg-card">
-        <CardContent className="p-2 flex">
-          <div className="flex flex-col sm:flex-row gap-4">
-            <div className="relative sm:w-2/5 overflow-hidden">
-              <div className="aspect-video sm:h-40 relative">
-                <Image
-                  src={
-                    property.images[0] ||
-                    "/placeholder.svg?height=600&width=800"
-                  }
-                  alt={property.name}
-                  fill
-                  sizes="(max-width: 640px) 100vw, 40vw"
-                  priority
-                  className="object-cover transition-transform rounded-xl duration-700"
-                  style={{ objectPosition: "center" }}
-                />
+      <motion.div
+        initial={{ opacity: 0, x: -20 }}
+        animate={{ opacity: 1, x: 0 }}
+        transition={{ duration: 0.3 }}
+        whileHover={{ x: -3 }}
+        className="w-full"
+      >
+        <Link href={`/search/${property.id}`}>
+          <div className="flex w-full h-28 rounded-xl overflow-hidden bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
+            {/* Property image */}
+            <div className="relative w-36 overflow-hidden bg-gray-100">
+              <div
+                className={`absolute inset-0 bg-gray-200 animate-pulse ${
+                  imageLoaded ? "opacity-0" : "opacity-100"
+                }`}
+                style={{ transition: "opacity 0.5s ease" }}
+              />
+              <Image
+                src={imageUrl}
+                alt={property.title}
+                fill
+                sizes="(max-width: 768px) 33vw, 25vw"
+                className={`object-cover transition-all duration-500 ${
+                  imageLoaded ? "scale-100" : "scale-110 blur-sm"
+                }`}
+                priority={false}
+                onLoad={() => setImageLoaded(true)}
+              />
+
+              {/* Favorite button */}
+              <motion.div
+                whileTap={{ scale: 0.9 }}
+                className="absolute top-2 right-2"
+              >
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className={`h-7 w-7 rounded-full ${
+                    isLiked
+                      ? "bg-red-500 text-white"
+                      : "bg-white/90 dark:bg-slate-700/90 text-gray-700 dark:text-gray-200"
+                  } hover:bg-white/90 dark:hover:bg-slate-700/90 hover:text-red-500 transition-all duration-300`}
+                  onClick={toggleLike}
+                >
+                  <Heart
+                    className={`h-3.5 w-3.5 transition-all duration-300 ${
+                      isLiked ? "fill-current" : ""
+                    }`}
+                  />
+                  <span className="sr-only">Toggle favorite</span>
+                </Button>
+              </motion.div>
+            </div>
+
+            {/* Property details */}
+            <div className="flex flex-col justify-between flex-1 p-3">
+              <div>
+                <div className="flex justify-between items-start">
+                  <div>
+                    <h3 className="font-medium text-sm truncate text-gray-900 dark:text-white">
+                      {property.title}
+                    </h3>
+                    <div className="flex items-center text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      <MapPin className="h-3 w-3 mr-1" />
+                      <p className="truncate">{property.location}</p>
+                    </div>
+                  </div>
+                  <p className="font-semibold text-sm text-gray-900 dark:text-white">
+                    {formatCurrency(property.price)}
+                  </p>
+                </div>
               </div>
+
+              {/* Property specs */}
+              <div className="flex items-center gap-4 text-xs text-gray-500 dark:text-gray-400">
+                <div className="inline-flex items-center">
+                  <Bed className="h-3.5 w-3.5 mr-1" />
+                  <span>{property.bedrooms} bed</span>
+                </div>
+                <div className="inline-flex items-center">
+                  <Bath className="h-3.5 w-3.5 mr-1" />
+                  <span>{property.bathrooms} bath</span>
+                </div>
+                <div className="inline-flex items-center">
+                  <Square className="h-3.5 w-3.5 mr-1" />
+                  <span>{property.area} sqft</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </Link>
+      </motion.div>
+    );
+  }
+
+  // Grid view card (default)
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3 }}
+      whileHover={{ y: -3 }}
+      className="h-full"
+    >
+      <Link href={`/search/${property.id}`} className="h-full">
+        <div className="relative h-full rounded-xl overflow-hidden bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700 shadow-sm hover:shadow-md transition-all duration-300">
+          {/* Property image */}
+          <div className="relative aspect-[3/2] w-full overflow-hidden bg-gray-100">
+            <div
+              className={`absolute inset-0 bg-gray-200 animate-pulse ${
+                imageLoaded ? "opacity-0" : "opacity-100"
+              }`}
+              style={{ transition: "opacity 0.5s ease" }}
+            />
+            <Image
+              src={imageUrl}
+              alt={property.title}
+              fill
+              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+              className={`object-cover transition-all duration-500 ${
+                imageLoaded ? "scale-100" : "scale-110 blur-sm"
+              }`}
+              priority={false}
+              onLoad={() => setImageLoaded(true)}
+            />
+
+            {/* Price tag overlay */}
+            <div className="absolute top-3 left-3 bg-white dark:bg-slate-700 px-3 py-1 rounded-lg shadow-sm">
+              <p className="font-semibold text-sm text-gray-900 dark:text-white">
+                {formatCurrency(property.price)}
+              </p>
+            </div>
+
+            {/* Favorite button */}
+            <motion.div
+              whileTap={{ scale: 0.9 }}
+              className="absolute top-3 right-3"
+            >
               <Button
                 variant="ghost"
                 size="icon"
-                className="absolute top-1 left-1 bg-background/90 hover:bg-background rounded-lg h-7 w-7 z-10 shadow-md"
-                onClick={(e) => {
-                  e.preventDefault();
-                  onFavoriteToggle();
-                }}
+                className={`h-8 w-8 rounded-full ${
+                  isLiked
+                    ? "bg-red-500 text-white"
+                    : "bg-white/90 dark:bg-slate-700/90 text-gray-700 dark:text-gray-200"
+                } hover:bg-white/90 dark:hover:bg-slate-700/90 hover:text-red-500 transition-all duration-300`}
+                onClick={toggleLike}
               >
                 <Heart
-                  className={`h-4 w-4 ${
-                    isFavorite ? "fill-destructive text-destructive" : ""
+                  className={`h-4 w-4 transition-all duration-300 ${
+                    isLiked ? "fill-current" : ""
                   }`}
                 />
                 <span className="sr-only">Toggle favorite</span>
               </Button>
-            </div>
-
-            <div className="flex flex-col justify-between">
-              <div className="flex flex-col">
-                <h3 className="font-semibold text-lg line-clamp-1">
-                  {property.name}
-                </h3>
-                <div className="flex items-center text-muted-foreground text-sm">
-                  <MapPin className="h-3.5 w-3.5 mr-1.5" />
-                  <span className="line-clamp-1">
-                    {property.location}, Yemen
-                  </span>
-                </div>
-                <p className="text-sm text-muted-foreground line-clamp-2">
-                  {property.description.slice(0, 20)}...
-                </p>
-              </div>
-
-              <div className="flex flex-wrap items-center justify-between">
-                <div className="flex items-center gap-5 text-sm py-2 border-b border-border mb-3">
-                  <div className="flex items-center">
-                    <BedDouble className="h-6 w-6 mr-1.5 text-muted-foreground bg-muted rounded-md p-1" />
-                    <span className="font-medium">{property.beds}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Bath className="h-6 w-6 mr-1.5 text-muted-foreground bg-muted rounded-md p-1" />
-                    <span className="font-medium">{property.baths}</span>
-                  </div>
-                  <div className="flex items-center">
-                    <Home className="h-6 w-6 mr-1.5 text-muted-foreground bg-muted rounded-md p-1" />
-                    <span className="font-medium">
-                      {property.squareFeet} m²
-                    </span>
-                  </div>
-                </div>
-
-                <div className="flex items-center justify-between gap-3 mt-3 sm:mt-0">
-                  <Badge
-                    variant="secondary"
-                    className="text-base font-semibold"
-                  >
-                    {formatCurrency(property.pricePerMonth)}/mo
-                  </Badge>
-                  <Button asChild variant="outline" size="sm" className="gap-1">
-                    <Link href={`/search/${property.id}`}>
-                      View
-                      <ArrowUpRight className="h-3.5 w-3.5" />
-                    </Link>
-                  </Button>
-                </div>
-              </div>
-            </div>
+            </motion.div>
           </div>
-        </CardContent>
-      </Card>
-    );
-  }
 
-  return (
-    <Link href={`/search/${property.id}`}>
-      <Card className="overflow-hidden hover:shadow-md duration-200 rounded-xl p-3 pb-5 border-0 bg-card">
-        <div className="relative">
-          <div className="aspect-[4/3] relative overflow-hidden">
-            <Image
-              src={
-                property.images[0] || "/placeholder.svg?height=600&width=800"
-              }
-              alt={property.name}
-              fill
-              className="object-cover transition-transform duration-500 rounded-xl"
-            />
-          </div>
-          <Button
-            variant="ghost"
-            size="icon"
-            className="absolute top-2 right-2 bg-background/50 hover:bg-background rounded-2xl h-9 w-9"
-            onClick={(e) => {
-              e.preventDefault();
-              onFavoriteToggle();
-            }}
-          >
-            <Heart
-              className={cn(
-                "h-5 w-5",
-                isFavorite ? "fill-destructive text-destructive" : ""
-              )}
-            />
-            <span className="sr-only">Toggle favorite</span>
-          </Button>
-          <Badge
-            variant="outline"
-            className="absolute bottom-3 left-3 font-semibold bg-background/80 backdrop-blur-sm px-2"
-          >
-            {property.propertyType}
-          </Badge>
-        </div>
-
-        <CardContent className="px-2 -mt-4">
-          <div className="space-y-2 flex flex-col">
-            <div className="flex justify-between items-center">
-              <h3 className="font-semibold text-xl line-clamp-1">
-                {property.name}
+          {/* Property details */}
+          <div className="p-3">
+            {/* Title and location */}
+            <div className="mb-2">
+              <h3 className="font-medium text-sm truncate text-gray-900 dark:text-white">
+                {property.title}
               </h3>
-              <div className="flex items-center text-muted-foreground font-bold text-xl">
-                {formatCurrency(property.pricePerMonth)}/mo
+              <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                {property.location}
+              </p>
+            </div>
+
+            {/* Property specs */}
+            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400 border-t border-gray-100 dark:border-gray-700 pt-2">
+              <div className="inline-flex items-center">
+                <Bed className="h-3.5 w-3.5 mr-1" />
+                <span>{property.bedrooms} bed</span>
+              </div>
+              <div className="inline-flex items-center">
+                <Bath className="h-3.5 w-3.5 mr-1" />
+                <span>{property.bathrooms} bath</span>
+              </div>
+              <div className="inline-flex items-center">
+                <Square className="h-3.5 w-3.5 mr-1" />
+                <span>{property.area} sqft</span>
               </div>
             </div>
-
-            <div className="flex items-center text-muted-foreground text-sm">
-              <MapPin className="h-3.5 w-3.5 mr-1.5" />
-              <span className="line-clamp-1">{property.location}, Yemen</span>
-            </div>
           </div>
-
-          <div className="flex items-center gap-5 mt-2 text-sm">
-            <div className="flex items-center">
-              <BedDouble className="h-7 w-7 mr-1.5 text-muted-foreground border border-border rounded-md p-1 bg-muted" />
-              <span className="font-medium">
-                {property.beds} {property.beds === 1 ? "bed" : "beds"}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <Bath className="h-7 w-7 mr-1.5 text-muted-foreground border border-border rounded-md p-1 bg-muted" />
-              <span className="font-medium">
-                {property.baths} {property.baths === 1 ? "bath" : "baths"}
-              </span>
-            </div>
-            <div className="flex items-center">
-              <Home className="h-7 w-7 mr-1.5 text-muted-foreground border border-border rounded-md p-1 bg-muted" />
-              <span className="font-medium">{property.squareFeet} m²</span>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </Link>
+        </div>
+      </Link>
+    </motion.div>
   );
 }

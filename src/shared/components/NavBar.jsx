@@ -452,15 +452,15 @@ export function MainNav() {
   return (
     <nav
       data-state={menuOpen ? "active" : undefined}
-      className="fixed z-20 w-full h-16 border-b border-dashed  border-zinc-300 dark:border-zinc-800 bg-white backdrop-blur md:relative dark:bg-zinc-950/50 lg:dark:bg-transparent "
+      className="fixed z-20 w-full h-16 border-b border-dashed  border-zinc-300 dark:border-zinc-800 p-2 md:relative dark:bg-zinc-950/50 lg:dark:bg-transparent "
     >
-      <div className="m-auto max-w-5xl px-6">
+      <div className="m-auto px-2">
         <div className="flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
           <div className="flex w-full justify-between lg:w-auto">
             <Link
               href="/"
               aria-label="EstateFind Home"
-              className="flex items-center space-x-2"
+              className="flex items-center space-x-2 pl-10"
             >
               <p>Logo</p>
               {/* <span className="font-semibold text-lg">EstateFind</span> */}

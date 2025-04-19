@@ -48,6 +48,7 @@ export default function AllProperties({ data = [] }) {
   };
 
   const handleEditProperty = (id) => {
+    console.log("Opening edit modal for  property ID:", id);
     setSelectedPropertyId(id);
     setIsEditModalOpen(true);
   };
@@ -165,6 +166,7 @@ export default function AllProperties({ data = [] }) {
                     bedrooms: property.bedrooms || 0,
                     bathrooms: property.bathrooms || 0,
                     size: property.size || 0,
+                    property_type: property.property_type || "Residential",
                   }}
                   showStatus={true}
                   onView={() => handleViewProperty(property.id)}
@@ -188,19 +190,25 @@ export default function AllProperties({ data = [] }) {
 
       {/* Property Edit Modal - Using your PropertyEditForm component */}
       {isEditModalOpen && selectedPropertyId && (
-        <PropertyEditForm
-          propertyId={selectedPropertyId}
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onSaved={() => {
-            setIsEditModalOpen(false);
-            toast({
-              title: "Property updated",
-              description: "The property has been successfully updated.",
-              variant: "success",
-            });
-          }}
-        />
+        <>
+          {console.log(
+            "Rendering PropertyEditForm with propertyId:",
+            selectedPropertyId
+          )}
+          <PropertyEditForm
+            propertyId={selectedPropertyId}
+            isOpen={isEditModalOpen}
+            onClose={() => setIsEditModalOpen(false)}
+            onSaved={() => {
+              setIsEditModalOpen(false);
+              toast({
+                title: "Property updated",
+                description: "The property has been successfully updated.",
+                variant: "success",
+              });
+            }}
+          />
+        </>
       )}
 
       {/* Delete Confirmation Modal */}

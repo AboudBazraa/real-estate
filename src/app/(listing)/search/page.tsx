@@ -104,12 +104,12 @@ export default function SearchPage() {
 
   return (
     <div
-      className="w-full mx-auto px-2 sm:px-4 lg:px-6 flex flex-col bg-background text-foreground transition-colors duration-300"
+      className="w-full mx-auto flex flex-col bg-background text-foreground transition-colors duration-300"
       style={{
         height: `calc(100vh - 4rem)`,
       }}
     >
-      <div className="flex justify-between items-center py-2">
+      <div className="flex justify-between items-center p-2">
         <FiltersBar
           filters={filters}
           setFilters={setFilters}
@@ -119,7 +119,6 @@ export default function SearchPage() {
           toggleFiltersFullOpen={toggleFiltersFullOpen}
         />
 
-        {/* Theme toggle button */}
         {mounted && (
           <Button
             variant="ghost"
@@ -134,28 +133,22 @@ export default function SearchPage() {
         )}
       </div>
 
-      <div
-        className="flex flex-col lg:flex-row justify-between flex-1 overflow-hidden gap-4 mt-2"
-        style={{ animation: "fadeIn 0.5s ease-in-out forwards" }}
-      >
-        {/* Filters panel */}
-        {isFiltersFullOpen && (
-          <div
-            className="h-full overflow-auto lg:w-3/12 bg-card rounded-lg shadow-sm dark:bg-slate-800 border border-border"
-            style={{
-              animation: "slideIn 0.3s ease-in-out forwards",
-            }}
-          >
-            <FiltersFull filters={filters} setFilters={setFilters} />
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left side - Properties listings */}
+        <div className="w-2/5 flex flex-col overflow-hidden">
+          {isFiltersFullOpen && (
+            <div className="bg-card dark:bg-slate-800 border-b border-border p-3">
+              <FiltersFull filters={filters} setFilters={setFilters} />
+            </div>
+          )}
+          <div className="flex-1 overflow-y-auto">
+            <Listings filters={filters} viewMode={viewMode} />
           </div>
-        )}
-
-        <div className="flex-1 rounded-lg overflow-hidden shadow-sm border border-border transition-all duration-300">
-          <Map filters={filters} />
         </div>
 
-        <div className="w-full lg:w-4/12 overflow-y-auto rounded-lg bg-card shadow-sm border border-border dark:bg-slate-800 transition-colors duration-300">
-          <Listings filters={filters} viewMode={viewMode} />
+        {/* Right side - Map */}
+        <div className="w-3/5 border-l border-border">
+          <Map filters={filters} />
         </div>
       </div>
 

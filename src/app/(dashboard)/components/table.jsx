@@ -13,6 +13,24 @@ import { Button } from "@/shared/components/ui/button";
 import { Eye, Edit, Trash2, ChevronDown, Search, Loader2 } from "lucide-react";
 import { Input } from "@/shared/components/ui/input";
 import { motion, AnimatePresence } from "framer-motion";
+import { PROPERTY_TYPES } from "@/app/(dashboard)/constants/propertype";
+
+// Helper function to get the display label for property type
+const getPropertyTypeLabel = (type) => {
+  if (!type) return "Residential";
+
+  // If it's already a full name string like "HOUSE", "APARTMENT", etc.
+  if (typeof type === "string" && PROPERTY_TYPES[type]) {
+    return type.charAt(0) + type.slice(1).toLowerCase();
+  }
+
+  // If it's a string that matches one of our PROPERTY_TYPES values
+  if (Object.values(PROPERTY_TYPES).includes(type)) {
+    return type.charAt(0) + type.slice(1).toLowerCase();
+  }
+
+  return type || "Residential";
+};
 
 export function DataTableDemo({
   data = [],
@@ -81,6 +99,7 @@ export function DataTableDemo({
               Price
             </TableHead>
             <TableHead className="hidden md:table-cell">Location</TableHead>
+            <TableHead className="hidden md:table-cell">Type</TableHead>
             <TableHead className="hidden md:table-cell">Status</TableHead>
             <TableHead className="w-[150px]">Actions</TableHead>
           </TableRow>
@@ -129,6 +148,9 @@ export function DataTableDemo({
                     </TableCell>
                     <TableCell className="max-w-[200px] truncate hidden md:table-cell">
                       {property.location || "Not specified"}
+                    </TableCell>
+                    <TableCell className="hidden md:table-cell">
+                      {getPropertyTypeLabel(property.property_type)}
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <Badge
@@ -236,6 +258,14 @@ export function DataTableDemo({
                               </span>{" "}
                               <span>
                                 {property.location || "Not specified"}
+                              </span>
+                            </div>
+                            <div>
+                              <span className="font-medium text-sm text-muted-foreground">
+                                Type:
+                              </span>{" "}
+                              <span>
+                                {getPropertyTypeLabel(property.property_type)}
                               </span>
                             </div>
                             <div>

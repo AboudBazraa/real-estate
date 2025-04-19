@@ -12,8 +12,10 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/components/ui/select";
-import { Grid, List, SlidersHorizontal, Search, MapPin } from "lucide-react";
+import { SlidersHorizontal, Search, Grid, List } from "lucide-react";
 import Link from "next/link";
+import { motion } from "framer-motion";
+import { cn } from "@/shared/lib/utils";
 
 interface FiltersBarProps {
   filters: PropertyFilters;
@@ -57,138 +59,82 @@ export default function FiltersBar({
     }
   };
 
+  const activeFiltersCount = Object.keys(filters).filter(
+    (key) => filters[key as keyof PropertyFilters] !== undefined
+  ).length;
+
   return (
-    <div
-      className="flex flex-col sm:flex-row items-center justify-between border-b border-border py-2 bg-card dark:bg-slate-800 rounded-lg shadow-sm transition-colors duration-300 w-full"
-      style={{ animation: "slideDown 0.3s ease-in-out forwards" }}
-    >
-      <div className="flex flex-wrap gap-2 w-full px-2">
-        <Link
-          href="/"
-          className="flex items-center gap-2 px-3 sm:px-4 py-1 rounded-xl border-r border-border"
-        >
-          <div
-            className="bg-gradient-to-r from-blue-500 to-indigo-500 p-1 rounded-lg"
-            style={{ animation: "scaleIn 0.3s ease-in-out forwards" }}
-          >
-            <MapPin className="h-5 w-5 text-white" />
-          </div>
-          <p className="text-lg font-semibold bg-gradient-to-r from-blue-500 to-indigo-500 bg-clip-text text-transparent hidden sm:block">
-            RealEstate
-          </p>
-        </Link>
-
-        <div className="relative flex-grow max-w-sm">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="text"
-            placeholder="Search location..."
-            className="pl-9 py-1 border border-border rounded-xl text-sm w-full bg-background dark:bg-slate-900 focus-within:ring-1 focus-within:ring-blue-500 transition-all duration-200"
-            value={filters.search_term || ""}
-            onChange={handleLocationChange}
-          />
-        </div>
-
-        <Select
-          value={filters.property_type || "any"}
-          onValueChange={handlePropertyTypeChange}
-        >
-          <SelectTrigger className="w-full sm:w-32 md:w-36 h-9 rounded-xl text-sm bg-background dark:bg-slate-900 border border-border">
-            <SelectValue placeholder="Any type" />
-          </SelectTrigger>
-          <SelectContent className="dark:bg-slate-800">
-            <SelectItem value="any">Any type</SelectItem>
-            {Object.values(PropertyType).map((type) => (
-              <SelectItem key={type} value={type}>
-                {type.replace("_", " ")}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-
-        <Select
-          value={filters.bedrooms?.toString() || "any"}
-          onValueChange={handleBedsChange}
-        >
-          <SelectTrigger className="w-full sm:w-28 md:w-32 h-9 rounded-xl text-sm bg-background dark:bg-slate-900 border border-border">
-            <SelectValue placeholder="Any beds" />
-          </SelectTrigger>
-          <SelectContent className="dark:bg-slate-800">
-            <SelectItem value="any">Any beds</SelectItem>
-            <SelectItem value="1">1+ Beds</SelectItem>
-            <SelectItem value="2">2+ Beds</SelectItem>
-            <SelectItem value="3">3+ Beds</SelectItem>
-            <SelectItem value="4">4+ Beds</SelectItem>
-          </SelectContent>
-        </Select>
+    <div className="flex items-center justify-between w-full gap-4">
+      <div className="flex-1 relative max-w-md">
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+        <Input
+          type="text"
+          placeholder="Search location..."
+          className="pl-9 h-10 rounded-md bg-white dark:bg-slate-800 border border-gray-200 dark:border-gray-700"
+          value={filters.search_term || ""}
+          onChange={handleLocationChange}
+        />
       </div>
 
-      <div className="flex items-center gap-2 mt-2 sm:mt-0 px-2">
-        <div className="flex items-center border border-border rounded-lg overflow-hidden dark:bg-slate-900">
-          <Button
-            variant={viewMode === "grid" ? "default" : "ghost"}
-            size="sm"
-            className={`h-8 w-8 rounded-none ${
+      <div className="flex items-center gap-3">
+        {/* View Toggle */}
+        <div className="bg-gray-100 dark:bg-slate-700 rounded-md flex items-center shadow-sm border border-gray-200 dark:border-gray-600">
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            className={cn(
+              "flex items-center justify-center h-8 w-10 rounded transition-all duration-200",
               viewMode === "grid"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+                ? "bg-white dark:bg-slate-800 shadow-sm"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            )}
             onClick={() => setViewMode("grid")}
+            aria-label="Grid view"
           >
             <Grid className="h-4 w-4" />
-            <span className="sr-only">Grid view</span>
-          </Button>
+          </motion.button>
 
-          <Button
-            variant={viewMode === "list" ? "default" : "ghost"}
-            size="sm"
-            className={`h-8 w-8 rounded-none ${
+          <motion.button
+            whileTap={{ scale: 0.95 }}
+            className={cn(
+              "flex items-center justify-center h-8 w-10 rounded transition-all duration-200",
               viewMode === "list"
-                ? "bg-primary text-primary-foreground"
-                : "text-muted-foreground hover:text-foreground"
-            }`}
+                ? "bg-white dark:bg-slate-800 shadow-sm"
+                : "text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+            )}
             onClick={() => setViewMode("list")}
+            aria-label="List view"
           >
             <List className="h-4 w-4" />
-            <span className="sr-only">List view</span>
-          </Button>
+          </motion.button>
         </div>
 
-        <Button
-          variant={isFiltersFullOpen ? "default" : "outline"}
-          size="sm"
-          className={`h-8 rounded-xl text-xs px-3 transition-all duration-300 ${
-            isFiltersFullOpen
-              ? "bg-primary text-primary-foreground"
-              : "border-border"
-          }`}
-          onClick={toggleFiltersFullOpen}
-        >
-          <SlidersHorizontal className="h-3 w-3 mr-1" />
-          {isFiltersFullOpen ? "Hide Filters" : "Filters"}
-        </Button>
+        {/* Filter Button */}
+        <motion.div whileHover={{ y: -2 }} whileTap={{ scale: 0.97 }}>
+          <Button
+            variant="outline"
+            className={cn(
+              "rounded-md border border-gray-200 dark:border-gray-700 flex items-center gap-1.5 transition-all duration-200",
+              isFiltersFullOpen
+                ? "bg-gray-100 dark:bg-gray-800"
+                : "bg-white hover:bg-white hover:border-gray-300 dark:bg-slate-800 dark:hover:border-gray-600"
+            )}
+            onClick={toggleFiltersFullOpen}
+          >
+            <SlidersHorizontal className="h-4 w-4" />
+            Filter
+            {activeFiltersCount > 0 && (
+              <motion.span
+                className="ml-1 bg-gray-800 dark:bg-gray-200 text-white dark:text-gray-900 rounded-full w-5 h-5 flex items-center justify-center text-xs"
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ type: "spring", stiffness: 500, damping: 20 }}
+              >
+                {activeFiltersCount}
+              </motion.span>
+            )}
+          </Button>
+        </motion.div>
       </div>
-
-      <style jsx global>{`
-        @keyframes slideDown {
-          from {
-            transform: translateY(-20px);
-            opacity: 0;
-          }
-          to {
-            transform: translateY(0);
-            opacity: 1;
-          }
-        }
-        @keyframes scaleIn {
-          from {
-            transform: scale(0.8);
-          }
-          to {
-            transform: scale(1);
-          }
-        }
-      `}</style>
     </div>
   );
 }

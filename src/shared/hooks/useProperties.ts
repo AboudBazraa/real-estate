@@ -16,7 +16,7 @@ export type {
 } from "@/shared/types/property";
 
 export const useProperties = () => {
-  const { supabase, user } = useSupabase();
+  const { supabase, user, isAdmin } = useSupabase();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -94,7 +94,8 @@ export const useProperties = () => {
       pageSize = 10,
       filters?: PropertyFilters,
       sort?: PropertySort,
-      fetchUserPropertiesOnly = false
+      fetchUserPropertiesOnly = false,
+      fetchFeaturedPropertiesOnly = false
     ) => {
       setLoading(true);
       setError(null);
@@ -110,6 +111,11 @@ export const useProperties = () => {
         // If fetching only user's properties
         if (fetchUserPropertiesOnly && user?.id) {
           query = query.eq("user_id", user.id);
+        }
+
+        // If fetching only featured properties
+        if (fetchFeaturedPropertiesOnly) {
+          query = query.eq("featured", true);
         }
 
         // Apply filters
@@ -424,8 +430,8 @@ export const useProperties = () => {
 
         if (fetchError) throw fetchError;
 
-        // Check if the user owns this property
-        if (currentProperty.user_id !== user.id) {
+        // Check if the user owns this property or is an admin
+        if (currentProperty.user_id !== user.id && !isAdmin) {
           throw new Error("You can only update your own properties");
         }
 
@@ -580,7 +586,7 @@ export const useProperties = () => {
         setLoading(false);
       }
     },
-    [supabase, user, toast, fetchProperties]
+    [supabase, user, toast, fetchProperties, isAdmin]
   );
 
   // Delete a property
@@ -603,8 +609,8 @@ export const useProperties = () => {
 
         if (fetchError) throw fetchError;
 
-        // Check if the user owns this property
-        if (currentProperty.user_id !== user.id) {
+        // Check if the user owns this property or is an admin
+        if (currentProperty.user_id !== user.id && !isAdmin) {
           throw new Error("You can only delete your own properties");
         }
 
@@ -666,7 +672,7 @@ export const useProperties = () => {
         setLoading(false);
       }
     },
-    [supabase, user, toast, fetchProperties]
+    [supabase, user, toast, fetchProperties, isAdmin]
   );
 
   // Toggle property favorite status
@@ -769,7 +775,7 @@ export const useProperties = () => {
           .single();
 
         if (propertyError) throw propertyError;
-        if (property.user_id !== user.id) {
+        if (property.user_id !== user.id && !isAdmin) {
           throw new Error("You can only modify your own properties");
         }
 
@@ -803,7 +809,7 @@ export const useProperties = () => {
         return false;
       }
     },
-    [supabase, user, toast]
+    [supabase, user, toast, isAdmin]
   );
 
   // Reorder images
@@ -825,7 +831,7 @@ export const useProperties = () => {
           .single();
 
         if (propertyError) throw propertyError;
-        if (property.user_id !== user.id) {
+        if (property.user_id !== user.id && !isAdmin) {
           throw new Error("You can only modify your own properties");
         }
 
@@ -853,7 +859,7 @@ export const useProperties = () => {
         return false;
       }
     },
-    [supabase, user, toast]
+    [supabase, user, toast, isAdmin]
   );
 
   // Get user's favorited properties
