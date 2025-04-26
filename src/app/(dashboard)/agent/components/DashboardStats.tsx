@@ -41,18 +41,18 @@ export function DashboardStats({
         title="Total Properties"
         value={totalProperties}
         icon={<Building2 className="h-6 w-6 text-blue-600" />}
-        bgColor="from-blue-50 to-blue-100 border-blue-200"
+        bgColor="from-blue-100/90 to-blue-200/90 border-blue-200"
         iconColor="bg-blue-500/10"
         link="/agent/agentProperties"
         linkText="View all properties"
-      />
+        />
 
       {/* Available Properties */}
       <StatCard
         title="Verified Properties"
         value={availableProperties}
         icon={<Check className="h-6 w-6 text-green-600" />}
-        bgColor="from-green-50 to-green-100 border-green-200"
+        bgColor="from-green-100/90 to-green-200/90 border-green-200"
         iconColor="bg-green-500/10"
         trend={availablePercentage}
       />
@@ -62,7 +62,7 @@ export function DashboardStats({
         title="Scheduled Viewings"
         value={scheduledViewings}
         icon={<Calendar className="h-6 w-6 text-amber-600" />}
-        bgColor="from-amber-50 to-amber-100 border-amber-200"
+        bgColor="from-amber-100/90 to-amber-200/90 border-amber-200"
         iconColor="bg-amber-500/10"
         link="/agent/meetings"
         linkText="View schedule"
@@ -73,7 +73,7 @@ export function DashboardStats({
         title="New Inquiries"
         value={newInquiries}
         icon={<MessageSquareText className="h-6 w-6 text-purple-600" />}
-        bgColor="from-purple-50 to-purple-100 border-purple-200"
+        bgColor="from-purple-100/90 to-purple-200/90 border-purple-200"
         iconColor="bg-purple-500/10"
         link="/agent/request"
         linkText="View inquiries"

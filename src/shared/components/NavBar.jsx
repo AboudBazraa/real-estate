@@ -422,7 +422,7 @@ const menuItems = [
   { name: "Buy", href: "/search" },
   { name: "Rent", href: "/search" },
   { name: "Sell", href: "/search" },
-  { name: "Agents", href: "/agents" },
+  { name: "Home", href: "/" },
   { name: "About", href: "/about" },
 ];
 
@@ -452,7 +452,7 @@ export function MainNav() {
   return (
     <nav
       data-state={menuOpen ? "active" : undefined}
-      className="fixed z-20 w-full h-16 border-b border-dashed  border-zinc-300 dark:border-zinc-800 p-2 md:relative dark:bg-zinc-950/50 lg:dark:bg-transparent "
+      className="fixed z-20 w-full h-16 border-zinc-300 dark:bord er-zinc-800 p-2 md:relative backdrop-blur-md active:backdrop-blur-sm bg-zinc-50 dark:bg-zinc-950/50"
     >
       <div className="m-auto px-2">
         <div className="flex flex-wrap items-center justify-between gap-6 py-3 lg:gap-0 lg:py-4">
@@ -489,7 +489,7 @@ export function MainNav() {
           </div>
 
           <div
-            className={`bg-background mb-6 w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/20 md:flex-nowrap lg:m-0 lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:bg-transparent lg:p-0 lg:shadow-none dark:shadow-none dark:lg:bg-transparent ${
+            className={`bg-white/40 backdrop-blur-md dark:bg-zinc-950/50 mb-6 w-full flex-wrap items-center justify-end space-y-8 rounded-3xl border p-6 shadow-2xl shadow-zinc-300/10 md:flex-nowrap lg:m-0 lg:w-fit lg:gap-6 lg:space-y-0 lg:border-transparent lg:p-0 lg:shadow-none dark:shadow-none active:backdrop-blur-sm  ${
               menuOpen ? "block" : "hidden lg:flex"
             }`}
           >
@@ -499,7 +499,7 @@ export function MainNav() {
                   <li key={index}>
                     <Link
                       href={item.href}
-                      className="text-muted-foreground hover:text-accent-foreground block duration-150"
+                      className="text-muted-foreground hover:text-zinc-800 dark:hover:text-zinc-300 hover:font-bold block duration-150 "
                     >
                       <span>{item.name}</span>
                     </Link>
@@ -508,7 +508,7 @@ export function MainNav() {
               </ul>
             </div>
             {/* auth //////////////////// */}
-            <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit lg:border-l lg:pl-6  lg:dark:border-l-zinc-800">
+            <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit lg:border-l lg:pl-6 border-l-zinc-400 lg:dark:border-l-zinc-800">
               {user ? (
                 <div className="flex items-center gap-2 w-36 relative hidden lg:block">
                   <ToolbarExpandable ITEMS={ITEMS} />

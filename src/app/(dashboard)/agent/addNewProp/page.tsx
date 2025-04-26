@@ -44,7 +44,7 @@ export default function AddNewPropPage() {
           </Tooltip>
         </TooltipProvider> */}
       </div>
-      <div className="rounded-xl border shadow-sm bg-background p-6">
+      <div className="rounded-xl border border-l-2 border-border/10 dark:border-slate-700 shadow-sm bg-background p-6">
         <AddProperty />
       </div>
     </motion.div>

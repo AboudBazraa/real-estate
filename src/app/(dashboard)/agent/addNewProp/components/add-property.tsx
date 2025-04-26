@@ -209,13 +209,6 @@ export default function AddProperty() {
 
   return (
     <div className="w-full mx-auto relative">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold">Add New Property</h1>
-        <p className="text-muted-foreground">
-          Fill in the details to create a new property listing
-        </p>
-      </div>
-
       <div className="mb-8">
         <div className="flex justify-between items-center mb-2">
           <span className="text-sm font-medium">Progress</span>

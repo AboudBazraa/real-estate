@@ -89,7 +89,7 @@ export default function EditPropertyPage() {
       <div className="container mx-auto p-6 text-center">
         <h1 className="text-2xl font-bold mb-4">Access Denied</h1>
         <p className="mb-4 text-muted-foreground">
-          You don't have permission to edit this property.
+          You dont have permission to edit this property.
         </p>
         <Button onClick={() => router.push("/agent/agentProperties")}>
           <ArrowLeft className="mr-2 h-4 w-4" />

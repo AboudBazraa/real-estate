@@ -1,135 +1,154 @@
 "use client";
 
-import React, { memo } from "react";
+import React, { useState, useEffect } from "react";
+import { AlertTriangle, RefreshCw, Home } from "lucide-react";
+import Link from "next/link";
+import { Button } from "./ui/button";
+import { motion } from "framer-motion";
 
-const ErrorIcon = memo(() => (
-  <svg
-    xmlns="http://www.w3.org/2000/svg"
-    className="h-6 w-6 text-destructive"
-    fill="none"
-    viewBox="0 0 24 24"
-    stroke="currentColor"
-  >
-    <path
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      strokeWidth={2}
-      d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
-    />
-  </svg>
-));
-ErrorIcon.displayName = "ErrorIcon";
-
-const ErrorContent = memo(
-  ({
-    error,
-    errorInfo,
-    onReset,
-  }: {
-    error?: Error;
-    errorInfo?: React.ErrorInfo;
-    onReset: () => void;
-  }) => (
-    <div className="max-w-md rounded-lg border border-destructive bg-destructive/5 p-8 shadow-lg">
-      <div className="flex items-center gap-3">
-        <ErrorIcon />
-        <h2 className="text-xl font-bold text-destructive">
-          Something went wrong
-        </h2>
-      </div>
-
-      {error && (
-        <div className="mt-4 rounded-md bg-destructive/10 p-4">
-          <p className="font-mono text-sm text-destructive">{error.message}</p>
-        </div>
-      )}
-
-      <p className="mt-4 text-muted-foreground">
-        An unexpected error has occurred. Please try one of the following:
-      </p>
-      <ul className="mt-4 list-inside list-disc space-y-2 text-muted-foreground">
-        <li>Refresh the page</li>
-        <li>Clear your browser cache</li>
-        <li>Try again later</li>
-      </ul>
-
-      <div className="mt-6 flex gap-4">
-        <button
-          onClick={() => window.location.reload()}
-          className="flex-1 rounded-md bg-destructive px-4 py-2 text-sm font-medium text-destructive-foreground hover:bg-destructive/90"
-        >
-          Refresh Page
-        </button>
-        <button
-          onClick={onReset}
-          className="flex-1 rounded-md border border-destructive bg-background px-4 py-2 text-sm font-medium text-destructive hover:bg-destructive/10"
-        >
-          Try Again
-        </button>
-      </div>
-
-      {process.env.NODE_ENV === "development" && errorInfo && (
-        <div className="mt-6">
-          <details className="text-sm text-muted-foreground">
-            <summary className="cursor-pointer font-medium">
-              Stack trace
-            </summary>
-            <pre className="mt-2 max-h-[200px] overflow-auto rounded-md bg-destructive/10 p-4 font-mono text-xs text-destructive">
-              {errorInfo.componentStack}
-            </pre>
-          </details>
-        </div>
-      )}
-    </div>
-  )
-);
-ErrorContent.displayName = "ErrorContent";
-
-interface Props {
+interface ErrorBoundaryProps {
   children: React.ReactNode;
   fallback?: React.ReactNode;
 }
 
-interface State {
+interface ErrorBoundaryState {
   hasError: boolean;
-  error?: Error;
-  errorInfo?: React.ErrorInfo;
+  error: Error | null;
+  errorInfo: React.ErrorInfo | null;
 }
 
-export class ErrorBoundary extends React.Component<Props, State> {
-  constructor(props: Props) {
+class ErrorBoundaryClass extends React.Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
+  constructor(props: ErrorBoundaryProps) {
     super(props);
-    this.state = { hasError: false };
+    this.state = {
+      hasError: false,
+      error: null,
+      errorInfo: null,
+    };
   }
 
-  static getDerivedStateFromError(error: Error): State {
+  static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
     return { hasError: true, error };
   }
 
-  componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
+  componentDidCatch(error: Error, errorInfo: React.ErrorInfo): void {
     this.setState({ error, errorInfo });
-    console.error("Error caught by boundary:", error, errorInfo);
+
+    // Log error to analytics or monitoring service
+    console.error("Error caught by ErrorBoundary:", error, errorInfo);
+
+    // You could send this to your error tracking service
+    // Example: Sentry.captureException(error);
   }
 
-  private handleReset = () => {
-    this.setState({ hasError: false, error: undefined, errorInfo: undefined });
-  };
-
-  render() {
+  render(): React.ReactNode {
     if (this.state.hasError) {
+      if (this.props.fallback) {
+        return this.props.fallback;
+      }
+
       return (
-        this.props.fallback || (
-          <div className="fixed inset-0 flex items-center justify-center bg-background/80 backdrop-blur-sm">
-            <ErrorContent
-              error={this.state.error}
-              errorInfo={this.state.errorInfo}
-              onReset={this.handleReset}
-            />
-          </div>
-        )
+        <ErrorFallback
+          error={this.state.error}
+          resetError={() =>
+            this.setState({ hasError: false, error: null, errorInfo: null })
+          }
+        />
       );
     }
 
     return this.props.children;
   }
 }
+
+interface ErrorFallbackProps {
+  error: Error | null;
+  resetError: () => void;
+}
+
+function ErrorFallback({ error, resetError }: ErrorFallbackProps) {
+  const [showDetails, setShowDetails] = useState(false);
+
+  // Auto-reset on route change if in development
+  useEffect(() => {
+    if (process.env.NODE_ENV === "development") {
+      const handleRouteChange = () => {
+        resetError();
+      };
+
+      window.addEventListener("popstate", handleRouteChange);
+      return () => {
+        window.removeEventListener("popstate", handleRouteChange);
+      };
+    }
+  }, [resetError]);
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      className="min-h-[50vh] flex items-center justify-center p-4"
+    >
+      <div className="max-w-md w-full bg-white dark:bg-zinc-900 p-6 rounded-lg shadow-lg border border-zinc-200 dark:border-zinc-800">
+        <div className="flex flex-col items-center text-center mb-6">
+          <div className="h-16 w-16 bg-red-100 dark:bg-red-900/30 rounded-full flex items-center justify-center mb-4">
+            <AlertTriangle className="h-8 w-8 text-red-500 dark:text-red-400" />
+          </div>
+          <h2 className="text-2xl font-bold text-zinc-900 dark:text-zinc-100 mb-2">
+            Something went wrong
+          </h2>
+          <p className="text-zinc-600 dark:text-zinc-400">
+            We apologize for the inconvenience. The application encountered an
+            unexpected error.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          {error && (
+            <div className="mt-4">
+              <button
+                onClick={() => setShowDetails(!showDetails)}
+                className="text-sm text-blue-600 dark:text-blue-400 hover:underline focus:outline-none"
+              >
+                {showDetails ? "Hide error details" : "Show error details"}
+              </button>
+
+              {showDetails && (
+                <div className="mt-2 p-3 bg-zinc-100 dark:bg-zinc-800 rounded-md overflow-x-auto">
+                  <pre className="text-xs text-zinc-700 dark:text-zinc-300 whitespace-pre-wrap">
+                    {error.stack || error.message}
+                  </pre>
+                </div>
+              )}
+            </div>
+          )}
+
+          <div className="flex flex-col sm:flex-row gap-3 mt-6">
+            <Button
+              onClick={resetError}
+              className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <RefreshCw className="h-4 w-4" />
+              Try again
+            </Button>
+
+            <Link href="/" className="w-full sm:w-auto">
+              <Button
+                variant="outline"
+                className="w-full flex items-center justify-center gap-2"
+              >
+                <Home className="h-4 w-4" />
+                Go to Home
+              </Button>
+            </Link>
+          </div>
+        </div>
+      </div>
+    </motion.div>
+  );
+}
+
+export { ErrorBoundaryClass as ErrorBoundary };

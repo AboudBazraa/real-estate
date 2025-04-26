@@ -1,0 +1,5 @@
+Global MCP config content:
+{
+  "databaseUrl": "postgresql://postgres.gscbuqtjqh leygrworlc:hr3YmyN.9gKtqiK@aws-0-eu-central-1.pooler.supabase.com:5432/postgres",
+  "mcpServers": {}
+}

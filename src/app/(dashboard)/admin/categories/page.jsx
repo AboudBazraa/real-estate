@@ -218,7 +218,9 @@ export default function CategoriesPage() {
           transition={{ duration: 0.3, ease: "easeOut" }}
         >
           <Loader2 className="h-5 w-5 animate-spin" />
-          <span className="text-sm font-medium">Loading categories data...</span>
+          <span className="text-sm font-medium">
+            Loading categories data...
+          </span>
         </motion.div>
       </div>
     );
@@ -322,7 +324,7 @@ const CategoryCard = ({ category, icon, index }) => (
   >
     <Card className="overflow-hidden hover:shadow-md transition-all border-t-4 border-t-primary/80">
       <CardHeader className="">
-        <CardTitle className="flex items-center gap-2 bg-slate-100 p-2 rounded-md">
+        <CardTitle className="flex items-center gap-2 bg-slate-100 dark:bg-slate-800 p-2 rounded-xl">
           <span className="bg-primary/10 rounded-md text-primary">
             {icon || <FolderIcon className="h-6 w-6" />}
           </span>

@@ -11,21 +11,14 @@ const Section = () => {
   return (
     <>
       {/* <div  className="border-t-2 pb-6 w-full  border-dashed border-zinc-300 dark:border-zinc-800"></div> */}
-      <div className="flex justify-start items-start w-full flex-col">
+      <div className="flex justify-center items-center w-full flex-col">
         <BlurText
-          text={`Welcome`}
-          delay={150}
-          animateBy="words"
-          direction="top"
-          className="text-5xl font-sigmar"
-        />
-        <BlurText
-          text={`to our website`}
+          text={`Welcome to our website`}
           delay={150}
           animateBy="words"
           direction="top"
           // onAnimationComplete={handleAnimationComplete}
-          className="text-5xl font-sigmar"
+          className="text-5xl font-sigmar text-white"
         />
       </div>
     </>

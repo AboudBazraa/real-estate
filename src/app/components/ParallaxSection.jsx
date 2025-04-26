@@ -16,16 +16,16 @@ export default function ParallaxSection() {
   const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [1, 0.5, 0]);
 
   return (
-    <div className="h-full w-full">
-      <BackgroundLines>
-        <main className="pt-16 p-1 h-full w-fit flex flex-col justify-between">
-          <div className="flex flex-col gap-4 h-full w-full pt-1.5 justify-center items-start">
+    <div className="h-full w-full flex flex-col justify-center items-center">
+      <BackgroundLines className="bg-transparent">
+        <main className="pt-16 p-1 h-full w-fit flex flex-col justify-center items-center">
+          <div className="flex flex-col gap-4 h-full w-full pt-1.5 justify-center items-center">
             <GlowEffectButton
               text={"Get in our website"}
-              className={`mx-3 px-8 rounded-xl italic `}
+              className={`mx-3 px-8 rounded-xl italic text-center text-black`}
             />
             <MemoizedSection />
-            <p className="w-2xl text-sm font-playwrite">
+            <p className="w-2xl text-sm font-playwrite text-center text-white">
               Discover a curated collection of properties designed to fit your
               unique vision. Our dedicated team is here to help you find the
               perfect match—no matter where you are on your real estate journey.

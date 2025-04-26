@@ -8,19 +8,8 @@ const SectionAnmation = () => {
       <div className="w-full h-full flex relative">
         <div className="h-full w-3/5 z-10">
           <div className="h-full w-full absolute top-0 z-0 flex flex-col justify-center">
-            <div className="w-full h-full flex relative">
-              <TextPressure
-                text="Empower!"
-                flex={true}
-                alpha={false}
-                stroke={false}
-                width={false}
-                weight={true}
-                italic={true}
-                textColor="#ffffff"
-                strokeColor="#ff0000"
-                minFontSize={24}
-              />
+            <div className="w-full h-full flex">
+              <TextPressure text="Empower!" />
             </div>
 
             <ShinyText

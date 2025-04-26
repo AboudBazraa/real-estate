@@ -1042,6 +1042,96 @@ export const useProperties = () => {
     [supabase]
   );
 
+  // Get similar properties based on property type, listing type, and price range
+  const getSimilarProperties = useCallback(
+    async (propertyId: string, limit = 4): Promise<Property[]> => {
+      try {
+        // First, get the current property
+        const { data: currentProperty, error: propertyError } = await supabase
+          .from("properties")
+          .select("*")
+          .eq("id", propertyId)
+          .single();
+
+        if (propertyError) throw propertyError;
+        if (!currentProperty) throw new Error("Property not found");
+
+        // Calculate price range (±20% of the current property's price)
+        const minPrice = Math.floor(currentProperty.price * 0.8);
+        const maxPrice = Math.ceil(currentProperty.price * 1.2);
+
+        // Find similar properties with matching property_type and price range
+        const { data: similarPropertiesData, error: similarError } =
+          await supabase
+            .from("properties")
+            .select("*")
+            .neq("id", propertyId) // Exclude current property
+            .eq("property_type", currentProperty.property_type)
+            .eq("listing_type", currentProperty.listing_type)
+            .gte("price", minPrice)
+            .lte("price", maxPrice)
+            .limit(limit);
+
+        if (similarError) throw similarError;
+
+        // If we don't have enough properties, do a broader search
+        if (!similarPropertiesData || similarPropertiesData.length < limit) {
+          const { data: broaderResults, error: broadError } = await supabase
+            .from("properties")
+            .select("*")
+            .neq("id", propertyId)
+            .eq("property_type", currentProperty.property_type)
+            .limit(limit - (similarPropertiesData?.length || 0));
+
+          if (!broadError && broaderResults) {
+            // Combine results, avoiding duplicates
+            const existingIds = new Set(
+              similarPropertiesData?.map((p) => p.id)
+            );
+            const additionalProperties = broaderResults.filter(
+              (p) => !existingIds.has(p.id)
+            );
+            similarPropertiesData?.push(
+              ...additionalProperties.slice(
+                0,
+                limit - similarPropertiesData.length
+              )
+            );
+          }
+        }
+
+        // Fetch images for each property
+        const propertiesWithImages = await Promise.all(
+          (similarPropertiesData || []).map(async (property) => {
+            const { data: images } = await supabase
+              .from("property_images")
+              .select("*")
+              .eq("property_id", property.id)
+              .order("display_order", { ascending: true });
+
+            // Get the primary image URL
+            const primaryImage =
+              images?.find((img) => img.is_primary)?.image_url ||
+              (images && images.length > 0 ? images[0].image_url : null);
+
+            return {
+              ...property,
+              images: images || [],
+              primaryImage,
+            };
+          })
+        );
+
+        return propertiesWithImages;
+      } catch (err) {
+        console.error("Error fetching similar properties:", err);
+        // Return empty array instead of throwing to avoid breaking the UI
+        return [];
+      }
+    },
+    [supabase]
+  );
+
   return {
     properties,
     loading,
@@ -1058,5 +1148,6 @@ export const useProperties = () => {
     reorderImages,
     getFavoritedProperties,
     getPropertyById,
+    getSimilarProperties,
   };
 };

@@ -1,24 +1,19 @@
-// 'use client';
-// import { useRef } from "react";
-// import VariableProximity from "./VariableProximity";
+"use client";
+import { useRef } from "react";
 
-// const useVariableProximity = ({ label }) => {
-//   const containerRef = useRef(null);
+/**
+ * A hook to provide containerRef for VariableProximity component
+ */
+const useVariableProximity = () => {
+  const containerRef = useRef(null);
 
-//   return (
-//     <div ref={containerRef} style={{ position: "relative" }}>
-//       <VariableProximity
-//         label={label}
-//         className={"variable-proximity-demo"}
-//         fromFontVariationSettings="'wght' 400, 'opsz' 9"
-//         toFontVariationSettings="'wght' 1000, 'opsz' 40"
-//         containerRef={containerRef}
-//         radius={100}
-//         falloff="linear"
+  return {
+    containerRef,
+    containerProps: {
+      ref: containerRef,
+      style: { position: "relative" },
+    },
+  };
+};
 
-//       />
-//     </div>
-//   );
-// };
-
-// export default useVariableProximity;
+export default useVariableProximity;
