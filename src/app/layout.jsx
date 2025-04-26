@@ -1,9 +1,4 @@
-import {
-  Geist,
-  Geist_Mono,
-  Sigmar,
-  Playwrite_IT_Moderna,
-} from "next/font/google";
+import { Outfit, Sigmar, Playwrite_IT_Moderna } from "next/font/google";
 import "./globals.css";
 import "@/styles/keyframes.css";
 import { Toaster } from "@/shared/components/ui/toaster";
@@ -13,35 +8,27 @@ import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 import Providers from "./providers";
 import { ToastProvider } from "@/shared/components/ui/toast";
 
-// Optimize font loading
-const playwrite = Playwrite_IT_Moderna({
+// Main font for the entire application
+const outfit = Outfit({
   subsets: ["latin"],
-  weight: "400",
-  variable: "--font-playwrite",
   display: "swap",
   preload: true,
-  adjustFontFallback: true,
+  variable: "--font-outfit",
 });
 
+// Special fonts just for homepage sections
 const sigmar = Sigmar({
   subsets: ["latin"],
   weight: "400",
   variable: "--font-sigmar",
   display: "swap",
   preload: true,
-  adjustFontFallback: true,
 });
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
+const playwrite = Playwrite_IT_Moderna({
   subsets: ["latin"],
-  display: "swap",
-  preload: true,
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
+  weight: "400",
+  variable: "--font-playwrite",
   display: "swap",
   preload: true,
 });
@@ -78,7 +65,7 @@ export default function RootLayout({ children }) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={`${sigmar.variable} ${playwrite.variable} ${geistSans.variable} ${geistMono.variable} `}
+      className={`${outfit.variable} ${sigmar.variable} ${playwrite.variable}`}
     >
       {/* <head>
         <link
@@ -98,7 +85,7 @@ export default function RootLayout({ children }) {
           as="style"
         />
       </head> */}
-      <body className="antialiased font-barriecito flex flex-col min-h-screen">
+      <body className="antialiased flex flex-col min-h-screen">
         <ToastProvider>
           <ErrorBoundary fallback={<div>Something went wrong</div>}>
             <Providers>
@@ -109,7 +96,7 @@ export default function RootLayout({ children }) {
                 disableTransitionOnChange
                 storageKey="real-estate-theme"
               >
-                <main className="flex-grow font-sans">{children}</main>
+                <main className="flex-grow">{children}</main>
 
                 {/* Toaster is rendered outside main content flow */}
                 <Suspense fallback={null}>

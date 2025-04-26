@@ -1,6 +1,7 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/app/auth/hooks/useAuth";
+import { useRouteProtection } from "@/app/auth/hooks/useRouteProtection";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
@@ -10,12 +11,21 @@ import { GalleryVerticalEnd, Mail, ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
   const { login, loading, resetPassword } = useAuth();
+  const { isLoading } = useRouteProtection({ requireAuth: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [forgotEmail, setForgotEmail] = useState("");
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const router = useRouter();
   const { toast } = useToast();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="animate-spin h-8 w-8 border-4 border-blue-600 rounded-full border-t-transparent"></div>
+      </div>
+    );
+  }
 
   const handleLogin = async (username: string, password: string) => {
     try {

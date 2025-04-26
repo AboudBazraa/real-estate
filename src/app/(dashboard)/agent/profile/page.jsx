@@ -412,7 +412,7 @@ export default function ProfilePage() {
                       <Label className="text-muted-foreground text-xs">
                         User ID
                       </Label>
-                      <div className="p-2 rounded-md bg-muted font-mono text-xs break-all">
+                      <div className="p-2 rounded-md bg-muted text-xs break-all">
                         {user.id}
                       </div>
                     </div>

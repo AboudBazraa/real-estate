@@ -41,7 +41,6 @@
 }
 
 @layer utilities {
-
   ::-webkit-scrollbar {
     @apply w-[3px] h-[6px] md:w-[4px] rounded-full;
   }
@@ -142,19 +141,24 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
-    --font-barriecito: 'Barriecito', cursive;
-    --font-fredericka: 'Fredericka the Great', cursive;
   }
 
-  .font-barriecito{
-    font-family: var(--font-barriecito);
+  /* Global default font */
+  html,
+  body,
+  button,
+  input,
+  textarea,
+  select {
+    font-family: var(--font-outfit);
   }
 
-  .font-sigmar{
+  /* Special fonts for home section */
+  .font-sigmar {
     font-family: var(--font-sigmar);
   }
 
-  .font-playwrite{
+  .font-playwrite {
     font-family: var(--font-playwrite);
   }
 

@@ -20,6 +20,7 @@ import {
   Heart,
   Map,
 } from "lucide-react";
+import { useRouteProtection } from "@/app/auth/hooks/useRouteProtection";
 
 export default function RegisterPage() {
   const { register, loading } = useAuth();
@@ -36,6 +37,15 @@ export default function RegisterPage() {
   });
   const router = useRouter();
   const { toast } = useToast();
+  const { isLoading } = useRouteProtection({ requireAuth: false });
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="animate-spin h-8 w-8 border-4 border-blue-600 rounded-full border-t-transparent"></div>
+      </div>
+    );
+  }
 
   const handleRegister = async (formData: {
     username: string;
@@ -248,10 +258,9 @@ export default function RegisterPage() {
             exit="exit"
             className="grid grid-cols-1 md:grid-cols-6 gap-1 w-full rounded-2xl overflow-hidden shadow-xl bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md border border-white/30 dark:border-zinc-800/50 "
           >
-
             <motion.div
               variants={itemVariants}
-                className="flex flex-col items-center justify-center w-full p-3 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden col-span-2"
+              className="flex flex-col items-center justify-center w-full p-3 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden col-span-2"
             >
               {/* Progress steps - only show when not complete */}
               <div className="absolute top-6 left-8 right-8 flex justify-between items-center">
@@ -339,7 +348,6 @@ export default function RegisterPage() {
                     exit={{ opacity: 0, x: -20 }}
                     transition={{ duration: 0.3 }}
                     className="flex flex-col items-center justify-center w-full p-3 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden col-span-2"
-
                   >
                     <div className="space-y-4 w-full">
                       <div className="grid gap-3">
@@ -400,7 +408,6 @@ export default function RegisterPage() {
                     exit={{ opacity: 0, x: 20 }}
                     transition={{ duration: 0.3 }}
                     className="flex flex-col items-center justify-center w-full p-3 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden col-span-2"
-
                   >
                     <div className="space-y-4 w-full">
                       <div className="grid gap-3">
@@ -479,7 +486,6 @@ export default function RegisterPage() {
                   <span className="text-xs">→</span>
                 </Link>
               </div>
-
             </motion.div>
 
             <motion.div
@@ -578,8 +584,6 @@ export default function RegisterPage() {
                 </motion.div>
               </div>
             </motion.div>
-
-
           </motion.div>
         )}
       </AnimatePresence>

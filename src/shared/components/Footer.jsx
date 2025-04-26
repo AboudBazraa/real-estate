@@ -19,7 +19,7 @@ export function Footer() {
           <div className="space-y-4">
             <Link
               href="/"
-              className="text-2xl font-extrabold bg-clip-text font-playwrite text-transparent bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300"
+              className="text-2xl font-extrabold bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-teal-500 dark:from-blue-400 dark:to-teal-300"
             >
               Almukalla
             </Link>

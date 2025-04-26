@@ -1,9 +1,58 @@
-import { type NextRequest } from "next/server";
+import { type NextRequest, NextResponse } from "next/server";
 import { updateSession } from "@/shared/utils/supabase/middleware";
+import { createServerClient } from "@supabase/ssr";
 
 export async function middleware(request: NextRequest) {
-  // update user's auth session
-  return await updateSession(request);
+  // Update user's auth session
+  const response = await updateSession(request);
+
+  const { pathname } = request.nextUrl;
+
+  // Check if the current route is an auth page
+  const isAuthPage =
+    pathname.startsWith("/auth/login") ||
+    pathname.startsWith("/auth/registration") ||
+    pathname === "/auth";
+
+  // Get the authentication cookie to determine if user is logged in
+  const supabase = createServerClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      cookies: {
+        getAll() {
+          return request.cookies.getAll();
+        },
+        setAll() {
+          // This is handled by updateSession
+        },
+      },
+    }
+  );
+
+  // Get the current user
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  // If user is logged in and trying to access auth pages, redirect to homepage
+  if (user && isAuthPage) {
+    // Determine redirect based on user role if available
+    const userRole = user.user_metadata?.role?.toLowerCase() || "user";
+
+    let redirectUrl;
+    if (userRole === "admin") {
+      redirectUrl = "/admin";
+    } else if (userRole === "agent") {
+      redirectUrl = "/agent";
+    } else {
+      redirectUrl = "/properties";
+    }
+
+    return NextResponse.redirect(new URL(redirectUrl, request.url));
+  }
+
+  return response;
 }
 
 export const config = {
