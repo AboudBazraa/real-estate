@@ -1,34 +1,60 @@
 import { createBrowserClient } from "@supabase/ssr";
 
 export function createClient() {
-  // Create a supabase client on the browser with project's credentials
-  return createBrowserClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL!,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
-    {
+  // Check if environment variables are defined
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  if (!supabaseUrl || !supabaseKey) {
+    console.warn("Supabase URL or key is missing. Using mock client.");
+    // Return a mock client that doesn't make actual API calls
+    return {
       auth: {
-        persistSession: true,
-        autoRefreshToken: true,
-        detectSessionInUrl: true,
-        storage: {
-          getItem: (key) => {
-            if (typeof window !== "undefined") {
-              return window.localStorage.getItem(key);
-            }
-            return null;
-          },
-          setItem: (key, value) => {
-            if (typeof window !== "undefined") {
-              window.localStorage.setItem(key, value);
-            }
-          },
-          removeItem: (key) => {
-            if (typeof window !== "undefined") {
-              window.localStorage.removeItem(key);
-            }
-          },
+        getSession: async () => ({ data: { session: null }, error: null }),
+        onAuthStateChange: () => ({
+          data: { subscription: { unsubscribe: () => {} } },
+          error: null,
+        }),
+        getUser: async () => ({ data: { user: null }, error: null }),
+      },
+      from: () => ({
+        select: () => ({
+          eq: () => ({
+            single: async () => ({ data: null, error: null }),
+            data: null,
+            error: null,
+          }),
+          data: null,
+          error: null,
+        }),
+      }),
+    } as any;
+  }
+
+  // Create a supabase client on the browser with project's credentials
+  return createBrowserClient(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: true,
+      autoRefreshToken: true,
+      detectSessionInUrl: true,
+      storage: {
+        getItem: (key) => {
+          if (typeof window !== "undefined") {
+            return window.localStorage.getItem(key);
+          }
+          return null;
+        },
+        setItem: (key, value) => {
+          if (typeof window !== "undefined") {
+            window.localStorage.setItem(key, value);
+          }
+        },
+        removeItem: (key) => {
+          if (typeof window !== "undefined") {
+            window.localStorage.removeItem(key);
+          }
         },
       },
-    }
-  );
+    },
+  });
 }
