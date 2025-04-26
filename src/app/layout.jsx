@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 import Providers from "./providers";
 import { ToastProvider } from "@/shared/components/ui/toast";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 
 // Main font for the entire application
 const outfit = Outfit({
@@ -106,6 +107,8 @@ export default function RootLayout({ children }) {
             </Providers>
           </ErrorBoundary>
         </ToastProvider>
+
+        <SpeedInsights />
 
         {/* Add performance monitoring in development */}
         {process.env.NODE_ENV === "development" && (

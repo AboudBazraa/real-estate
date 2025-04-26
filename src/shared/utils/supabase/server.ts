@@ -15,6 +15,17 @@ export async function createClient() {
       auth: {
         getSession: async () => ({ data: { session: null }, error: null }),
         getUser: async () => ({ data: { user: null }, error: null }),
+        signUp: async () => ({
+          data: { user: null, session: null },
+          error: null,
+        }),
+        signInWithPassword: async () => ({
+          data: { user: null, session: null },
+          error: null,
+        }),
+        resetPasswordForEmail: async () => ({ data: {}, error: null }),
+        updateUser: async () => ({ data: { user: null }, error: null }),
+        signOut: async () => ({ error: null }),
       },
       from: () => ({
         select: () => ({
@@ -27,6 +38,7 @@ export async function createClient() {
           error: null,
         }),
       }),
+      rpc: async () => ({ data: null, error: null }),
     } as any;
   }
 
