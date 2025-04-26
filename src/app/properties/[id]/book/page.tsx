@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { format, addDays, isWeekend } from "date-fns";
+import { addDays, format, isWeekend } from "date-fns";
 import {
   Card,
   CardContent,
@@ -80,16 +80,16 @@ export default function BookPropertyPage({
       // Weekend hours: 10 AM to 3 PM
       const times = [];
       for (let hour = 10; hour < 15; hour++) {
-        times.push(`${hour}:00`);
-        times.push(`${hour}:30`);
+        times.push(`${hour}:00` as never);
+        times.push(`${hour}:30` as never);
       }
       return times;
     } else {
       // Weekday hours: 9 AM to 5 PM
       const times = [];
       for (let hour = 9; hour < 17; hour++) {
-        times.push(`${hour}:00`);
-        times.push(`${hour}:30`);
+        times.push(`${hour}:00` as never);
+        times.push(`${hour}:30` as never);
       }
       return times;
     }
