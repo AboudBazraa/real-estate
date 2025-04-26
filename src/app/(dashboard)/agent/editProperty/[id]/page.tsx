@@ -14,16 +14,24 @@ export default function EditPropertyPage() {
   const { user, isLoading: userLoading } = useUser();
   const [isEditModalOpen, setIsEditModalOpen] = useState(true);
 
+  // Convert id from params to a string
+  const propertyId = id ? (Array.isArray(id) ? id[0] : id) : null;
+
   const {
     data: property,
     isLoading: propertyLoading,
     isError,
-  } = useSupabaseItem("properties", id, {
-    enabled: !!id && !!user,
-  });
+  } = useSupabaseItem<{ id: string; user_id: string }>(
+    "properties",
+    propertyId,
+    {
+      enabled: !!propertyId && !!user,
+    }
+  );
 
   // Check if the current user is the owner of the property
-  const isOwner = property && user && property.user_id === user.id;
+  const isOwner =
+    property && user && "user_id" in property && property.user_id === user.id;
 
   // Redirect back to properties list when modal is closed
   const handleCloseModal = () => {
@@ -40,7 +48,13 @@ export default function EditPropertyPage() {
 
   // If property doesn't belong to user, redirect to properties list
   useEffect(() => {
-    if (!propertyLoading && property && user && property.user_id !== user.id) {
+    if (
+      !propertyLoading &&
+      property &&
+      user &&
+      "user_id" in property &&
+      property.user_id !== user.id
+    ) {
       router.push("/agent/agentProperties");
     }
   }, [property, propertyLoading, user, router]);
@@ -113,9 +127,9 @@ export default function EditPropertyPage() {
         <h1 className="text-2xl font-bold">Edit Property</h1>
       </div>
 
-      {isEditModalOpen && id && (
+      {isEditModalOpen && propertyId && (
         <PropertyEditForm
-          propertyId={id}
+          propertyId={propertyId}
           isOpen={isEditModalOpen}
           onClose={handleCloseModal}
         />

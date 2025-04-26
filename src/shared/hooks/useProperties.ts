@@ -269,6 +269,14 @@ export const useProperties = () => {
           updated_at: new Date().toISOString(),
         };
 
+        // Ensure features is properly formatted as a boolean
+        if (propertyForInsert.features !== undefined) {
+          // Convert to boolean
+          propertyForInsert.features = !!propertyForInsert.features;
+        } else {
+          propertyForInsert.features = false;
+        }
+
         // Insert the property
         const { data: newProperty, error: propertyError } = await supabase
           .from("properties")
@@ -459,6 +467,12 @@ export const useProperties = () => {
           ...propertyData,
           updated_at: new Date().toISOString(),
         };
+
+        // Ensure features is properly formatted as a boolean if included in the update
+        if (dataToUpdate.features !== undefined) {
+          // Convert to boolean
+          dataToUpdate.features = !!dataToUpdate.features;
+        }
 
         // Update the property
         const { data: updatedProperty, error: updateError } = await supabase

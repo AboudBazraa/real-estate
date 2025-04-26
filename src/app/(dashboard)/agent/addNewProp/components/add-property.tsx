@@ -32,6 +32,13 @@ import {
   AlertDescription,
   AlertTitle,
 } from "@/shared/components/ui/alert";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/components/ui/select";
 
 const fadeInUp = {
   hidden: { opacity: 0, y: 20 },
@@ -74,7 +81,7 @@ export default function AddProperty() {
     latitude: 0,
     longitude: 0,
     location: "", // Will be set during submission based on city and state
-    features: [], // Add missing features property
+    features: false, // Changed from empty array to boolean
   });
 
   const [images, setImages] = useState<File[]>([]);

@@ -56,7 +56,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         <NavSecondary items={data[role]?.navSecondary || []} />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data[role]?.user || []} />
+        <NavUser />
       </SidebarFooter>
     </Sidebar>
   );

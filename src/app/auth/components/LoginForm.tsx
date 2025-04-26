@@ -3,23 +3,24 @@ import { useState } from "react";
 import { useAuth } from "@/app/auth/hooks/useAuth";
 import { useRouter } from "next/navigation";
 import { useRole } from "@/app/auth/hooks/useRole";
+import Roles from "@/app/auth/types/roles";
 
 export default function LoginForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const { login, isLoading , error } = useAuth();
+  const [error, setError] = useState<string | null>(null);
+  const { login, loading } = useAuth();
   const router = useRouter();
   const role = useRole();
-
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
       await login(email, password);
-      router.push(`${role === "ADMIN" ? "/admin" : "/agent"}`)
-    } catch (error) {
-      // Handle error - potentially display a more user-friendly message
-      console.error("Login failed:", error);
+      router.push(`${role === Roles.ADMIN ? "/admin" : "/agent"}`);
+    } catch (err: any) {
+      setError(err.message || "Login failed");
+      console.error("Login failed:", err);
     }
   };
 
@@ -47,8 +48,8 @@ export default function LoginForm() {
           required
         />
       </div>
-      <button type="submit" disabled={isLoading}>
-        {isLoading ? "Logging in..." : "Login"}
+      <button type="submit" disabled={loading}>
+        {loading ? "Logging in..." : "Login"}
       </button>
       <p>
         Don&apos;t have an account?{" "}

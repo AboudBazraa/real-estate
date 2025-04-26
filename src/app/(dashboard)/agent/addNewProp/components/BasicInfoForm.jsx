@@ -73,16 +73,24 @@ export function BasicInfoForm({ data, onChange, onTypeChange }) {
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value={PROPERTY_TYPES.APARTMENT}>
+                <SelectItem key="APARTMENT" value="APARTMENT">
                   Apartment
                 </SelectItem>
-                <SelectItem value={PROPERTY_TYPES.HOUSE}>House</SelectItem>
-                <SelectItem value={PROPERTY_TYPES.VILLA}>Villa</SelectItem>
-                <SelectItem value={PROPERTY_TYPES.LAND}>Land</SelectItem>
-                <SelectItem value={PROPERTY_TYPES.COMMERCIAL}>
+                <SelectItem key="HOUSE" value="HOUSE">
+                  House
+                </SelectItem>
+                <SelectItem key="VILLA" value="VILLA">
+                  Villa
+                </SelectItem>
+                <SelectItem key="LAND" value="LAND">
+                  Land
+                </SelectItem>
+                <SelectItem key="COMMERCIAL" value="COMMERCIAL">
                   Commercial
                 </SelectItem>
-                <SelectItem value={PROPERTY_TYPES.OTHER}>Other</SelectItem>
+                <SelectItem key="OTHER" value="OTHER">
+                  Other
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -107,8 +115,12 @@ export function BasicInfoForm({ data, onChange, onTypeChange }) {
                 <SelectValue placeholder="Select listing type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="SALE">For Sale</SelectItem>
-                <SelectItem value="RENT">For Rent</SelectItem>
+                <SelectItem key="SALE" value="SALE">
+                  For Sale
+                </SelectItem>
+                <SelectItem key="RENT" value="RENT">
+                  For Rent
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -119,11 +131,21 @@ export function BasicInfoForm({ data, onChange, onTypeChange }) {
                 <SelectValue placeholder="Select status" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="ACTIVE">Active</SelectItem>
-                <SelectItem value="PENDING">Pending</SelectItem>
-                <SelectItem value="SOLD">Sold</SelectItem>
-                <SelectItem value="RENTED">Rented</SelectItem>
-                <SelectItem value="INACTIVE">Inactive</SelectItem>
+                <SelectItem key="ACTIVE" value="ACTIVE">
+                  Active
+                </SelectItem>
+                <SelectItem key="PENDING" value="PENDING">
+                  Pending
+                </SelectItem>
+                <SelectItem key="SOLD" value="SOLD">
+                  Sold
+                </SelectItem>
+                <SelectItem key="RENTED" value="RENTED">
+                  Rented
+                </SelectItem>
+                <SelectItem key="INACTIVE" value="INACTIVE">
+                  Inactive
+                </SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -150,14 +172,15 @@ export function BasicInfoForm({ data, onChange, onTypeChange }) {
           />
         </div>
 
-        {/* <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-2">
           <Switch
             id="featured"
             checked={data.featured}
             onCheckedChange={handleFeaturedChange}
+            disabled={true}
           />
           <Label htmlFor="featured">Featured Property</Label>
-        </div> */}
+        </div>
       </CardContent>
     </Card>
   );

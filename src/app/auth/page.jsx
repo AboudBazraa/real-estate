@@ -5,9 +5,9 @@ import LoginForm from "@/app/auth/components/LoginForm";
 // import { RegisterForm } from "@/shared/components/register-form";
 
 export default function AuthPage() {
-  const { user, isLoading, error, login, register } = useAuth();
+  const { user, loading, login, register } = useAuth();
 
-  if (user && !isLoading) {
+  if (user && !loading) {
     return <Navigate href="/dashboard" />;
   }
 
@@ -20,7 +20,6 @@ export default function AuthPage() {
           {/* <RegisterForm register={register} /> */}
         </div>
       )}
-      {error && <p className="error-message">{error}</p>}
     </div>
   );
 }

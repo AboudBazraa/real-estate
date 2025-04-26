@@ -675,13 +675,14 @@ function MapBoundsUpdater({
 
     try {
       // More robust check that map is ready before continuing
+      const mapInstance = map as any; // Type assertion to access internal properties
       if (
-        !map._loaded ||
-        !map._container ||
+        !mapInstance._loaded ||
+        !mapInstance._container ||
         !map.getContainer() ||
         typeof map.invalidateSize !== "function" ||
-        !map._container.offsetWidth ||
-        !map._container.offsetHeight ||
+        !mapInstance._container.offsetWidth ||
+        !mapInstance._container.offsetHeight ||
         document.hidden // Check if page is visible
       ) {
         if (attemptCount < maxAttempts) {
@@ -768,7 +769,7 @@ function MapBoundsUpdater({
         );
       }
       // Fallback to Yemen center
-      if (map && map._loaded) {
+      if (map && (map as any)._loaded) {
         try {
           map.setView(YEMEN_CENTER, YEMEN_ZOOM, { animate: false });
           setBoundsSet(true);
@@ -807,7 +808,7 @@ function MapBoundsUpdater({
       map.once("error", errorHandler);
 
       // Ensure map is actually loaded and ready
-      if (map._loaded) {
+      if ((map as any)._loaded) {
         // Ensure the map container is properly sized before trying to set bounds
         map.invalidateSize({ animate: false });
 

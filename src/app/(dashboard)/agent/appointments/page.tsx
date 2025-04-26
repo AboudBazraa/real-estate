@@ -256,6 +256,7 @@ export default function AppointmentsPage() {
       .sort((a, b) => new Date(a).getTime() - new Date(b).getTime())
       .map((date) => ({
         date,
+        appointments: groups[date],
       }));
   };
 

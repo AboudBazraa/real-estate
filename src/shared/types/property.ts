@@ -42,7 +42,7 @@ export interface Property {
   updated_at: string;
   images?: PropertyImage[];
   primaryImage?: string; // URL to primary image, for dashboard view
-  features: string[];
+  features: boolean;
   agent?: {
     name: string;
     phone: string;

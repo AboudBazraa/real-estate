@@ -73,7 +73,7 @@ export default function PropertyMap({ property }: PropertyMapProps) {
           }
 
           const map = L.map("property-map", {
-            center: [property.latitude, property.longitude],
+            center: [property.latitude ?? 0, property.longitude ?? 0],
             zoom: 15,
             zoomControl: true,
           });
@@ -108,7 +108,7 @@ export default function PropertyMap({ property }: PropertyMapProps) {
 
           // Add marker
           markerRef.current = L.marker(
-            [property.latitude, property.longitude],
+            [property.latitude ?? 0, property.longitude ?? 0],
             {
               icon,
             }
@@ -120,7 +120,7 @@ export default function PropertyMap({ property }: PropertyMapProps) {
           `);
 
           // Add a circle around the marker
-          L.circle([property.latitude, property.longitude], {
+          L.circle([property.latitude ?? 0, property.longitude ?? 0], {
             color: "rgba(59, 130, 246, 0.2)",
             fillColor: "rgba(59, 130, 246, 0.1)",
             fillOpacity: 0.5,

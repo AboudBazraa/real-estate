@@ -735,6 +735,17 @@ export default function AgentProperties() {
                     onToggleFavorite={handleToggleFavorite}
                     variant="compact"
                     showStatus={true}
+                    id={property.id}
+                    title={property.title || ""}
+                    price={property.price || 0}
+                    status={property.status || ""}
+                    primaryImage={
+                      property.primaryImage ||
+                      (property.images && property.images.length > 0
+                        ? property.images[0].image_url
+                        : null)
+                    }
+                    address={property.address || ""}
                   />
                 </motion.div>
               ))}

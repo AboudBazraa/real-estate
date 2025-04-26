@@ -298,6 +298,30 @@ export default function PropertyPage() {
     ? `${property.bedrooms} bed, ${property.bathrooms} bath property in ${property.city}, ${property.state}`
     : "View property details";
 
+  // Helper function to handle features data safely
+  const getFeatures = (featuresData) => {
+    // Now features is a boolean, so we'll return a different set of features based on the boolean value
+    const standardFeatures = [
+      "Air conditioning",
+      "Heating",
+      "Parking available",
+      "Security system",
+    ];
+
+    // If features is true, return extended features list
+    if (featuresData) {
+      return [
+        ...standardFeatures,
+        "Smart home",
+        "Laundry room",
+        "Swimming pool",
+      ];
+    }
+
+    // If features is false, return only basic features
+    return standardFeatures;
+  };
+
   if (loading) {
     // Enhanced loading skeleton with more realistic appearance
     return (
@@ -768,18 +792,17 @@ export default function PropertyPage() {
                     </span>
                   </div>
                 )}
-                {property.features &&
-                  property.features.map((feature, index) => (
-                    <div key={index} className="flex items-center">
-                      <ChevronRight
-                        size={18}
-                        className="text-gray-600 dark:text-gray-300 mr-3"
-                      />
-                      <span className="text-gray-700 dark:text-gray-300">
-                        {feature}
-                      </span>
-                    </div>
-                  ))}
+                {getFeatures(property.features).map((feature, index) => (
+                  <div key={index} className="flex items-center">
+                    <ChevronRight
+                      size={18}
+                      className="text-gray-600 dark:text-gray-300 mr-3"
+                    />
+                    <span className="text-gray-700 dark:text-gray-300">
+                      {feature}
+                    </span>
+                  </div>
+                ))}
               </div>
             </div>
 
