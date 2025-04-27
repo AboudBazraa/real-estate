@@ -61,7 +61,7 @@ export function EmailVerificationSuccess({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, ease: "easeOut" }}
-      className="w-full max-w-md mx-auto space-y-6 bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800"
+      className="w-full h-full max-w-md mx-auto space-y-6 bg-white dark:bg-zinc-900 p-8 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800"
     >
       <div className="flex flex-col items-center justify-center text-center space-y-4">
         <div className="p-3 rounded-full bg-green-100 dark:bg-green-900/30">
@@ -81,7 +81,6 @@ export function EmailVerificationSuccess({
           ) : (
             "your email address"
           )}
-          .
         </p>
 
         <div className="bg-amber-50 dark:bg-amber-950/30 border border-amber-200 dark:border-amber-900/50 p-4 rounded-lg text-sm text-amber-800 dark:text-amber-400">

@@ -1,4 +1,5 @@
 import { createClient } from "@/shared/utils/supabase/client";
+import { SUPABASE_CONFIG } from "@/shared/config/supabase";
 
 const supabase = createClient();
 
@@ -20,6 +21,7 @@ export const authService = {
       password,
       options: {
         data: userData,
+        emailRedirectTo: SUPABASE_CONFIG.redirectUrl,
       },
     });
 
@@ -124,6 +126,29 @@ export const authService = {
       return data;
     } catch (error: any) {
       console.error("Password reset error:", error);
+      throw error;
+    }
+  },
+
+  /**
+   * Resend the verification email for a user
+   * @param email The email address of the user
+   */
+  async resendVerificationEmail(email: string) {
+    try {
+      // Request a new verification email
+      const { data, error } = await supabase.auth.resend({
+        type: "signup",
+        email,
+        options: {
+          emailRedirectTo: SUPABASE_CONFIG.redirectUrl,
+        },
+      });
+
+      if (error) throw error;
+      return data;
+    } catch (error: any) {
+      console.error("Verification email resend error:", error);
       throw error;
     }
   },

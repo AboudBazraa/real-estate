@@ -1,4 +1,5 @@
 import { createBrowserClient } from "@supabase/ssr";
+import { SUPABASE_CONFIG } from "@/shared/config/supabase";
 
 export function createClient() {
   // Check if environment variables are defined
@@ -27,6 +28,11 @@ export function createClient() {
         resetPasswordForEmail: async () => ({ data: {}, error: null }),
         updateUser: async () => ({ data: { user: null }, error: null }),
         signOut: async () => ({ error: null }),
+        verifyOtp: async () => ({
+          data: { user: null, session: null },
+          error: null,
+        }),
+        resend: async () => ({ data: {}, error: null }),
       },
       from: () => ({
         select: () => ({
@@ -46,9 +52,11 @@ export function createClient() {
   // Create a supabase client on the browser with project's credentials
   return createBrowserClient(supabaseUrl, supabaseKey, {
     auth: {
-      persistSession: true,
+      flowType: "pkce",
       autoRefreshToken: true,
+      persistSession: true,
       detectSessionInUrl: true,
+      storageKey: "supabase.auth.token",
       storage: {
         getItem: (key) => {
           if (typeof window !== "undefined") {
