@@ -44,6 +44,7 @@ import {
 import Map from "./components/map";
 import type { MapProperty } from "./components/map";
 import { useProperties, PropertyFilters } from "@/shared/hooks/useProperties";
+import { PageTransition } from "@/shared/components/animation/PageTransition";
 
 export default function SearchPage() {
   const router = useRouter();
@@ -235,286 +236,295 @@ export default function SearchPage() {
   const [emailNotifications, setEmailNotifications] = useState(false);
 
   return (
-    <div className="w-screen h-screen overflow-hidden bg-background text-foreground relative ">
-      {/* Search Bar */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 w-full max-w-3xl px-4">
-        <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
-          <div className="flex items-center p-1 gap-2">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-              <input
-                ref={searchInputRef}
-                type="text"
-                placeholder="Search by location, name, or description..."
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                className="w-full pl-9 pr-3 rounded-md bg-transparent   focus:outline-none"
-              />
-            </div>
-            <div className="flex gap-2">
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    className="px-3 rounded-lg"
-                  >
-                    <Filter className="h-4 w-4 mr-2" />
-                    Filters
-                    <Badge
-                      className="ml-2 bg-primary text-primary-foreground"
-                      variant="secondary"
+    <PageTransition>
+      <div className="w-screen h-screen overflow-hidden bg-background text-foreground relative ">
+        {/* Search Bar */}
+        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 w-full max-w-3xl px-4">
+          <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
+            <div className="flex items-center p-1 gap-2">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  placeholder="Search by location, name, or description..."
+                  value={searchValue}
+                  onChange={(e) => setSearchValue(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                  className="w-full pl-9 pr-3 rounded-md bg-transparent   focus:outline-none"
+                />
+              </div>
+              <div className="flex gap-2">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="px-3 rounded-lg"
                     >
-                      {Object.values(filters).filter(Boolean).length}
-                    </Badge>
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-80 p-0">
-                  <div className="p-4 border-b">
-                    <div className="flex justify-between items-center">
-                      <h3 className="font-medium">Filters</h3>
-                      <Button variant="ghost" size="sm" onClick={resetFilters}>
-                        Clear All
+                      <Filter className="h-4 w-4 mr-2" />
+                      Filters
+                      <Badge
+                        className="ml-2 bg-primary text-primary-foreground"
+                        variant="secondary"
+                      >
+                        {Object.values(filters).filter(Boolean).length}
+                      </Badge>
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-80 p-0">
+                    <div className="p-4 border-b">
+                      <div className="flex justify-between items-center">
+                        <h3 className="font-medium">Filters</h3>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={resetFilters}
+                        >
+                          Clear All
+                        </Button>
+                      </div>
+                    </div>
+                    <div className="p-4 space-y-5">
+                      {/* Price Range */}
+                      <div className="space-y-2">
+                        <div className="flex justify-between items-center">
+                          <h4 className="text-sm font-medium flex items-center">
+                            <Home className="h-4 w-4 mr-1.5" />
+                            Price Range
+                          </h4>
+                          <span className="text-xs text-muted-foreground">
+                            {formatPrice(priceRange[0])} -{" "}
+                            {formatPrice(priceRange[1])}
+                          </span>
+                        </div>
+                        <Slider
+                          defaultValue={[0, 1000000]}
+                          value={priceRange}
+                          min={0}
+                          max={1000000}
+                          step={10000}
+                          onValueChange={handlePriceChange}
+                          onValueCommit={handlePriceChangeEnd}
+                          className="mt-3"
+                        />
+                      </div>
+
+                      {/* Bedrooms */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium flex items-center">
+                          <Bed className="h-4 w-4 mr-1.5" />
+                          Bedrooms
+                        </h4>
+                        <div className="flex gap-2">
+                          <Button
+                            variant={
+                              filters.bedrooms === undefined
+                                ? "default"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handleBedroomFilter(undefined)}
+                            className="flex-1"
+                          >
+                            Any
+                          </Button>
+                          {[1, 2, 3, 4].map((num) => (
+                            <Button
+                              key={num}
+                              variant={
+                                filters.bedrooms === num ? "default" : "outline"
+                              }
+                              size="sm"
+                              onClick={() => handleBedroomFilter(num)}
+                            >
+                              {num}+
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Bathrooms */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium flex items-center">
+                          <Bath className="h-4 w-4 mr-1.5" />
+                          Bathrooms
+                        </h4>
+                        <div className="flex gap-2">
+                          <Button
+                            variant={
+                              filters.bathrooms === undefined
+                                ? "default"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handleBathroomFilter(undefined)}
+                            className="flex-1"
+                          >
+                            Any
+                          </Button>
+                          {[1, 2, 3].map((num) => (
+                            <Button
+                              key={num}
+                              variant={
+                                filters.bathrooms === num
+                                  ? "default"
+                                  : "outline"
+                              }
+                              size="sm"
+                              onClick={() => handleBathroomFilter(num)}
+                            >
+                              {num}+
+                            </Button>
+                          ))}
+                        </div>
+                      </div>
+
+                      {/* Property Type */}
+                      <div className="space-y-2">
+                        <h4 className="text-sm font-medium flex items-center">
+                          <Building className="h-4 w-4 mr-1.5" />
+                          Property Type
+                        </h4>
+                        <div className="grid grid-cols-2 gap-2">
+                          <Button
+                            variant={
+                              filters.property_type === undefined
+                                ? "default"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handlePropertyTypeFilter(undefined)}
+                          >
+                            Any
+                          </Button>
+                          <Button
+                            variant={
+                              filters.property_type === "apartment"
+                                ? "default"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() =>
+                              handlePropertyTypeFilter("apartment")
+                            }
+                          >
+                            Apartment
+                          </Button>
+                          <Button
+                            variant={
+                              filters.property_type === "house"
+                                ? "default"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handlePropertyTypeFilter("house")}
+                          >
+                            House
+                          </Button>
+                          <Button
+                            variant={
+                              filters.property_type === "villa"
+                                ? "default"
+                                : "outline"
+                            }
+                            size="sm"
+                            onClick={() => handlePropertyTypeFilter("villa")}
+                          >
+                            Villa
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Apply Button */}
+                      <Button className="w-full" onClick={() => {}}>
+                        Apply Filters
                       </Button>
                     </div>
-                  </div>
-                  <div className="p-4 space-y-5">
-                    {/* Price Range */}
-                    <div className="space-y-2">
-                      <div className="flex justify-between items-center">
-                        <h4 className="text-sm font-medium flex items-center">
-                          <Home className="h-4 w-4 mr-1.5" />
-                          Price Range
-                        </h4>
-                        <span className="text-xs text-muted-foreground">
-                          {formatPrice(priceRange[0])} -{" "}
-                          {formatPrice(priceRange[1])}
-                        </span>
-                      </div>
-                      <Slider
-                        defaultValue={[0, 1000000]}
-                        value={priceRange}
-                        min={0}
-                        max={1000000}
-                        step={10000}
-                        onValueChange={handlePriceChange}
-                        onValueCommit={handlePriceChangeEnd}
-                        className="mt-3"
-                      />
-                    </div>
+                  </PopoverContent>
+                </Popover>
 
-                    {/* Bedrooms */}
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium flex items-center">
-                        <Bed className="h-4 w-4 mr-1.5" />
-                        Bedrooms
-                      </h4>
-                      <div className="flex gap-2">
-                        <Button
-                          variant={
-                            filters.bedrooms === undefined
-                              ? "default"
-                              : "outline"
-                          }
-                          size="sm"
-                          onClick={() => handleBedroomFilter(undefined)}
-                          className="flex-1"
-                        >
-                          Any
-                        </Button>
-                        {[1, 2, 3, 4].map((num) => (
-                          <Button
-                            key={num}
-                            variant={
-                              filters.bedrooms === num ? "default" : "outline"
-                            }
-                            size="sm"
-                            onClick={() => handleBedroomFilter(num)}
-                          >
-                            {num}+
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Bathrooms */}
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium flex items-center">
-                        <Bath className="h-4 w-4 mr-1.5" />
-                        Bathrooms
-                      </h4>
-                      <div className="flex gap-2">
-                        <Button
-                          variant={
-                            filters.bathrooms === undefined
-                              ? "default"
-                              : "outline"
-                          }
-                          size="sm"
-                          onClick={() => handleBathroomFilter(undefined)}
-                          className="flex-1"
-                        >
-                          Any
-                        </Button>
-                        {[1, 2, 3].map((num) => (
-                          <Button
-                            key={num}
-                            variant={
-                              filters.bathrooms === num ? "default" : "outline"
-                            }
-                            size="sm"
-                            onClick={() => handleBathroomFilter(num)}
-                          >
-                            {num}+
-                          </Button>
-                        ))}
-                      </div>
-                    </div>
-
-                    {/* Property Type */}
-                    <div className="space-y-2">
-                      <h4 className="text-sm font-medium flex items-center">
-                        <Building className="h-4 w-4 mr-1.5" />
-                        Property Type
-                      </h4>
-                      <div className="grid grid-cols-2 gap-2">
-                        <Button
-                          variant={
-                            filters.property_type === undefined
-                              ? "default"
-                              : "outline"
-                          }
-                          size="sm"
-                          onClick={() => handlePropertyTypeFilter(undefined)}
-                        >
-                          Any
-                        </Button>
-                        <Button
-                          variant={
-                            filters.property_type === "apartment"
-                              ? "default"
-                              : "outline"
-                          }
-                          size="sm"
-                          onClick={() => handlePropertyTypeFilter("apartment")}
-                        >
-                          Apartment
-                        </Button>
-                        <Button
-                          variant={
-                            filters.property_type === "house"
-                              ? "default"
-                              : "outline"
-                          }
-                          size="sm"
-                          onClick={() => handlePropertyTypeFilter("house")}
-                        >
-                          House
-                        </Button>
-                        <Button
-                          variant={
-                            filters.property_type === "villa"
-                              ? "default"
-                              : "outline"
-                          }
-                          size="sm"
-                          onClick={() => handlePropertyTypeFilter("villa")}
-                        >
-                          Villa
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Apply Button */}
-                    <Button className="w-full" onClick={() => {}}>
-                      Apply Filters
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild className="px-3 rounded-lg">
+                    <Button variant="outline" size="sm">
+                      <ArrowDownUp className="h-4 w-4 mr-2" />
+                      Sort
                     </Button>
-                  </div>
-                </PopoverContent>
-              </Popover>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuCheckboxItem
+                      checked={sortBy === "newest"}
+                      onCheckedChange={() => setSortBy("newest")}
+                    >
+                      Newest
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={sortBy === "oldest"}
+                      onCheckedChange={() => setSortBy("oldest")}
+                    >
+                      Oldest
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={sortBy === "price-low"}
+                      onCheckedChange={() => setSortBy("price-low")}
+                    >
+                      Price: Low to High
+                    </DropdownMenuCheckboxItem>
+                    <DropdownMenuCheckboxItem
+                      checked={sortBy === "price-high"}
+                      onCheckedChange={() => setSortBy("price-high")}
+                    >
+                      Price: High to Low
+                    </DropdownMenuCheckboxItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild className="px-3 rounded-lg">
-                  <Button variant="outline" size="sm">
-                    <ArrowDownUp className="h-4 w-4 mr-2" />
-                    Sort
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-                  <DropdownMenuSeparator />
-                  <DropdownMenuCheckboxItem
-                    checked={sortBy === "newest"}
-                    onCheckedChange={() => setSortBy("newest")}
-                  >
-                    Newest
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={sortBy === "oldest"}
-                    onCheckedChange={() => setSortBy("oldest")}
-                  >
-                    Oldest
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={sortBy === "price-low"}
-                    onCheckedChange={() => setSortBy("price-low")}
-                  >
-                    Price: Low to High
-                  </DropdownMenuCheckboxItem>
-                  <DropdownMenuCheckboxItem
-                    checked={sortBy === "price-high"}
-                    onCheckedChange={() => setSortBy("price-high")}
-                  >
-                    Price: High to Low
-                  </DropdownMenuCheckboxItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setIsMapView(!isMapView)}
-                className="px-3 rounded-lg"
-              >
-                {isMapView ? (
-                  <>
-                    <List className="h-4 w-4 mr-2" />
-                    List
-                  </>
-                ) : (
-                  <>
-                    <MapIcon className="h-4 w-4 mr-2" />
-                    Map
-                  </>
-                )}
-              </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsMapView(!isMapView)}
+                  className="px-3 rounded-lg"
+                >
+                  {isMapView ? (
+                    <>
+                      <List className="h-4 w-4 mr-2" />
+                      List
+                    </>
+                  ) : (
+                    <>
+                      <MapIcon className="h-4 w-4 mr-2" />
+                      Map
+                    </>
+                  )}
+                </Button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Map Container */}
-      <div
-        ref={mapContainerRef}
-        className="absolute inset-0 "
-        style={{ display: isMapView ? "block" : "none" }}
-      >
-        <Map
-          properties={mapProperties}
-          loading={loading}
-          selectedProperty={selectedProperty}
-          onPropertySelect={handlePropertySelect}
-        />
-      </div>
+        {/* Map Container */}
+        <div
+          ref={mapContainerRef}
+          className="absolute inset-0 "
+          style={{ display: isMapView ? "block" : "none" }}
+        >
+          <Map
+            properties={mapProperties}
+            loading={loading}
+            selectedProperty={selectedProperty}
+            onPropertySelect={handlePropertySelect}
+          />
+        </div>
 
-      {/* List View */}
-      {!isMapView && (
-        <div className="absolute inset-0 pt-20 px-4 pb-8 overflow-y-auto bg-gradient-to-br from-white via-gray-50 to-blue-50 dark:bg-gradient-to-br dark:from-zinc-800/80 dark:via-zinc-900/80 dark:to-blue-950/20 backdrop-blur-sm">
-          <div className="max-w-8xl mx-auto pb-20">
-            {/* Results summary and count */}
-            <div className="flex items-center justify-between mb-6 mt-2">
-              {/* <div className="flex items-center gap-2">
+        {/* List View */}
+        {!isMapView && (
+          <div className="absolute inset-0 pt-20 px-4 pb-8 overflow-y-auto bg-gradient-to-br from-white via-gray-50 to-blue-50 dark:bg-gradient-to-br dark:from-zinc-800/80 dark:via-zinc-900/80 dark:to-blue-950/20 backdrop-blur-sm">
+            <div className="max-w-8xl mx-auto pb-20">
+              {/* Results summary and count */}
+              <div className="flex items-center justify-between mb-6 mt-2">
+                {/* <div className="flex items-center gap-2">
                 <Badge
                   variant="outline"
                   className="px-3 py-1.5 text-sm bg-white dark:bg-zinc-800 shadow-sm"
@@ -535,226 +545,226 @@ export default function SearchPage() {
               <p className="text-sm text-muted-foreground">
                 Showing {mapProperties.length} results
               </p> */}
-            </div>
+              </div>
 
-            {loading ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {Array(8)
-                  .fill(0)
-                  .map((_, i) => (
-                    <div
-                      key={i}
-                      className="bg-card rounded-xl overflow-hidden shadow-sm border border-border/10 dark:border-zinc-700 h-[420px]"
-                    >
-                      <div className="h-48 bg-muted animate-pulse"></div>
-                      <div className="p-4 space-y-3">
-                        <div className="h-6 bg-muted animate-pulse rounded-md w-3/4"></div>
-                        <div className="h-4 bg-muted animate-pulse rounded-md w-1/2"></div>
-                        <div className="h-4 bg-muted animate-pulse rounded-md w-full"></div>
-                        <div className="flex gap-2 pt-2">
-                          <div className="h-8 bg-muted animate-pulse rounded-md w-1/3"></div>
-                          <div className="h-8 bg-muted animate-pulse rounded-md w-1/3"></div>
-                          <div className="h-8 bg-muted animate-pulse rounded-md w-1/3"></div>
+              {loading ? (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {Array(8)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div
+                        key={i}
+                        className="bg-card rounded-xl overflow-hidden shadow-sm border border-border/10 dark:border-zinc-700 h-[420px]"
+                      >
+                        <div className="h-48 bg-muted animate-pulse"></div>
+                        <div className="p-4 space-y-3">
+                          <div className="h-6 bg-muted animate-pulse rounded-md w-3/4"></div>
+                          <div className="h-4 bg-muted animate-pulse rounded-md w-1/2"></div>
+                          <div className="h-4 bg-muted animate-pulse rounded-md w-full"></div>
+                          <div className="flex gap-2 pt-2">
+                            <div className="h-8 bg-muted animate-pulse rounded-md w-1/3"></div>
+                            <div className="h-8 bg-muted animate-pulse rounded-md w-1/3"></div>
+                            <div className="h-8 bg-muted animate-pulse rounded-md w-1/3"></div>
+                          </div>
                         </div>
                       </div>
+                    ))}
+                </div>
+              ) : mapProperties.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-20 text-center">
+                  <div className="bg-muted/30 p-6 rounded-full mb-6">
+                    <Home className="h-16 w-16 text-muted-foreground" />
+                  </div>
+                  <h3 className="text-2xl font-medium">No properties found</h3>
+                  <p className="text-muted-foreground mt-2 max-w-md">
+                    We couldn&apos;t find any properties matching your search
+                    criteria. Try adjusting your filters or expanding your
+                    search area.
+                  </p>
+                  <Button
+                    variant="default"
+                    className="mt-6"
+                    onClick={resetFilters}
+                  >
+                    <X className="h-4 w-4 mr-2" />
+                    Clear All Filters
+                  </Button>
+                </div>
+              ) : (
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+                  {mapProperties.map((property, index) => (
+                    <div
+                      key={property.id}
+                      className="group relative bg-card rounded-xl overflow-hidden bg-white dark:bg-zinc-900 border border-border/10 dark:border-zinc-700 shadow hover:shadow-sm transition-all duration-500 transform hover:-translate-y-1 border-l-4"
+                      style={{ animationDelay: `${index * 50}ms` }}
+                      onClick={() => router.push(`/search/${property.id}`)}
+                    >
+                      {/* Property image with gradient overlay */}
+                      <div className="relative h-60 overflow-hidden">
+                        <img
+                          src={property.primaryImage}
+                          alt={property.title}
+                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                        />
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-70 group-hover:opacity-60 transition-opacity duration-300"></div>
+
+                        {/* Price tag */}
+                        <div className="absolute top-4 right-4 bg-white dark:bg-zinc-800 shadow-lg rounded-lg px-3 py-1.5 text-sm font-semibold text-primary">
+                          {formatPrice(property.price)}
+                          <span className="text-xs font-normal text-muted-foreground">
+                            /mo
+                          </span>
+                        </div>
+
+                        {/* Featured badge */}
+                        {property.featured && (
+                          <div className="absolute top-4 left-4 bg-gradient-to-r from-primary to-primary/80 text-white shadow-md rounded-lg px-3 py-1 text-xs font-medium flex items-center gap-1">
+                            <svg
+                              width="14"
+                              height="14"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth="2"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                            Featured
+                          </div>
+                        )}
+
+                        {/* Property type badge */}
+                        <Badge
+                          variant="outline"
+                          className="absolute bottom-4 right-4 bg-black/50 text-white border-0 capitalize"
+                        >
+                          {property.propertyType}
+                        </Badge>
+                      </div>
+
+                      {/* Property content */}
+                      <div className="p-5">
+                        <h3 className="text-lg font-semibold line-clamp-1 group-hover:text-primary transition-colors duration-300">
+                          {property.title}
+                        </h3>
+                        <p className="text-sm text-muted-foreground flex items-center mt-1.5 line-clamp-1">
+                          <MapPin className="h-3.5 w-3.5 mr-1.5 flex-shrink-0 text-primary/70" />
+                          <span>{property.location}</span>
+                        </p>
+
+                        <p className="mt-3 text-sm text-muted-foreground line-clamp-2">
+                          {property.description.slice(0, 20)}...
+                        </p>
+
+                        {/* Property details */}
+                        <div className="mt-4 grid grid-cols-3 gap-2">
+                          <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 group-hover:bg-primary/5 transition-colors duration-300 dark:bg-zinc-800 bg-slate-100">
+                            <Bed className="h-4 w-4 mb-1 text-primary/70" />
+                            <span className="text-xs font-medium">
+                              {property.bedrooms} Beds
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 group-hover:bg-primary/5 transition-colors duration-300 dark:bg-zinc-800 bg-slate-100">
+                            <Bath className="h-4 w-4 mb-1 text-primary/70" />
+                            <span className="text-xs font-medium">
+                              {property.bathrooms} Baths
+                            </span>
+                          </div>
+                          <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 group-hover:bg-primary/5 transition-colors duration-300 dark:bg-zinc-800 bg-slate-100">
+                            <Square className="h-4 w-4 mb-1 text-primary/70" />
+                            <span className="text-xs font-medium">
+                              {property.squareFeet} sqft
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Call to action */}
+                        <div className="mt-2 flex items-center justify-between bg-slate-100 dark:bg-zinc-800 px-3 py-1 rounded-lg">
+                          <Button
+                            size="sm"
+                            variant="ghost"
+                            className="px-0 text-primary text-sm font-medium"
+                          >
+                            View Details
+                          </Button>
+                          <Button
+                            size="icon"
+                            variant="outline"
+                            className="h-8 w-8 rounded-full hover:bg-primary/5 transition-colors duration-300"
+                          >
+                            <ArrowUpRight className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Property accent line */}
+                      <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                     </div>
                   ))}
-              </div>
-            ) : mapProperties.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-20 text-center">
-                <div className="bg-muted/30 p-6 rounded-full mb-6">
-                  <Home className="h-16 w-16 text-muted-foreground" />
                 </div>
-                <h3 className="text-2xl font-medium">No properties found</h3>
-                <p className="text-muted-foreground mt-2 max-w-md">
-                  We couldn&apos;t find any properties matching your search
-                  criteria. Try adjusting your filters or expanding your search
-                  area.
-                </p>
-                <Button
-                  variant="default"
-                  className="mt-6"
-                  onClick={resetFilters}
-                >
-                  <X className="h-4 w-4 mr-2" />
-                  Clear All Filters
-                </Button>
-              </div>
-            ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-                {mapProperties.map((property, index) => (
-                  <div
-                    key={property.id}
-                    className="group relative bg-card rounded-xl overflow-hidden bg-white dark:bg-zinc-900 border border-border/10 dark:border-zinc-700 shadow hover:shadow-sm transition-all duration-500 transform hover:-translate-y-1 border-l-4"
-                    style={{ animationDelay: `${index * 50}ms` }}
-                    onClick={() => router.push(`/search/${property.id}`)}
-                  >
-                    {/* Property image with gradient overlay */}
-                    <div className="relative h-60 overflow-hidden">
-                      <img
-                        src={property.primaryImage}
-                        alt={property.title}
-                        className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-70 group-hover:opacity-60 transition-opacity duration-300"></div>
-
-                      {/* Price tag */}
-                      <div className="absolute top-4 right-4 bg-white dark:bg-zinc-800 shadow-lg rounded-lg px-3 py-1.5 text-sm font-semibold text-primary">
-                        {formatPrice(property.price)}
-                        <span className="text-xs font-normal text-muted-foreground">
-                          /mo
-                        </span>
-                      </div>
-
-                      {/* Featured badge */}
-                      {property.featured && (
-                        <div className="absolute top-4 left-4 bg-gradient-to-r from-primary to-primary/80 text-white shadow-md rounded-lg px-3 py-1 text-xs font-medium flex items-center gap-1">
-                          <svg
-                            width="14"
-                            height="14"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth="2"
-                            strokeLinecap="round"
-                            strokeLinejoin="round"
-                          >
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                          </svg>
-                          Featured
-                        </div>
-                      )}
-
-                      {/* Property type badge */}
-                      <Badge
-                        variant="outline"
-                        className="absolute bottom-4 right-4 bg-black/50 text-white border-0 capitalize"
-                      >
-                        {property.propertyType}
-                      </Badge>
-                    </div>
-
-                    {/* Property content */}
-                    <div className="p-5">
-                      <h3 className="text-lg font-semibold line-clamp-1 group-hover:text-primary transition-colors duration-300">
-                        {property.title}
-                      </h3>
-                      <p className="text-sm text-muted-foreground flex items-center mt-1.5 line-clamp-1">
-                        <MapPin className="h-3.5 w-3.5 mr-1.5 flex-shrink-0 text-primary/70" />
-                        <span>{property.location}</span>
-                      </p>
-
-                      <p className="mt-3 text-sm text-muted-foreground line-clamp-2">
-                        {property.description.slice(0, 20)}...
-                      </p>
-
-                      {/* Property details */}
-                      <div className="mt-4 grid grid-cols-3 gap-2">
-                        <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 group-hover:bg-primary/5 transition-colors duration-300 dark:bg-zinc-800 bg-slate-100">
-                          <Bed className="h-4 w-4 mb-1 text-primary/70" />
-                          <span className="text-xs font-medium">
-                            {property.bedrooms} Beds
-                          </span>
-                        </div>
-                        <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 group-hover:bg-primary/5 transition-colors duration-300 dark:bg-zinc-800 bg-slate-100">
-                          <Bath className="h-4 w-4 mb-1 text-primary/70" />
-                          <span className="text-xs font-medium">
-                            {property.bathrooms} Baths
-                          </span>
-                        </div>
-                        <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 group-hover:bg-primary/5 transition-colors duration-300 dark:bg-zinc-800 bg-slate-100">
-                          <Square className="h-4 w-4 mb-1 text-primary/70" />
-                          <span className="text-xs font-medium">
-                            {property.squareFeet} sqft
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Call to action */}
-                      <div className="mt-2 flex items-center justify-between bg-slate-100 dark:bg-zinc-800 px-3 py-1 rounded-lg">
-                        <Button
-                          size="sm"
-                          variant="ghost"
-                          className="px-0 text-primary text-sm font-medium"
-                        >
-                          View Details
-                        </Button>
-                        <Button
-                          size="icon"
-                          variant="outline"
-                          className="h-8 w-8 rounded-full hover:bg-primary/5 transition-colors duration-300"
-                        >
-                          <ArrowUpRight className="h-4 w-4" />
-                        </Button>
-                      </div>
-                    </div>
-
-                    {/* Property accent line */}
-                    <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                ))}
-              </div>
-            )}
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Property Info Overlay */}
-      {isMapView && selectedProperty && (
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 bg-white/95 dark:bg-zinc-900/90 backdrop-blur-sm pl-2 pr-2 py-2 border border-border/10 border-l-4 border-l-primary dark:border-l-primary rounded-xl shadow-lg max-w-lg w-full  dark:border-zinc-700">
-          <div className="flex items-center gap-4">
-            <div className="flex-shrink-0 w-32 h-24 bg-muted rounded-lg relative overflow-hidden">
-              <img
-                src={selectedProperty.primaryImage || "/placeholder.jpg"}
-                alt={selectedProperty.title}
-                className="object-cover w-full h-full"
-              />
-              {/* {selectedProperty.featured && (
+        {/* Property Info Overlay */}
+        {isMapView && selectedProperty && (
+          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 bg-white/95 dark:bg-zinc-900/90 backdrop-blur-sm pl-2 pr-2 py-2 border border-border/10 border-l-4 border-l-primary dark:border-l-primary rounded-xl shadow-lg max-w-lg w-full  dark:border-zinc-700">
+            <div className="flex items-center gap-4">
+              <div className="flex-shrink-0 w-32 h-24 bg-muted rounded-lg relative overflow-hidden">
+                <img
+                  src={selectedProperty.primaryImage || "/placeholder.jpg"}
+                  alt={selectedProperty.title}
+                  className="object-cover w-full h-full"
+                />
+                {/* {selectedProperty.featured && (
                 <Badge className="absolute top-1 left-1 bg-yellow-500/90 text-white text-xs">
                   Featured
                 </Badge>
               )} */}
-            </div>
-            <div className="flex-1 flex flex-col gap-1">
-              <h3 className="font-medium">{selectedProperty.title}</h3>
-              <p className="text-sm flex items-center text-muted-foreground gap-1">
-                <MapPin className="h-3.5 w-3.5" />
-                {selectedProperty.location}
-              </p>
+              </div>
+              <div className="flex-1 flex flex-col gap-1">
+                <h3 className="font-medium">{selectedProperty.title}</h3>
+                <p className="text-sm flex items-center text-muted-foreground gap-1">
+                  <MapPin className="h-3.5 w-3.5" />
+                  {selectedProperty.location}
+                </p>
 
-              <div className="flex gap-3 text-sm text-muted-foreground mt-1">
-                <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
-                  <Bed className="h-3.5 w-3.5 mr-1" />
-                  {selectedProperty.bedrooms}
-                </div>
-                <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
-                  <Bath className="h-3.5 w-3.5 mr-1" />
-                  {selectedProperty.bathrooms}
-                </div>
-                <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
-                  <Square className="h-3.5 w-3.5 mr-1" />
-                  {selectedProperty.squareFeet}
+                <div className="flex gap-3 text-sm text-muted-foreground mt-1">
+                  <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
+                    <Bed className="h-3.5 w-3.5 mr-1" />
+                    {selectedProperty.bedrooms}
+                  </div>
+                  <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
+                    <Bath className="h-3.5 w-3.5 mr-1" />
+                    {selectedProperty.bathrooms}
+                  </div>
+                  <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
+                    <Square className="h-3.5 w-3.5 mr-1" />
+                    {selectedProperty.squareFeet}
+                  </div>
                 </div>
               </div>
-            </div>
-            <div className="flex-1 flex flex-col gap-3 justify-center">
-              <p className="text-primary font-semibold mt-1">
-                {formatPrice(selectedProperty.price)}/mon
-              </p>
-              <Button
-                variant="default"
-                size="sm"
-                onClick={() => router.push(`/search/${selectedProperty.id}`)}
-              >
-                View Details
-              </Button>
+              <div className="flex-1 flex flex-col gap-3 justify-center">
+                <p className="text-primary font-semibold mt-1">
+                  {formatPrice(selectedProperty.price)}/mon
+                </p>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={() => router.push(`/search/${selectedProperty.id}`)}
+                >
+                  View Details
+                </Button>
+              </div>
             </div>
           </div>
-        </div>
-      )}
+        )}
 
-      {/* Save Search Button */}
-      {/* {properties.length > 0 && (
+        {/* Save Search Button */}
+        {/* {properties.length > 0 && (
         <div className="absolute bottom-4 right-4 z-30">
           <Popover>
             <PopoverTrigger asChild>
@@ -820,29 +830,30 @@ export default function SearchPage() {
         </div>
       )} */}
 
-      {error && (
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-destructive/95 text-destructive-foreground backdrop-blur-sm p-4 rounded-lg shadow-lg max-w-md">
-          <p className="font-medium">Error loading properties</p>
-          <p className="text-sm">{error}</p>
-        </div>
-      )}
-
-      {/* Property count indicator */}
-      <div className="absolute top-4.5 left-4 z-30 bg-white/70 dark:bg-black/70 backdrop-blur-sm px-3 py-2 rounded-xl text-sm font-medium shadow-sm">
-        {loading ? (
-          <div className="flex items-center gap-2">
-            <Loader2 className="h-3.5 w-3.5 animate-spin" />
-            Loading properties...
-          </div>
-        ) : (
-          <div className="flex flex-row items-center justify-center gap-2">
-            <Home className="h-4 w-4" />
-            {properties.length} Properties found
+        {error && (
+          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-destructive/95 text-destructive-foreground backdrop-blur-sm p-4 rounded-lg shadow-lg max-w-md">
+            <p className="font-medium">Error loading properties</p>
+            <p className="text-sm">{error}</p>
           </div>
         )}
-      </div>
 
-      <Toaster />
-    </div>
+        {/* Property count indicator */}
+        <div className="absolute top-4.5 left-4 z-30 bg-white/70 dark:bg-black/70 backdrop-blur-sm px-3 py-2 rounded-xl text-sm font-medium shadow-sm">
+          {loading ? (
+            <div className="flex items-center gap-2">
+              <Loader2 className="h-3.5 w-3.5 animate-spin" />
+              Loading properties...
+            </div>
+          ) : (
+            <div className="flex flex-row items-center justify-center gap-2">
+              <Home className="h-4 w-4" />
+              {properties.length} Properties found
+            </div>
+          )}
+        </div>
+
+        <Toaster />
+      </div>
+    </PageTransition>
   );
 }

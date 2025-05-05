@@ -470,9 +470,14 @@ export function ChartTwo() {
   }, [timeRange]);
 
   return (
-    <motion.div initial="hidden" animate="visible" variants={fadeIn}>
+    <motion.div
+      initial="hidden"
+      animate="visible"
+      variants={fadeIn}
+      className=""
+    >
       <Card className="border-none overflow-hidden">
-        <CardHeader className="flex flex-col items-stretch space-y-0 border-b p-0 sm:flex-row">
+        <CardHeader className="flex flex-col items-stretch space-y-0 border-b border-gray-300 dark:border-gray-700 p-0 sm:flex-row">
           <div className="flex flex-1 flex-col justify-center gap-1 px-6 py-5 sm:py-6">
             <div className="flex items-center justify-between">
               <div>
@@ -506,7 +511,7 @@ export function ChartTwo() {
                 <motion.button
                   key={chart}
                   data-active={activeChart === chart}
-                  className="group relative z-30 flex flex-1 flex-col justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
+                  className="group relative z-30 flex flex-1 flex-col border-gray-300 dark:border-gray-700 justify-center gap-1 border-t px-6 py-4 text-left even:border-l data-[active=true]:bg-muted/50 sm:border-l sm:border-t-0 sm:px-8 sm:py-6"
                   onClick={() => setActiveChart(chart)}
                   whileHover={{ backgroundColor: "rgba(0,0,0,0.03)" }}
                   whileTap={{ backgroundColor: "rgba(0,0,0,0.05)" }}
@@ -604,7 +609,7 @@ export function ChartTwo() {
             </ResponsiveContainer>
           </div>
         </CardContent>
-        <CardFooter className="border-t px-6 py-3 flex items-center justify-between text-xs text-muted-foreground">
+        <CardFooter className="border-t border-gray-300 dark:border-gray-700 px-6 py-3 flex items-center justify-between text-xs text-muted-foreground">
           <div className="flex items-center">
             <Activity className="h-3 w-3 mr-1" />
             <span>

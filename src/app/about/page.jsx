@@ -1,24 +1,46 @@
-import Footer from "@/shared/components/Footer";
+import { Suspense } from "react";
+import { PageTransition } from "@/shared/components/animation/PageTransition";
 import { MainNav } from "@/shared/components/NavBar";
-import SectionAnmation from "../components/SectionAnmation";
+import Spinner from "@/shared/components/ui/spinner";
+import Footer from "@/shared/components/Footer";
+import AboutHero from "./client-components/AboutHero";
+import AboutContent from "./client-components/AboutContent";
 
-export default function aboutpage() {
+export default function AboutPage() {
   return (
-    <div>
-      <>
-        <div className="h-screen w-screen px-2 pb-2 bg-zinc-50 text-foreground transition-colors duration-300 dark:bg-black flex flex-col gap-2">
-          <div className="bg-black">
-            <MainNav />
-          </div>
-          {/* hero section */}
-          <div className="bg-gradient-to-b from-zinc-950 via-black to-zinc-950 border border-zinc-800 h-full rounded-xl overflow-hidden shadow-2xl w-full mx-auto flex flex-col justify-center items-center">
-            <SectionAnmation />
-          </div>
-          <div className="flex-1">
-            <Footer />
-          </div>
+    <PageTransition>
+      <div className="min-h-screen flex flex-col bg-white dark:bg-black">
+        {/* Navigation */}
+        <MainNav />
+
+        {/* Content with padding for fixed navbar */}
+        <div className="pt-16">
+          {/* Hero Section */}
+          <Suspense
+            fallback={
+              <div className="w-full h-[50vh] flex items-center justify-center">
+                <Spinner size="lg" />
+              </div>
+            }
+          >
+            <AboutHero />
+          </Suspense>
+
+          {/* About Content */}
+          <Suspense
+            fallback={
+              <div className="w-full min-h-[30vh] flex items-center justify-center">
+                <Spinner />
+              </div>
+            }
+          >
+            <AboutContent />
+          </Suspense>
         </div>
-      </>
-    </div>
+
+        {/* Footer */}
+        <Footer />
+      </div>
+    </PageTransition>
   );
 }

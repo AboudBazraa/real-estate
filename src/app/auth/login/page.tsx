@@ -47,7 +47,7 @@ export default function LoginPage() {
             ? "/admin"
             : userRole.toLowerCase() === "agent"
             ? "/agent"
-            : "/properties"
+            : "/search"
         );
       }, 800); // Increased delay for better UX
     } catch (error: any) {

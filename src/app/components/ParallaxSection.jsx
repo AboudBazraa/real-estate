@@ -18,7 +18,7 @@ export default function ParallaxSection() {
   return (
     <div className="h-full w-full flex flex-col justify-center items-center">
       <BackgroundLines className="bg-transparent">
-        <main className="pt-16 p-1 h-full w-fit flex flex-col justify-center items-center">
+        <main className="pt-16 p-1 h-full w-full flex flex-col justify-center items-center">
           <div className="flex flex-col gap-4 h-full w-full pt-1.5 justify-center items-center">
             <GlowEffectButton
               text={"Get in our website"}

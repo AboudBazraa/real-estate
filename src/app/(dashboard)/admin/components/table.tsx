@@ -163,7 +163,7 @@ export function TableDemo() {
         </div>
 
         {/* Properties Table */}
-        <Table className="rounded-lg overflow-hidden shadow-sm border">
+        <Table className="rounded-lg overflow-hidden shadow-sm border border-gray-300 dark:border-gray-700">
           <TableCaption>Recent Properties</TableCaption>
           <TableHeader>
             <TableRow>
@@ -173,7 +173,7 @@ export function TableDemo() {
               <TableHead className="text-right">Price</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className="">
             {loading ? (
               <TableRow>
                 <TableCell colSpan={4} className="text-center py-8">

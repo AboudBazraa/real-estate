@@ -213,7 +213,7 @@ function AdminPage() {
                 <h3 className="text-lg font-semibold mb-4">Monthly Listings</h3>
                 <ChartOne />
               </div> */}
-            <div className="bg-card rounded-xl p-6 shadow-sm border">
+            <div className="bg-card rounded-xl p-6 shadow-sm border dark:border-gray-700 border-gray-300">
               <h3 className="text-lg font-semibold mb-4">
                 Property Categories
               </h3>

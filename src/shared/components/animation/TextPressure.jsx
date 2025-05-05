@@ -1,11 +1,11 @@
-'use client';
-import { useEffect, useRef, useState } from 'react';
+"use client";
+import { useEffect, useRef, useState } from "react";
 
 const TextPressure = ({
-  text = 'Compressa',
-  fontFamily = 'Compressa VF',
+  text = "Compressa",
+  fontFamily = "Compressa VF",
   // This font is just an example, you should not use it in commercial projects.
-  fontUrl = 'https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2',
+  fontUrl = "https://res.cloudinary.com/dr6lvwubh/raw/upload/v1529908256/CompressaPRO-GX.woff2",
 
   width = true,
   weight = true,
@@ -16,13 +16,12 @@ const TextPressure = ({
   stroke = false,
   scale = false,
 
-  textColor = '#FFFFFF',
-  strokeColor = '#FF0000',
+  textColor = "#FFFFFF",
+  strokeColor = "#FF0000",
   strokeWidth = 2,
-  className = '',
+  className = "",
 
-  minFontSize = 24,
-
+  minFontSize = 20,
 }) => {
   const containerRef = useRef(null);
   const titleRef = useRef(null);
@@ -35,7 +34,7 @@ const TextPressure = ({
   const [scaleY, setScaleY] = useState(1);
   const [lineHeight, setLineHeight] = useState(1);
 
-  const chars = text.split('');
+  const chars = text.split("");
 
   const dist = (a, b) => {
     const dx = b.x - a.x;
@@ -54,11 +53,12 @@ const TextPressure = ({
       cursorRef.current.y = t.clientY;
     };
 
-    window.addEventListener('mousemove', handleMouseMove);
-    window.addEventListener('touchmove', handleTouchMove, { passive: false });
+    window.addEventListener("mousemove", handleMouseMove);
+    window.addEventListener("touchmove", handleTouchMove, { passive: false });
 
     if (containerRef.current) {
-      const { left, top, width, height } = containerRef.current.getBoundingClientRect();
+      const { left, top, width, height } =
+        containerRef.current.getBoundingClientRect();
       mouseRef.current.x = left + width / 2;
       mouseRef.current.y = top + height / 2;
       cursorRef.current.x = mouseRef.current.x;
@@ -66,15 +66,16 @@ const TextPressure = ({
     }
 
     return () => {
-      window.removeEventListener('mousemove', handleMouseMove);
-      window.removeEventListener('touchmove', handleTouchMove);
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("touchmove", handleTouchMove);
     };
   }, []);
 
   const setSize = () => {
     if (!containerRef.current || !titleRef.current) return;
 
-    const { width: containerW, height: containerH } = containerRef.current.getBoundingClientRect();
+    const { width: containerW, height: containerH } =
+      containerRef.current.getBoundingClientRect();
 
     let newFontSize = containerW / (chars.length / 2);
     newFontSize = Math.max(newFontSize, minFontSize);
@@ -97,8 +98,8 @@ const TextPressure = ({
 
   useEffect(() => {
     setSize();
-    window.addEventListener('resize', setSize);
-    return () => window.removeEventListener('resize', setSize);
+    window.addEventListener("resize", setSize);
+    return () => window.removeEventListener("resize", setSize);
   }, [scale, text]);
 
   useEffect(() => {
@@ -173,14 +174,15 @@ const TextPressure = ({
 
       <h1
         ref={titleRef}
-        className={`text-pressure-title ${className} ${flex ? 'flex justify-between' : ''
-          } ${stroke ? 'stroke' : ''} uppercase text-center`}
+        className={`text-pressure-title ${className} ${
+          flex ? "flex justify-between" : ""
+        } ${stroke ? "stroke" : ""} uppercase text-center`}
         style={{
           fontFamily,
           fontSize: fontSize,
           lineHeight,
           transform: `scale(1, ${scaleY})`,
-          transformOrigin: 'center top',
+          transformOrigin: "center top",
           margin: 0,
           fontWeight: 100,
           color: stroke ? undefined : textColor,

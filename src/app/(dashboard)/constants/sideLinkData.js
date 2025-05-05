@@ -1,14 +1,18 @@
 "use client";
 import {
-  SquareTerminal,
-  Bot,
-  BookOpen,
+
   Settings2,
-  LifeBuoy,
-  Send,
-  Frame,
-  PieChart,
-  Map,
+
+  Home,
+  Building,
+  Users,
+
+  CreditCard,
+  Calendar,
+
+  UserCircle,
+  HelpCircle,
+  MessageSquare,
 } from "lucide-react";
 import Roles from "@/app/auth/types/roles";
 
@@ -25,13 +29,13 @@ const sidebarData = {
       {
         title: "Dashboard",
         url: "/admin",
-        icon: SquareTerminal,
+        icon: Home,
         isActive,
       },
       {
         title: "Properties Management",
         url: "/admin/propertyList",
-        icon: Bot,
+        icon: Building,
         isActive,
         items: [
           {
@@ -51,7 +55,7 @@ const sidebarData = {
       {
         title: "Users Management",
         url: "/admin/userList",
-        icon: BookOpen,
+        icon: Users,
         isActive,
         items: [
           {
@@ -71,7 +75,7 @@ const sidebarData = {
       {
         title: "Transactions & Payments",
         url: "/admin/subscriptions",
-        icon: BookOpen,
+        icon: CreditCard,
         isActive,
         items: [
           {
@@ -108,13 +112,13 @@ const sidebarData = {
       {
         title: "Dashboard",
         url: "/agent",
-        icon: SquareTerminal,
+        icon: Home,
         isActive,
       },
       {
         title: "My Properties",
         url: "/agent/agentProperties",
-        icon: Bot,
+        icon: Building,
         isActive,
         items: [
           {
@@ -130,7 +134,7 @@ const sidebarData = {
       {
         title: "Appointments & Meetings",
         url: "/agent/meetings",
-        icon: BookOpen,
+        icon: Calendar,
         isActive,
         items: [
           {
@@ -146,7 +150,7 @@ const sidebarData = {
       {
         title: "Profile & Settings ",
         url: "/agent/profile", // Corrected URL
-        icon: Settings2,
+        icon: UserCircle,
         isActive,
         items: [
           {
@@ -160,12 +164,12 @@ const sidebarData = {
       {
         title: "Support",
         url: "#",
-        icon: LifeBuoy,
+        icon: HelpCircle,
       },
       {
         title: "Feedback",
         url: "#",
-        icon: Send,
+        icon: MessageSquare,
       },
     ],
     projects: [
