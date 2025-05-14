@@ -10,6 +10,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import Image from "next/image";
 import Head from "next/head";
 import PropertyMap from "./components/property-map";
+import Footer from "@/shared/components/Footer";
 import {
   ArrowLeft,
   ArrowRight,
@@ -486,7 +487,7 @@ export default function PropertyPage() {
       </AnimatePresence>
 
       {/* Header */}
-      <header className="border-b border-gray-200 dark:border-gray-800 sticky top-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm z-30">
+      <header className="border-b border-gray-200 dark:border-gray-800 sticky top-0 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm z-[9999]">
         <div className="container mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
           <div className="font-bold text-xl text-gray-800 dark:text-white">
             <Link href="/" className="flex items-center">
@@ -496,7 +497,7 @@ export default function PropertyPage() {
           </div>
 
           <div className="flex items-center space-x-4">
-            <button
+            {/* <button
               onClick={toggleDarkMode}
               className="p-2 text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
               aria-label={
@@ -504,7 +505,7 @@ export default function PropertyPage() {
               }
             >
               {darkMode ? <Sun size={18} /> : <Moon size={18} />}
-            </button>
+            </button> */}
             {/* <a
               href="#"
               className="text-sm text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
@@ -717,13 +718,13 @@ export default function PropertyPage() {
             </span>
           </div>
 
-          <div
+          {/* <div
             ref={descriptionRef}
             className="text-gray-600 dark:text-gray-300 text-base leading-relaxed mb-2 overflow-hidden transition-all duration-300"
             style={{ maxHeight: "100px" }}
           >
             <p>{property.description}</p>
-          </div>
+          </div> */}
 
           {property.description && property.description.length > 300 && (
             <button
@@ -1177,183 +1178,7 @@ export default function PropertyPage() {
       </main>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white py-12">
-        <div className="container mx-auto max-w-7xl px-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-8 mb-8">
-            <div>
-              <h3 className="text-xl font-bold mb-4 flex items-center">
-                <Home className="mr-2" />
-                RealEstate
-              </h3>
-              <p className="text-gray-300 mb-4">
-                Connecting people with their perfect homes since 2010. Our
-                mission is to make property search simple, efficient, and
-                enjoyable.
-              </p>
-              <div className="flex space-x-4">
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                  aria-label="Twitter"
-                >
-                  <Twitter size={20} />
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                  aria-label="Facebook"
-                >
-                  <Facebook size={20} />
-                </a>
-                <a
-                  href="#"
-                  className="text-gray-400 hover:text-white transition-colors"
-                  aria-label="Instagram"
-                >
-                  <Instagram size={20} />
-                </a>
-              </div>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-lg mb-4">Quick Links</h4>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Home
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Properties
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Agents
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Blog
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Contact
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-lg mb-4">Property Types</h4>
-              <ul className="space-y-2">
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Houses
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Apartments
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Condos
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Commercial
-                  </a>
-                </li>
-                <li>
-                  <a
-                    href="#"
-                    className="text-gray-400 hover:text-white transition-colors"
-                  >
-                    Land
-                  </a>
-                </li>
-              </ul>
-            </div>
-
-            <div>
-              <h4 className="font-semibold text-lg mb-4">Contact Us</h4>
-              <address className="not-italic text-gray-400">
-                <p className="mb-2">123 Property Street</p>
-                <p className="mb-2">Austin, TX 78701</p>
-                <p className="mb-2">United States</p>
-              </address>
-              <p className="text-gray-400 mb-1">
-                <a
-                  href="tel:+15125551234"
-                  className="hover:text-white transition-colors"
-                >
-                  (512) 555-1234
-                </a>
-              </p>
-              <p className="text-gray-400">
-                <a
-                  href="mailto:info@realestate.com"
-                  className="hover:text-white transition-colors"
-                >
-                  info@realestate.com
-                </a>
-              </p>
-            </div>
-          </div>
-
-          <div className="border-t border-gray-800 pt-8 mt-8 flex flex-col md:flex-row justify-between items-center">
-            <div className="text-sm text-gray-400 mb-4 md:mb-0">
-              &copy; {new Date().getFullYear()} RealEstate. All rights reserved.
-            </div>
-            <div className="flex flex-wrap gap-4 text-sm text-gray-400">
-              <a href="#" className="hover:text-white transition-colors">
-                Terms &amp; Conditions
-              </a>
-              <a href="#" className="hover:text-white transition-colors">
-                Privacy Policy
-              </a>
-              <a href="#" className="hover:text-white transition-colors">
-                Cookie Policy
-              </a>
-              <a href="#" className="hover:text-white transition-colors">
-                Sitemap
-              </a>
-            </div>
-          </div>
-        </div>
-      </footer>
+      <Footer />
 
       {/* Contact Modal - Would be implemented as a component */}
       <AnimatePresence>

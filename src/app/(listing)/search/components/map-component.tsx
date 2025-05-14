@@ -31,6 +31,7 @@ import {
   Target,
   ZoomIn,
   ZoomOut,
+  Loader2,
 } from "lucide-react";
 import Image from "next/image";
 import "leaflet/dist/leaflet.css";
@@ -414,9 +415,18 @@ export default function MapComponent({
       {/* Property count indicator */}
 
       {/* Attribution badge */}
-      <div className="absolute bottom-8 left-4 z-10 bg-white/80 dark:bg-zinc-800/90 backdrop-blur-sm rounded-lg shadow-sm px-3 py-2 text-xs font-medium text-muted-foreground border border-border/30 flex items-center gap-1.5">
-        <MapPin className="h-3 w-3 text-primary" />
-        <span>Yemen Real Estate</span>
+      <div className="absolute bottom-6 sm:bottom-8 left-2 z-10 bg-white/80 dark:bg-zinc-800/90 backdrop-blur-sm rounded-lg shadow-sm px-3 py-2 text-xs font-medium text-muted-foreground border border-border/30 flex items-center gap-1.5">
+        {loading ? (
+          <div className="flex items-center gap-2">
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+            Loading properties...
+          </div>
+        ) : (
+          <div className="flex flex-row items-center justify-center gap-2">
+            <Home className="h-4 w-4" />
+            {properties.length} Properties found
+          </div>
+        )}
       </div>
 
       {/* Loading spinner */}
@@ -498,7 +508,7 @@ function MapMarkers({
             const houseIcon = L.divIcon({
               className: `house-marker-icon ${isActive ? "active" : ""}`,
               html: `
-                <div class="marker-container ${
+                <div class="marker-container flex flex-col ${
                   isActive ? "active" : ""
                 }" style="
                   position: relative;
@@ -535,10 +545,15 @@ function MapMarkers({
                         : "0 2px 4px rgba(0,0,0,0.1)"
                     };
                   "></div>
+                  <div class="bg-white border border-gray-500 px-1 rounded-md">
+                    <p className="text-white font-bold text-sm">
+                      ${formatCurrency(property.pricePerMonth)}
+                    </p>
+                  </div>
                 </div>
               `,
-              iconSize: [28, 40],
-              iconAnchor: [14, 28],
+              iconSize: [36, 44],
+              iconAnchor: [18, 32],
             });
 
             return (
@@ -598,7 +613,7 @@ function MapMarkers({
                       )}
                       <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/70 to-transparent px-3 py-2">
                         <p className="text-white font-bold text-sm">
-                          ${formatCurrency(property.pricePerMonth)}/mo
+                          ${formatCurrency(property.pricePerMonth)}
                         </p>
                       </div>
                     </div>

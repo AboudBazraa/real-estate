@@ -237,12 +237,12 @@ export default function SearchPage() {
 
   return (
     <PageTransition>
-      <div className="w-screen h-screen overflow-hidden bg-background text-foreground relative ">
+      <div className="w-screen h-screen overflow-hidden bg-background text-foreground relative">
         {/* Search Bar */}
-        <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 w-full max-w-3xl px-4">
+        <div className="absolute top-2 sm:top-4 left-1/2 -translate-x-1/2 z-30 w-full max-w-3xl pr-6 pl-2 sm:pr-4 sm:pl-4">
           <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
-            <div className="flex items-center p-1 gap-2">
-              <div className="relative flex-1">
+            <div className="flex sm:flex-row flex-col flex-wrap items-center p-2 sm:p-1 gap-2">
+              <div className="relative flex-1 w-full">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <input
                   ref={searchInputRef}
@@ -251,7 +251,7 @@ export default function SearchPage() {
                   value={searchValue}
                   onChange={(e) => setSearchValue(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-                  className="w-full pl-9 pr-3 rounded-md bg-transparent   focus:outline-none"
+                  className="w-full pl-9 pr-3 rounded-md bg-transparent focus:outline-none"
                 />
               </div>
               <div className="flex gap-2">
@@ -711,9 +711,9 @@ export default function SearchPage() {
 
         {/* Property Info Overlay */}
         {isMapView && selectedProperty && (
-          <div className="absolute bottom-8 left-1/2 -translate-x-1/2 z-30 bg-white/95 dark:bg-zinc-900/90 backdrop-blur-sm pl-2 pr-2 py-2 border border-border/10 border-l-4 border-l-primary dark:border-l-primary rounded-xl shadow-lg max-w-lg w-full  dark:border-zinc-700">
-            <div className="flex items-center gap-4">
-              <div className="flex-shrink-0 w-32 h-24 bg-muted rounded-lg relative overflow-hidden">
+          <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-30 bg-white/95 dark:bg-zinc-900/90 backdrop-blur-sm pl-2 pr-2 py-2 border border-border/10 border-l-4 border-l-primary dark:border-l-primary rounded-xl shadow-lg max-w-lg w-fit sm:w-full dark:border-zinc-700">
+            <div className="flex flex-col sm:flex-row items-center gap-4">
+              <div className="flex-shrink-0 w-full sm:w-32 h-24 bg-muted rounded-lg relative overflow-hidden">
                 <img
                   src={selectedProperty.primaryImage || "/placeholder.jpg"}
                   alt={selectedProperty.title}
@@ -725,39 +725,43 @@ export default function SearchPage() {
                 </Badge>
               )} */}
               </div>
-              <div className="flex-1 flex flex-col gap-1">
-                <h3 className="font-medium">{selectedProperty.title}</h3>
-                <p className="text-sm flex items-center text-muted-foreground gap-1">
-                  <MapPin className="h-3.5 w-3.5" />
-                  {selectedProperty.location}
-                </p>
+              <div className="flex flex-row gap-4 flex-1">
+                <div className="flex-1 flex flex-col gap-1">
+                  <h3 className="font-medium">{selectedProperty.title}</h3>
+                  <p className="text-sm flex items-center text-muted-foreground gap-1">
+                    <MapPin className="h-3.5 w-3.5" />
+                    {selectedProperty.location}
+                  </p>
 
-                <div className="flex gap-3 text-sm text-muted-foreground mt-1">
-                  <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
-                    <Bed className="h-3.5 w-3.5 mr-1" />
-                    {selectedProperty.bedrooms}
-                  </div>
-                  <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
-                    <Bath className="h-3.5 w-3.5 mr-1" />
-                    {selectedProperty.bathrooms}
-                  </div>
-                  <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
-                    <Square className="h-3.5 w-3.5 mr-1" />
-                    {selectedProperty.squareFeet}
+                  <div className="flex gap-3 text-sm text-muted-foreground mt-1">
+                    <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
+                      <Bed className="h-3.5 w-3.5 mr-1" />
+                      {selectedProperty.bedrooms}
+                    </div>
+                    <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
+                      <Bath className="h-3.5 w-3.5 mr-1" />
+                      {selectedProperty.bathrooms}
+                    </div>
+                    <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
+                      <Square className="h-3.5 w-3.5 mr-1" />
+                      {selectedProperty.squareFeet}
+                    </div>
                   </div>
                 </div>
-              </div>
-              <div className="flex-1 flex flex-col gap-3 justify-center">
-                <p className="text-primary font-semibold mt-1">
-                  {formatPrice(selectedProperty.price)}/mon
-                </p>
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={() => router.push(`/search/${selectedProperty.id}`)}
-                >
-                  View Details
-                </Button>
+                <div className="flex-1 flex flex-col gap-3 justify-center">
+                  <p className="text-primary font-semibold mt-1">
+                    {formatPrice(selectedProperty.price)}/mon
+                  </p>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() =>
+                      router.push(`/search/${selectedProperty.id}`)
+                    }
+                  >
+                    View Details
+                  </Button>
+                </div>
               </div>
             </div>
           </div>
@@ -831,14 +835,14 @@ export default function SearchPage() {
       )} */}
 
         {error && (
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-30 bg-destructive/95 text-destructive-foreground backdrop-blur-sm p-4 rounded-lg shadow-lg max-w-md">
-            <p className="font-medium">Error loading properties</p>
+          <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30 bg-destructive/95 text-destructive-foreground backdrop-blur-sm p-4 rounded-lg shadow-lg max-w-md">
+            <p className="font-medium mb-2">Error loading properties</p>
             <p className="text-sm">{error}</p>
           </div>
         )}
 
         {/* Property count indicator */}
-        <div className="absolute top-4.5 left-4 z-30 bg-white/70 dark:bg-black/70 backdrop-blur-sm px-3 py-2 rounded-xl text-sm font-medium shadow-sm">
+        {/* <div className="hidden sm:block absolute top-4.5 left-4 z-30 bg-white/70 dark:bg-black/70 backdrop-blur-sm px-3 py-2 rounded-xl text-sm font-medium shadow-sm">
           {loading ? (
             <div className="flex items-center gap-2">
               <Loader2 className="h-3.5 w-3.5 animate-spin" />
@@ -850,7 +854,7 @@ export default function SearchPage() {
               {properties.length} Properties found
             </div>
           )}
-        </div>
+        </div> */}
 
         <Toaster />
       </div>
