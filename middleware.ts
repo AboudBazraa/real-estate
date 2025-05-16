@@ -14,6 +14,13 @@ export async function middleware(request: NextRequest) {
     pathname.startsWith("/auth/registration") ||
     pathname === "/auth";
 
+  // Check if the current route is a protected page
+  const isProtectedRoute =
+    pathname.startsWith("/dashboard") ||
+    pathname.startsWith("/search/[id]") ||
+    pathname.startsWith("/agent") ||
+    pathname.startsWith("/admin");
+
   // Get the authentication cookie to determine if user is logged in
   const supabase = createServerClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -50,6 +57,15 @@ export async function middleware(request: NextRequest) {
     }
 
     return NextResponse.redirect(new URL(redirectUrl, request.url));
+  }
+
+  // If user is not logged in and trying to access protected routes, redirect to login
+  if (!user && isProtectedRoute) {
+    // Add a searchParam to indicate which page they were trying to access
+    const redirectUrl = new URL("/auth/login", request.url);
+    redirectUrl.searchParams.set("redirectTo", pathname);
+
+    return NextResponse.redirect(redirectUrl);
   }
 
   return response;

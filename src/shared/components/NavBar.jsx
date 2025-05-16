@@ -200,7 +200,7 @@ export function MainNav() {
   return (
     <motion.nav
       data-state={menuOpen ? "active" : undefined}
-      className={`fixed top-0 left-0 right-0 z-[1000] w-full h-16 ${
+      className={`sticky top-0 right-0 left-0 z-[1000] w-full h-16 ${
         scrolled
           ? "bg-white/90 dark:bg-zinc-900/90 shadow-md backdrop-blur-lg"
           : "bg-white/50 dark:bg-zinc-950/50 backdrop-blur-md"

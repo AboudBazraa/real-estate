@@ -200,7 +200,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <div className="h-screen overflow-hidden w-full flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-indigo-950 transition-colors duration-700 p-20 overflow-x-hidden  ">
+    <div className="h-screen overflow-hidden w-full flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-indigo-950 transition-colors duration-700 p-20 overflow-x-hidden">
       {/* Decorative elements */}
       {/* <div className="absolute top-0 left-0 w-full h-64 bg-blue-600 dark:bg-indigo-900 -z-10 opacity-5 blur-3xl rounded-full transform -translate-y-1/2 scale-x-150"></div> */}
       {/* <div className="absolute bottom-0 right-0 w-full h-64 bg-indigo-600 dark:bg-blue-900 -z-10 opacity-5 blur-3xl rounded-full transform translate-y-1/2 scale-x-150"></div> */}
@@ -257,7 +257,7 @@ export default function RegisterPage() {
           >
             <motion.div
               variants={itemVariants}
-              className="flex flex-col items-center justify-center w-full p-3 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden col-span-2"
+              className="flex flex-col items-center justify-center w-full p-3 rounded-t-2xl md:rounded-l-2xl md:rounded-tr-none relative overflow-hidden md:col-span-2"
             >
               {/* Progress steps - only show when not complete */}
               <div className="absolute top-6 left-8 right-8 flex justify-between items-center">

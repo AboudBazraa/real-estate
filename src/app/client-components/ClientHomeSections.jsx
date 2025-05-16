@@ -6,6 +6,7 @@ import { gsap } from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import BlurText from "@/shared/components/animation/BlurText";
 import { ArrowRight } from "lucide-react";
+import SubscriptionSection from "./SubscriptionSection";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
@@ -164,6 +165,7 @@ export default function ClientHomeSections() {
   const showcaseRef = useRef(null);
   const categoryRef = useRef(null);
   const ctaRef = useRef(null);
+  const subscriptionRef = useRef(null);
 
   // Data for sections
   const timelineEvents = [
@@ -287,6 +289,25 @@ export default function ClientHomeSections() {
           scrollTrigger: {
             trigger: ctaRef.current,
             start: "top 75%",
+            toggleActions: "play none none reset",
+          },
+        }
+      );
+    }
+
+    // Subscription section animation
+    if (subscriptionRef.current) {
+      gsap.fromTo(
+        ".subscription-content",
+        { opacity: 0, y: 30 },
+        {
+          opacity: 1,
+          y: 0,
+          duration: 0.7,
+          ease: "power3.out",
+          scrollTrigger: {
+            trigger: subscriptionRef.current,
+            start: "top 80%",
             toggleActions: "play none none reset",
           },
         }
@@ -580,6 +601,11 @@ export default function ClientHomeSections() {
           </div>
         </div>
       </section>
+
+      {/* Subscription Section */}
+      <div ref={subscriptionRef} className="subscription-content">
+        <SubscriptionSection />
+      </div>
 
       {/* CTA Section */}
       <section

@@ -7,6 +7,7 @@ import {
   CardContent,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/shared/components/ui/card";
 import { Input } from "@/shared/components/ui/input";
 import { Badge } from "@/shared/components/ui/badge";
@@ -35,15 +36,95 @@ import {
   Loader2,
   RefreshCw,
   ArrowUpDown,
+  BarChart3,
+  User,
+  Home,
+  DollarSign,
+  MoreHorizontal,
+  PlusCircle,
+  CheckCircle2,
+  XCircle,
+  Clock,
+  CalendarIcon,
 } from "lucide-react";
 import { Skeleton } from "@/shared/components/ui/skeleton";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
+import { useSupabase } from "@/shared/providers/SupabaseProvider";
+import { useToast } from "@/shared/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/components/ui/dropdown-menu";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/shared/components/ui/popover";
+import { Calendar as CalendarComponent } from "@/shared/components/ui/calendar";
+import { format } from "date-fns";
+import { cn } from "@/shared/lib/utils";
+
+// Define types for data from Supabase
+interface Agent {
+  id: string;
+  email: string;
+  role: string;
+}
+
+interface Property {
+  id: string;
+  address: string;
+}
+
+interface CommissionData {
+  id: string;
+  agent_id: string;
+  property_id: string | null;
+  property_address: string | null;
+  sale_price: number;
+  commission: number;
+  rate: number;
+  status: "paid" | "pending" | "cancelled";
+  created_at: string;
+}
+
+interface Commission {
+  id: string;
+  agent: string;
+  agent_id: string;
+  property: string;
+  property_id: string | null;
+  salePrice: number;
+  commission: number;
+  rate: number;
+  status: "paid" | "pending" | "cancelled";
+  date: string;
+}
+
+interface CommissionStats {
+  totalCommissions: number;
+  averageCommission: number;
+  pendingCommissions: number;
+  averageRate: number;
+}
 
 // Animation variants
 const container = {
@@ -71,104 +152,213 @@ const fadeIn = {
   show: { opacity: 1, transition: { duration: 0.3 } },
 };
 
-const commissions = [
-  {
-    id: "COM-001",
-    agent: "Sarah Johnson",
-    property: "123 Main St",
-    salePrice: 450000,
-    commission: 13500,
-    rate: 3,
-    status: "paid",
-    date: "2024-02-25",
+// Status indicator colors
+const statusColors = {
+  paid: {
+    bg: "bg-green-100 dark:bg-green-900/20",
+    text: "text-green-800 dark:text-green-300",
+    icon: <CheckCircle2 className="h-4 w-4 mr-1.5 text-green-500" />,
   },
-  {
-    id: "COM-002",
-    agent: "Michael Chen",
-    property: "456 Oak Ave",
-    salePrice: 375000,
-    commission: 11250,
-    rate: 3,
-    status: "pending",
-    date: "2024-02-24",
+  pending: {
+    bg: "bg-yellow-100 dark:bg-yellow-900/20",
+    text: "text-yellow-800 dark:text-yellow-300",
+    icon: <Clock className="h-4 w-4 mr-1.5 text-yellow-500" />,
   },
-  {
-    id: "COM-003",
-    agent: "Emily Rodriguez",
-    property: "789 Pine Rd",
-    salePrice: 525000,
-    commission: 15750,
-    rate: 3,
-    status: "paid",
-    date: "2024-02-23",
+  cancelled: {
+    bg: "bg-red-100 dark:bg-red-900/20",
+    text: "text-red-800 dark:text-red-300",
+    icon: <XCircle className="h-4 w-4 mr-1.5 text-red-500" />,
   },
-  {
-    id: "COM-004",
-    agent: "David Kim",
-    property: "321 Elm St",
-    salePrice: 299000,
-    commission: 8970,
-    rate: 3,
-    status: "pending",
-    date: "2024-02-22",
-  },
-];
-
-const stats = [
-  {
-    title: "Total Commissions",
-    value: "$49,470",
-    change: "+12.5%",
-    changeType: "positive",
-  },
-  {
-    title: "Average Commission",
-    value: "$12,367",
-    change: "+5.2%",
-    changeType: "positive",
-  },
-  {
-    title: "Pending Commissions",
-    value: "$20,220",
-    change: "-2.3%",
-    changeType: "negative",
-  },
-  {
-    title: "Commission Rate",
-    value: "3%",
-    change: "0%",
-    changeType: "neutral",
-  },
-];
+};
 
 export default function CommissionsPage() {
+  const { supabase } = useSupabase();
+  const { toast } = useToast();
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("all");
+  const [dateFilter, setDateFilter] = React.useState<Date | undefined>(
+    undefined
+  );
   const [isLoading, setIsLoading] = React.useState(true);
   const [isRefreshing, setIsRefreshing] = React.useState(false);
   const [sortColumn, setSortColumn] = React.useState("date");
   const [sortDirection, setSortDirection] = React.useState("desc");
+  const [commissions, setCommissions] = React.useState<Commission[]>([]);
+  const [agents, setAgents] = React.useState<Agent[]>([]);
+  const [properties, setProperties] = React.useState<Property[]>([]);
+  const [stats, setStats] = React.useState<CommissionStats>({
+    totalCommissions: 0,
+    averageCommission: 0,
+    pendingCommissions: 0,
+    averageRate: 0,
+  });
+  const [isCommissionDialogOpen, setIsCommissionDialogOpen] =
+    React.useState(false);
+  const [newCommission, setNewCommission] = React.useState({
+    agent_id: "",
+    property_id: "",
+    property_address: "",
+    sale_price: "",
+    commission: "",
+    rate: "3",
+    status: "pending",
+    date: new Date().toISOString().split("T")[0],
+  });
+
+  // Fetch data from Supabase
+  const fetchData = React.useCallback(async () => {
+    setIsLoading(true);
+    try {
+      // Fetch commissions
+      const { data: commissionsData, error: commissionsError } = await supabase
+        .from("commissions")
+        .select("*");
+
+      if (commissionsError) throw commissionsError;
+
+      // Fetch agents (users with agent role)
+      const { data: agentsData, error: agentsError } = await supabase
+        .from("users")
+        .select("id, email, role")
+        .eq("role", "agent");
+
+      if (agentsError) throw agentsError;
+
+      // Fetch properties
+      const { data: propertiesData, error: propertiesError } = await supabase
+        .from("properties")
+        .select("id, address");
+
+      if (propertiesError) throw propertiesError;
+
+      // Transform commissions data for the UI
+      const transformedCommissions = commissionsData
+        ? commissionsData.map((commission) => {
+            const agent = agentsData?.find((a) => a.id === commission.agent_id);
+            const property = propertiesData?.find(
+              (p) => p.id === commission.property_id
+            );
+
+            return {
+              id: commission.id,
+              agent: agent?.email || "Unknown Agent",
+              agent_id: commission.agent_id,
+              property:
+                property?.address ||
+                commission.property_address ||
+                "Unknown Property",
+              property_id: commission.property_id,
+              salePrice: commission.sale_price || 0,
+              commission: commission.commission || 0,
+              rate: commission.rate || 3,
+              status: commission.status || "pending",
+              date: commission.created_at
+                ? commission.created_at.split("T")[0]
+                : new Date().toISOString().split("T")[0],
+            };
+          })
+        : [];
+
+      setCommissions(transformedCommissions);
+      setAgents(agentsData || []);
+      setProperties(propertiesData || []);
+
+      // Calculate statistics
+      calculateStats(transformedCommissions);
+    } catch (error) {
+      console.error("Error fetching commission data:", error);
+      toast({
+        title: "Error",
+        description: "Failed to load commission data",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  }, [supabase, toast]);
 
   React.useEffect(() => {
-    // Simulate loading data
-    const timer = setTimeout(() => {
-      setIsLoading(false);
-    }, 1500);
-    return () => clearTimeout(timer);
-  }, []);
+    fetchData();
 
-  const handleRefresh = () => {
+    // Set up real-time subscription for commission changes
+    const channel = supabase
+      .channel("commissions-changes")
+      .on(
+        "postgres_changes",
+        {
+          event: "*",
+          schema: "public",
+          table: "commissions",
+        },
+        () => {
+          fetchData();
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [fetchData, supabase]);
+
+  const calculateStats = (commissions: Commission[]) => {
+    if (!commissions || commissions.length === 0) {
+      setStats({
+        totalCommissions: 0,
+        averageCommission: 0,
+        pendingCommissions: 0,
+        averageRate: 0,
+      });
+      return;
+    }
+
+    // Total commissions (paid)
+    const paidCommissions = commissions.filter((c) => c.status === "paid");
+    const totalCommissions = paidCommissions.reduce(
+      (sum, c) => sum + parseFloat(c.commission.toString()),
+      0
+    );
+
+    // Average commission
+    const averageCommission =
+      paidCommissions.length > 0
+        ? totalCommissions / paidCommissions.length
+        : 0;
+
+    // Pending commissions
+    const pendingCommissions = commissions
+      .filter((c) => c.status === "pending")
+      .reduce((sum, c) => sum + parseFloat(c.commission.toString()), 0);
+
+    // Average rate
+    const totalRate = commissions.reduce(
+      (sum, c) => sum + parseFloat(c.rate.toString()),
+      0
+    );
+    const averageRate =
+      commissions.length > 0 ? totalRate / commissions.length : 0;
+
+    setStats({
+      totalCommissions: Number(totalCommissions.toFixed(2)),
+      averageCommission: Number(averageCommission.toFixed(2)),
+      pendingCommissions: Number(pendingCommissions.toFixed(2)),
+      averageRate: Number(averageRate.toFixed(2)),
+    });
+  };
+
+  const handleRefresh = async () => {
     if (isRefreshing) return;
     setIsRefreshing(true);
-    // Simulate API call
-    setTimeout(() => {
-      setIsRefreshing(false);
-    }, 1000);
+    await fetchData();
+    setIsRefreshing(false);
+    toast({
+      title: "Data Refreshed",
+      description: "Commission data has been updated",
+    });
   };
 
   const handleSort = (column) => {
     if (sortColumn === column) {
-      // Toggle sort direction
       setSortDirection(sortDirection === "asc" ? "desc" : "asc");
     } else {
       setSortColumn(column);
@@ -176,20 +366,138 @@ export default function CommissionsPage() {
     }
   };
 
+  const handleUpdateCommissionStatus = async (
+    id: string,
+    newStatus: "paid" | "pending" | "cancelled"
+  ) => {
+    try {
+      const { error } = await supabase
+        .from("commissions")
+        .update({ status: newStatus })
+        .eq("id", id);
+
+      if (error) throw error;
+
+      // If this commission is approved (paid), create a payment record
+      if (newStatus === "paid") {
+        const commission = commissions.find((c) => c.id === id);
+        if (commission) {
+          // Create a payment record
+          await supabase.from("payments").insert({
+            user_id: commission.agent_id,
+            description: `Commission for ${commission.property}`,
+            amount: commission.commission,
+            status: "paid",
+            type: "commission",
+            created_at: new Date().toISOString(),
+          });
+        }
+      }
+
+      toast({
+        title: "Commission Updated",
+        description: `Commission status changed to ${newStatus}`,
+      });
+
+      await fetchData();
+    } catch (error) {
+      console.error("Error updating commission:", error);
+      toast({
+        title: "Update Failed",
+        description: error.message || "Could not update commission status",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleCreateCommission = async () => {
+    try {
+      if (!newCommission.agent_id || !newCommission.sale_price) {
+        toast({
+          title: "Missing Information",
+          description: "Please fill all required fields",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const salePrice = parseFloat(newCommission.sale_price);
+      const rate = parseFloat(newCommission.rate);
+
+      if (isNaN(salePrice) || salePrice <= 0) {
+        toast({
+          title: "Invalid Sale Price",
+          description: "Please enter a valid sale price",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Calculate commission
+      const commissionAmount = salePrice * (rate / 100);
+
+      // Insert commission record
+      const { data, error } = await supabase
+        .from("commissions")
+        .insert({
+          agent_id: newCommission.agent_id,
+          property_id: newCommission.property_id || null,
+          property_address: newCommission.property_address || null,
+          sale_price: salePrice,
+          commission: commissionAmount,
+          rate: rate,
+          status: newCommission.status,
+          created_at: new Date(newCommission.date).toISOString(),
+        })
+        .select();
+
+      if (error) throw error;
+
+      toast({
+        title: "Commission Created",
+        description: "New commission record has been added",
+      });
+
+      setIsCommissionDialogOpen(false);
+      setNewCommission({
+        agent_id: "",
+        property_id: "",
+        property_address: "",
+        sale_price: "",
+        commission: "",
+        rate: "3",
+        status: "pending",
+        date: new Date().toISOString().split("T")[0],
+      });
+
+      await fetchData();
+    } catch (error) {
+      console.error("Error creating commission:", error);
+      toast({
+        title: "Error",
+        description: error.message || "Failed to create commission",
+        variant: "destructive",
+      });
+    }
+  };
+
   const filteredCommissions = React.useMemo(() => {
     return commissions
       .filter((commission) => {
         const matchesSearch =
-          commission.agent.toLowerCase().includes(searchQuery.toLowerCase()) ||
+          commission.agent?.toLowerCase().includes(searchQuery.toLowerCase()) ||
           commission.property
-            .toLowerCase()
-            .includes(searchQuery.toLowerCase()) ||
-          commission.id.toLowerCase().includes(searchQuery.toLowerCase());
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase());
 
         const matchesStatus =
           statusFilter === "all" || commission.status === statusFilter;
 
-        return matchesSearch && matchesStatus;
+        // Filter by date if dateFilter is set
+        const matchesDate =
+          !dateFilter || commission.date === format(dateFilter, "yyyy-MM-dd");
+
+        return matchesSearch && matchesStatus && matchesDate;
       })
       .sort((a, b) => {
         // Handle sorting
@@ -198,19 +506,38 @@ export default function CommissionsPage() {
             ? new Date(a.date).getTime() - new Date(b.date).getTime()
             : new Date(b.date).getTime() - new Date(a.date).getTime();
         }
-        if (sortColumn === "salePrice" || sortColumn === "commission") {
+        if (
+          sortColumn === "salePrice" ||
+          sortColumn === "commission" ||
+          sortColumn === "rate"
+        ) {
           return sortDirection === "asc"
-            ? a[sortColumn] - b[sortColumn]
-            : b[sortColumn] - a[sortColumn];
+            ? parseFloat(a[sortColumn].toString()) -
+                parseFloat(b[sortColumn].toString())
+            : parseFloat(b[sortColumn].toString()) -
+                parseFloat(a[sortColumn].toString());
         }
-        if (sortColumn === "agent" || sortColumn === "property") {
+        if (
+          sortColumn === "agent" ||
+          sortColumn === "property" ||
+          sortColumn === "status"
+        ) {
+          const aValue = a[sortColumn]?.toString().toLowerCase() || "";
+          const bValue = b[sortColumn]?.toString().toLowerCase() || "";
           return sortDirection === "asc"
-            ? a[sortColumn].localeCompare(b[sortColumn])
-            : b[sortColumn].localeCompare(a[sortColumn]);
+            ? aValue.localeCompare(bValue)
+            : bValue.localeCompare(aValue);
         }
         return 0;
       });
-  }, [searchQuery, statusFilter, sortColumn, sortDirection]);
+  }, [
+    commissions,
+    searchQuery,
+    statusFilter,
+    dateFilter,
+    sortColumn,
+    sortDirection,
+  ]);
 
   const getSortIcon = (column) => {
     if (sortColumn !== column)
@@ -221,6 +548,22 @@ export default function CommissionsPage() {
       <ArrowUpDown className="ml-1 h-4 w-4 text-primary rotate-180" />
     );
   };
+
+  // Calculate commission when sale price or rate changes
+  React.useEffect(() => {
+    if (newCommission.sale_price && newCommission.rate) {
+      const salePrice = parseFloat(newCommission.sale_price);
+      const rate = parseFloat(newCommission.rate);
+
+      if (!isNaN(salePrice) && !isNaN(rate)) {
+        const commission = salePrice * (rate / 100);
+        setNewCommission((prev) => ({
+          ...prev,
+          commission: commission.toFixed(2),
+        }));
+      }
+    }
+  }, [newCommission.sale_price, newCommission.rate]);
 
   return (
     <motion.div
@@ -241,7 +584,7 @@ export default function CommissionsPage() {
             Track and manage agent commission payments
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <Button
             variant="outline"
             onClick={handleRefresh}
@@ -253,356 +596,594 @@ export default function CommissionsPage() {
             />
             Refresh
           </Button>
-          <Button className="gap-2">
+          <Button
+            onClick={() => setIsCommissionDialogOpen(true)}
+            className="gap-2"
+          >
+            <PlusCircle className="h-4 w-4" />
+            New Commission
+          </Button>
+          <Button variant="outline" className="gap-2">
             <Download className="h-4 w-4" />
-            Export Report
+            Export
           </Button>
         </div>
       </motion.div>
 
-      <AnimatePresence mode="wait">
-        {isLoading ? (
-          <motion.div
-            key="stats-loading"
-            className="grid gap-4 md:grid-cols-4"
-            variants={container}
-            initial="hidden"
-            animate="show"
-            exit={{ opacity: 0 }}
-          >
-            {[1, 2, 3, 4].map((i) => (
-              <motion.div key={i} variants={item}>
-                <Card>
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <Skeleton className="h-5 w-32" />
-                    <Skeleton className="h-4 w-4 rounded-full" />
-                  </CardHeader>
-                  <CardContent>
-                    <Skeleton className="h-8 w-24 mb-1" />
-                    <Skeleton className="h-4 w-28" />
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-        ) : (
-          <motion.div
-            key="stats-loaded"
-            className="grid gap-4 md:grid-cols-4"
-            variants={container}
-            initial="hidden"
-            animate="show"
-            exit={{ opacity: 0 }}
-          >
-            {stats.map((stat) => (
-              <motion.div key={stat.title} variants={item}>
-                <Card
-                  className="overflow-hidden border-l-4 transition-all hover:shadow-md"
-                  style={{
-                    borderLeftColor:
-                      stat.changeType === "positive"
-                        ? "var(--green-500)"
-                        : stat.changeType === "negative"
-                        ? "var(--red-500)"
-                        : "var(--border)",
-                  }}
-                >
-                  <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                    <CardTitle className="text-sm font-medium">
-                      {stat.title}
-                    </CardTitle>
-                    <TrendingUp
-                      className={`h-4 w-4 ${
-                        stat.changeType === "positive"
-                          ? "text-green-500"
-                          : stat.changeType === "negative"
-                          ? "text-red-500"
-                          : "text-muted-foreground"
-                      }`}
-                    />
-                  </CardHeader>
-                  <CardContent>
-                    <div className="text-2xl font-bold">{stat.value}</div>
-                    <p
-                      className={`text-xs flex items-center ${
-                        stat.changeType === "positive"
-                          ? "text-green-500"
-                          : stat.changeType === "negative"
-                          ? "text-red-500"
-                          : "text-muted-foreground"
-                      }`}
-                    >
-                      {stat.change} from last month
-                    </p>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* Summary Stats */}
+      <div className="grid gap-4 md:grid-cols-4">
+        <motion.div variants={item}>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Total Commissions
+              </CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                <div className="text-2xl font-bold">
+                  ${stats.totalCommissions}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
-      <motion.div
-        variants={item}
-        className="flex flex-col gap-4 md:flex-row md:items-center"
-      >
-        <div className="relative flex-1">
-          <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-          <Input
-            type="search"
-            placeholder="Search commissions..."
-            className="pl-8"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <div className="flex gap-2">
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-[160px]">
-              <SelectValue placeholder="Filter by status" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="paid">Paid</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-            </SelectContent>
-          </Select>
+        <motion.div variants={item}>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Average Commission
+              </CardTitle>
+              <BarChart3 className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                <div className="text-2xl font-bold">
+                  ${stats.averageCommission}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
 
-          <TooltipProvider>
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="icon">
+        <motion.div variants={item}>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Pending Commissions
+              </CardTitle>
+              <Clock className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                <div className="text-2xl font-bold">
+                  ${stats.pendingCommissions}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+
+        <motion.div variants={item}>
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">
+                Average Rate
+              </CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              {isLoading ? (
+                <Skeleton className="h-8 w-20" />
+              ) : (
+                <div className="text-2xl font-bold">{stats.averageRate}%</div>
+              )}
+            </CardContent>
+          </Card>
+        </motion.div>
+      </div>
+
+      {/* Filter Controls */}
+      <motion.div variants={item} className="flex flex-col sm:flex-row gap-4">
+        <div className="flex-1 flex flex-col sm:flex-row gap-2">
+          <div className="relative flex-1">
+            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="search"
+              placeholder="Search by agent or property..."
+              className="pl-8 w-full"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          <div className="flex flex-wrap gap-2">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <SelectTrigger className="w-[140px]">
+                <div className="flex items-center gap-2">
                   <Filter className="h-4 w-4" />
+                  <span>Status</span>
+                </div>
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Statuses</SelectItem>
+                <SelectItem value="paid">Paid</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="cancelled">Cancelled</SelectItem>
+              </SelectContent>
+            </Select>
+
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "w-[140px] justify-start text-left font-normal",
+                    !dateFilter && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {dateFilter ? (
+                    format(dateFilter, "PPP")
+                  ) : (
+                    <span>Pick date</span>
+                  )}
                 </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>More filters</p>
-              </TooltipContent>
-            </Tooltip>
-          </TooltipProvider>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <CalendarComponent
+                  mode="single"
+                  selected={dateFilter}
+                  onSelect={(date: Date | undefined) => setDateFilter(date)}
+                  initialFocus
+                />
+                {dateFilter && (
+                  <div className="p-3 border-t border-border">
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-center"
+                      onClick={() => setDateFilter(undefined)}
+                    >
+                      Clear
+                    </Button>
+                  </div>
+                )}
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
       </motion.div>
 
-      <AnimatePresence mode="wait">
+      {/* Commissions Table */}
+      <motion.div variants={item} className="rounded-md border">
         {isLoading ? (
-          <motion.div
-            key="table-loading"
-            variants={fadeIn}
-            initial="hidden"
-            animate="show"
-            exit={{ opacity: 0 }}
-            className="rounded-md border"
-          >
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Commission ID</TableHead>
-                  <TableHead>Agent</TableHead>
-                  <TableHead>Property</TableHead>
-                  <TableHead>Sale Price</TableHead>
-                  <TableHead>Commission</TableHead>
-                  <TableHead>Rate</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {[1, 2, 3, 4].map((i) => (
-                  <TableRow key={i}>
-                    <TableCell>
-                      <Skeleton className="h-5 w-20" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-5 w-24" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-5 w-24" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-5 w-20" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-5 w-16" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-5 w-10" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-6 w-16 rounded-full" />
-                    </TableCell>
-                    <TableCell>
-                      <Skeleton className="h-5 w-20" />
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Skeleton className="h-9 w-24 ml-auto" />
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </motion.div>
+          <div className="space-y-3 p-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-12 w-full" />
+            ))}
+          </div>
         ) : (
-          <motion.div
-            key="table-loaded"
-            variants={fadeIn}
-            initial="hidden"
-            animate="show"
-            exit={{ opacity: 0 }}
-            className="rounded-md border"
-          >
-            <Table>
-              <TableHeader>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort("agent")}
+                >
+                  <div className="flex items-center">
+                    Agent {getSortIcon("agent")}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer"
+                  onClick={() => handleSort("property")}
+                >
+                  <div className="flex items-center">
+                    Property {getSortIcon("property")}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer w-[130px]"
+                  onClick={() => handleSort("salePrice")}
+                >
+                  <div className="flex items-center">
+                    Sale Price {getSortIcon("salePrice")}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer w-[130px]"
+                  onClick={() => handleSort("commission")}
+                >
+                  <div className="flex items-center">
+                    Commission {getSortIcon("commission")}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer w-[80px]"
+                  onClick={() => handleSort("rate")}
+                >
+                  <div className="flex items-center">
+                    Rate {getSortIcon("rate")}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer w-[100px]"
+                  onClick={() => handleSort("status")}
+                >
+                  <div className="flex items-center">
+                    Status {getSortIcon("status")}
+                  </div>
+                </TableHead>
+                <TableHead
+                  className="cursor-pointer w-[110px]"
+                  onClick={() => handleSort("date")}
+                >
+                  <div className="flex items-center">
+                    Date {getSortIcon("date")}
+                  </div>
+                </TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredCommissions.length === 0 ? (
                 <TableRow>
-                  <TableHead>Commission ID</TableHead>
-                  <TableHead
-                    className="cursor-pointer"
-                    onClick={() => handleSort("agent")}
-                  >
-                    <div className="flex items-center">
-                      Agent
-                      {getSortIcon("agent")}
-                    </div>
-                  </TableHead>
-                  <TableHead
-                    className="cursor-pointer"
-                    onClick={() => handleSort("property")}
-                  >
-                    <div className="flex items-center">
-                      Property
-                      {getSortIcon("property")}
-                    </div>
-                  </TableHead>
-                  <TableHead
-                    className="cursor-pointer"
-                    onClick={() => handleSort("salePrice")}
-                  >
-                    <div className="flex items-center">
-                      Sale Price
-                      {getSortIcon("salePrice")}
-                    </div>
-                  </TableHead>
-                  <TableHead
-                    className="cursor-pointer"
-                    onClick={() => handleSort("commission")}
-                  >
-                    <div className="flex items-center">
-                      Commission
-                      {getSortIcon("commission")}
-                    </div>
-                  </TableHead>
-                  <TableHead>Rate</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead
-                    className="cursor-pointer"
-                    onClick={() => handleSort("date")}
-                  >
-                    <div className="flex items-center">
-                      Date
-                      {getSortIcon("date")}
-                    </div>
-                  </TableHead>
-                  <TableHead className="text-right">Actions</TableHead>
+                  <TableCell colSpan={8} className="h-24 text-center">
+                    No commissions found.
+                  </TableCell>
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                <AnimatePresence>
-                  {filteredCommissions.map((commission, index) => (
-                    <motion.tr
-                      key={commission.id}
-                      initial={{ opacity: 0, y: 10 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: -10 }}
-                      transition={{ duration: 0.2, delay: index * 0.05 }}
-                      className="group"
-                    >
-                      <TableCell className="font-medium">
-                        {commission.id}
-                      </TableCell>
-                      <TableCell>{commission.agent}</TableCell>
-                      <TableCell>{commission.property}</TableCell>
-                      <TableCell>
-                        ${commission.salePrice.toLocaleString()}
-                      </TableCell>
-                      <TableCell>
-                        ${commission.commission.toLocaleString()}
-                      </TableCell>
-                      <TableCell>{commission.rate}%</TableCell>
-                      <TableCell>
-                        <Badge
-                          variant="outline"
-                          className={`capitalize transition-colors duration-300 ${
-                            commission.status === "paid"
-                              ? "border-green-500 bg-green-50 text-green-700"
-                              : "border-yellow-500 bg-yellow-50 text-yellow-700"
-                          }`}
-                        >
-                          {commission.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="flex items-center gap-1">
-                        <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                        {new Date(commission.date).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="gap-1"
-                              >
-                                <Eye className="h-3.5 w-3.5" />
-                                View Details
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>View commission details</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      </TableCell>
-                    </motion.tr>
-                  ))}
-                </AnimatePresence>
-                {filteredCommissions.length === 0 && (
-                  <TableRow>
-                    <TableCell colSpan={9} className="h-32 text-center">
-                      <div className="flex flex-col items-center justify-center text-muted-foreground">
-                        <Search className="mb-2 h-8 w-8" />
-                        <p className="mb-2 text-lg font-medium">
-                          No results found
-                        </p>
-                        <p className="text-sm">
-                          Try adjusting your search or filter to find what
-                          you&apos;re looking for.
-                        </p>
+              ) : (
+                filteredCommissions.map((commission) => (
+                  <TableRow key={commission.id}>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                        {commission.agent}
                       </div>
                     </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <Home className="mr-2 h-4 w-4 text-muted-foreground" />
+                        {commission.property}
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      $
+                      {typeof commission.salePrice === "number"
+                        ? commission.salePrice.toLocaleString()
+                        : parseFloat(
+                            String(commission.salePrice)
+                          ).toLocaleString()}
+                    </TableCell>
+                    <TableCell>
+                      $
+                      {typeof commission.commission === "number"
+                        ? commission.commission.toLocaleString()
+                        : parseFloat(
+                            String(commission.commission)
+                          ).toLocaleString()}
+                    </TableCell>
+                    <TableCell>{commission.rate}%</TableCell>
+                    <TableCell>
+                      <Badge
+                        variant="outline"
+                        className={`${statusColors[commission.status]?.bg} ${
+                          statusColors[commission.status]?.text
+                        } flex items-center`}
+                      >
+                        {statusColors[commission.status]?.icon}
+                        {commission.status.charAt(0).toUpperCase() +
+                          commission.status.slice(1)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center">
+                        <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                        {commission.date}
+                      </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                          <DropdownMenuSeparator />
+                          {commission.status === "pending" && (
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleUpdateCommissionStatus(
+                                  commission.id,
+                                  "paid"
+                                )
+                              }
+                            >
+                              <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
+                              Mark as Paid
+                            </DropdownMenuItem>
+                          )}
+                          {commission.status === "pending" && (
+                            <DropdownMenuItem
+                              onClick={() =>
+                                handleUpdateCommissionStatus(
+                                  commission.id,
+                                  "cancelled"
+                                )
+                              }
+                            >
+                              <XCircle className="mr-2 h-4 w-4 text-red-500" />
+                              Cancel Commission
+                            </DropdownMenuItem>
+                          )}
+                          <DropdownMenuItem>
+                            <Eye className="mr-2 h-4 w-4" />
+                            View Details
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
                   </TableRow>
-                )}
-              </TableBody>
-            </Table>
-          </motion.div>
+                ))
+              )}
+            </TableBody>
+          </Table>
         )}
-      </AnimatePresence>
+      </motion.div>
 
-      {/* Refreshing indicator */}
-      <AnimatePresence>
-        {isRefreshing && (
-          <motion.div
-            className="fixed bottom-6 right-6 bg-background/90 backdrop-blur-sm text-foreground px-4 py-3 shadow-lg flex items-center space-x-3 z-50 rounded-lg border"
-            initial={{ y: 20, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: 20, opacity: 0 }}
-            transition={{ duration: 0.3, ease: "easeOut" }}
-          >
-            <Loader2 className="h-5 w-5 animate-spin text-primary" />
-            <span className="text-sm font-medium">Refreshing data...</span>
-          </motion.div>
-        )}
-      </AnimatePresence>
+      {/* New Commission Dialog */}
+      <Dialog
+        open={isCommissionDialogOpen}
+        onOpenChange={setIsCommissionDialogOpen}
+      >
+        <DialogContent className="sm:max-w-[500px]">
+          <DialogHeader>
+            <DialogTitle>Add New Commission</DialogTitle>
+            <DialogDescription>
+              Create a new agent commission record
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="agent" className="text-right text-sm font-medium">
+                Agent
+              </label>
+              <div className="col-span-3">
+                <Select
+                  value={newCommission.agent_id}
+                  onValueChange={(value) =>
+                    setNewCommission({ ...newCommission, agent_id: value })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select an agent" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {agents.map((agent) => (
+                      <SelectItem key={agent.id} value={agent.id}>
+                        {agent.email}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label
+                htmlFor="property"
+                className="text-right text-sm font-medium"
+              >
+                Property
+              </label>
+              <div className="col-span-3">
+                <Select
+                  value={newCommission.property_id}
+                  onValueChange={(value) =>
+                    setNewCommission({ ...newCommission, property_id: value })
+                  }
+                >
+                  <SelectTrigger className="w-full">
+                    <SelectValue placeholder="Select a property" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {properties.map((property) => (
+                      <SelectItem key={property.id} value={property.id}>
+                        {property.address}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label
+                htmlFor="propertyAddress"
+                className="text-right text-sm font-medium"
+              >
+                Or Enter Address
+              </label>
+              <Input
+                id="propertyAddress"
+                placeholder="123 Main St"
+                className="col-span-3"
+                value={newCommission.property_address}
+                onChange={(e) =>
+                  setNewCommission({
+                    ...newCommission,
+                    property_address: e.target.value,
+                  })
+                }
+                disabled={!!newCommission.property_id}
+              />
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label
+                htmlFor="salePrice"
+                className="text-right text-sm font-medium"
+              >
+                Sale Price
+              </label>
+              <div className="col-span-3">
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5">$</span>
+                  <Input
+                    id="salePrice"
+                    type="number"
+                    placeholder="0.00"
+                    className="pl-7"
+                    value={newCommission.sale_price}
+                    onChange={(e) =>
+                      setNewCommission({
+                        ...newCommission,
+                        sale_price: e.target.value,
+                      })
+                    }
+                    step="0.01"
+                    min="0"
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="rate" className="text-right text-sm font-medium">
+                Commission Rate
+              </label>
+              <div className="col-span-3">
+                <div className="relative">
+                  <Input
+                    id="rate"
+                    type="number"
+                    placeholder="3.0"
+                    className="pr-8"
+                    value={newCommission.rate}
+                    onChange={(e) =>
+                      setNewCommission({
+                        ...newCommission,
+                        rate: e.target.value,
+                      })
+                    }
+                    step="0.1"
+                    min="0"
+                    max="100"
+                  />
+                  <span className="absolute right-3 top-2.5">%</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label
+                htmlFor="commission"
+                className="text-right text-sm font-medium"
+              >
+                Calculated Amount
+              </label>
+              <div className="col-span-3">
+                <div className="relative">
+                  <span className="absolute left-3 top-2.5">$</span>
+                  <Input
+                    id="commission"
+                    readOnly
+                    className="pl-7 bg-muted"
+                    value={newCommission.commission}
+                  />
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label
+                htmlFor="status"
+                className="text-right text-sm font-medium"
+              >
+                Status
+              </label>
+              <div className="col-span-3">
+                <Select
+                  value={newCommission.status}
+                  onValueChange={(value) =>
+                    setNewCommission({ ...newCommission, status: value })
+                  }
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="pending">Pending</SelectItem>
+                    <SelectItem value="paid">Paid</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 items-center gap-4">
+              <label htmlFor="date" className="text-right text-sm font-medium">
+                Date
+              </label>
+              <div className="col-span-3">
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !newCommission.date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {newCommission.date ? (
+                        newCommission.date
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0">
+                    <CalendarComponent
+                      mode="single"
+                      selected={
+                        newCommission.date
+                          ? new Date(newCommission.date)
+                          : undefined
+                      }
+                      onSelect={(date) =>
+                        setNewCommission({
+                          ...newCommission,
+                          date: date ? format(date, "yyyy-MM-dd") : "",
+                        })
+                      }
+                      initialFocus
+                    />
+                  </PopoverContent>
+                </Popover>
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <Button
+              variant="outline"
+              onClick={() => setIsCommissionDialogOpen(false)}
+            >
+              Cancel
+            </Button>
+            <Button onClick={handleCreateCommission}>Create Commission</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </motion.div>
   );
 }

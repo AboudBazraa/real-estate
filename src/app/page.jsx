@@ -10,10 +10,10 @@ export default function Home() {
     <PageTransition>
       <div className="min-h-screen w-screen text-zinc-900 transition-colors duration-300 dark:bg-black dark:text-white flex flex-col relative">
         {/* Navigation */}
-          <MainNav />
+        <MainNav />
 
         {/* Content with padding for fixed navbar */}
-        <div className="pt-16">
+        <div className="pt-6">
           <Suspense
             fallback={
               <div className="w-full min-h-[70vh] flex items-center justify-center">
@@ -33,7 +33,6 @@ export default function Home() {
             <ClientHomeSections />
           </Suspense>
         </div>
-
         {/* Footer */}
         <Footer />
       </div>

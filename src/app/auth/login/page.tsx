@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "@/app/auth/hooks/useAuth";
 import { useRouteProtection } from "@/app/auth/hooks/useRouteProtection";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { useToast } from "@/shared/hooks/use-toast";
@@ -17,7 +17,22 @@ export default function LoginPage() {
   const [forgotEmail, setForgotEmail] = useState("");
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { toast } = useToast();
+
+  // Check if user was redirected from a protected route
+  const redirectTo = searchParams.get("redirectTo");
+
+  useEffect(() => {
+    // Show toast notification if user was redirected from a protected route
+    if (redirectTo) {
+      toast({
+        title: "Authentication required",
+        description: "You must be logged in to access that page.",
+        variant: "destructive",
+      });
+    }
+  }, [redirectTo, toast]);
 
   if (isLoading) {
     return (
@@ -39,17 +54,25 @@ export default function LoginPage() {
         variant: "success",
       });
 
-      // Redirect based on user metadata or role
-      const userRole = user?.user_metadata?.role || "user";
-      setTimeout(() => {
-        router.push(
-          userRole.toLowerCase() === "admin"
-            ? "/admin"
-            : userRole.toLowerCase() === "agent"
-            ? "/agent"
-            : "/search"
-        );
-      }, 800); // Increased delay for better UX
+      // Determine where to redirect the user
+      // First check if there's a redirectTo param from a protected route
+      if (redirectTo) {
+        setTimeout(() => {
+          router.push(redirectTo);
+        }, 800);
+      } else {
+        // Otherwise, redirect based on user role
+        const userRole = user?.user_metadata?.role || "user";
+        setTimeout(() => {
+          router.push(
+            userRole.toLowerCase() === "admin"
+              ? "/admin"
+              : userRole.toLowerCase() === "agent"
+              ? "/agent"
+              : "/search"
+          );
+        }, 800); // Increased delay for better UX
+      }
     } catch (error: any) {
       toast({
         title: "Login failed",
@@ -135,7 +158,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-indigo-950 transition-colors duration-700">
+    <div className="h-screen flex items-center justify-center p-4 bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-zinc-950 dark:via-zinc-900 dark:to-indigo-950 transition-colors duration-700 overflow-y-hidden">
       <div className="absolute top-0 left-0 w-full h-64 bg-blue-600 dark:bg-indigo-900 -z-10 opacity-5 blur-3xl rounded-full transform -translate-y-1/2 scale-x-150"></div>
 
       <AnimatePresence mode="wait">

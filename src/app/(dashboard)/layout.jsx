@@ -18,9 +18,10 @@ import DynamicBreadcrumb from "@/app/(dashboard)/components/breadcrumb";
 import { Suspense } from "react";
 import { UserProvider } from "@/shared/providers/UserProvider";
 import { SupabaseProvider } from "@/shared/providers/SupabaseProvider";
+import { withAuth } from "@/shared/components/withAuth";
 // import Loading from "./loading";
 
-export default function DashboardLayout({ children }) {
+function DashboardLayout({ children }) {
   return (
     <SupabaseProvider>
       <UserProvider>
@@ -37,3 +38,6 @@ export default function DashboardLayout({ children }) {
     </SupabaseProvider>
   );
 }
+
+// Apply the withAuth HOC to protect all dashboard routes
+export default withAuth(DashboardLayout);

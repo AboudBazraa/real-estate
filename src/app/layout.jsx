@@ -97,7 +97,7 @@ export default function RootLayout({ children }) {
                 disableTransitionOnChange
                 storageKey="real-estate-theme"
               >
-                <main className="flex-grow overflow-x-hidden">{children}</main>
+                <main className="">{children}</main>
 
                 {/* Toaster is rendered outside main content flow */}
                 <Suspense fallback={null}>
