@@ -473,22 +473,6 @@ export default function SubscriptionSection() {
               </DrawerDescription>
             </DrawerHeader>
             <div className="p-4 md:p-6 flex flex-col md:flex-row items-center justify-center gap-4 w-full">
-              {/* Free Plan */}
-              {renderPlanCard(
-                "free",
-                "Free Plan",
-                "0",
-                "Forever free",
-                "Basic features for casual users",
-                [
-                  { text: "Up to 5 property listings", included: true },
-                  { text: "Basic property analytics", included: true },
-                  { text: "Email support", included: true },
-                  { text: "Advanced search filters", included: false },
-                  { text: "Agent tools", included: false },
-                ]
-              )}
-
               {/* Pro Plan */}
               {renderPlanCard(
                 "pro",
@@ -504,6 +488,22 @@ export default function SubscriptionSection() {
                   { text: "Complete agent toolkit", included: true },
                 ],
                 true
+              )}
+
+              {/* Free Plan */}
+              {renderPlanCard(
+                "free",
+                "Free Plan",
+                "0",
+                "Forever free",
+                "Basic features for casual users",
+                [
+                  { text: "Up to 5 property listings", included: true },
+                  { text: "Basic property analytics", included: true },
+                  { text: "Email support", included: true },
+                  { text: "Advanced search filters", included: false },
+                  { text: "Agent tools", included: false },
+                ]
               )}
             </div>
             <DrawerFooter>
