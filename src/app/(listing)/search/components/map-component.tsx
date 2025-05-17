@@ -546,7 +546,7 @@ function MapMarkers({
                     };
                   "></div>
                   <div class="bg-white border border-gray-500 px-1 rounded-md">
-                    <p className="text-white font-bold text-sm">
+                    <p className="text-white dark:text-black font-bold text-sm">
                       ${formatCurrency(property.pricePerMonth)}
                     </p>
                   </div>
