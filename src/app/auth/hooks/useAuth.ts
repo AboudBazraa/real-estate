@@ -44,5 +44,6 @@ export function useAuth() {
     updatePassword: authService.updatePassword,
     resetPassword: authService.resetPassword,
     resendVerificationEmail: authService.resendVerificationEmail,
+    signInWithGoogle: authService.signInWithGoogle,
   };
 }

@@ -14,6 +14,18 @@ export const authService = {
     return data;
   },
 
+  async signInWithGoogle() {
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`,
+      },
+    });
+
+    if (error) throw new Error(error.message);
+    return data;
+  },
+
   async register(email: string, password: string, userData: any) {
     // Step 1: Register the user
     const { data, error: registrationError } = await supabase.auth.signUp({

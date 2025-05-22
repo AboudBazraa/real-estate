@@ -10,7 +10,7 @@ import { LoginForm } from "@/shared/components/login-form";
 import { GalleryVerticalEnd, Mail, ArrowLeft } from "lucide-react";
 
 export default function LoginPage() {
-  const { login, loading, resetPassword } = useAuth();
+  const { login, loading, resetPassword, signInWithGoogle } = useAuth();
   const { isLoading } = useRouteProtection({ requireAuth: false });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
@@ -328,6 +328,22 @@ export default function LoginPage() {
                   whileTap={{ y: 0, boxShadow: "0 0px 0px rgba(0, 0, 0, 0)" }}
                   className="flex items-center justify-center gap-2 rounded-xl border border-zinc-300 bg-white p-2.5 text-sm font-medium hover:border-zinc-400 dark:border-zinc-700 dark:bg-zinc-800 dark:hover:border-zinc-600 transition-all duration-200"
                   type="button"
+                  onClick={async () => {
+                    try {
+                      setIsSubmitting(true);
+                      await signInWithGoogle();
+                      // Note: No need for success toast here as the page will redirect to the callback URL
+                    } catch (error: any) {
+                      toast({
+                        title: "Google login failed",
+                        description: error.message || "Could not sign in with Google",
+                        variant: "destructive",
+                      });
+                    } finally {
+                      setIsSubmitting(false);
+                    }
+                  }}
+                  disabled={isSubmitting}
                 >
                   <svg viewBox="0 0 24 24" className="h-5 w-5">
                     <path
@@ -347,7 +363,7 @@ export default function LoginPage() {
                       fill="#34A853"
                     />
                   </svg>
-                  <span>Google</span>
+                  <span>{isSubmitting ? "Connecting..." : "Google"}</span>
                 </motion.button>
                 <motion.button
                   whileHover={{

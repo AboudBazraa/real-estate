@@ -42,6 +42,7 @@ import {
   PopoverContent,
 } from "@/shared/components/ui/popover";
 import Map from "./components/map";
+import { ChatBot } from "./components/ChatBot";
 import type { MapProperty } from "./components/map";
 import { useProperties, PropertyFilters } from "@/shared/hooks/useProperties";
 import { PageTransition } from "@/shared/components/animation/PageTransition";
@@ -855,6 +856,9 @@ export default function SearchPage() {
             </div>
           )}
         </div> */}
+
+        {/* Add the ChatBot component */}
+        <ChatBot />
 
         <Toaster />
       </div>
