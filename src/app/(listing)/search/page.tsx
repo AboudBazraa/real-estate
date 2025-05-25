@@ -20,6 +20,7 @@ import {
   Building,
   Bookmark,
   ArrowUpRight,
+  Move,
 } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { Toaster } from "@/shared/components/ui/toaster";
@@ -41,11 +42,13 @@ import {
   PopoverTrigger,
   PopoverContent,
 } from "@/shared/components/ui/popover";
+import { motion, AnimatePresence } from "framer-motion";
 import Map from "./components/map";
 import { ChatBot } from "./components/ChatBot";
 import type { MapProperty } from "./components/map";
 import { useProperties, PropertyFilters } from "@/shared/hooks/useProperties";
 import { PageTransition } from "@/shared/components/animation/PageTransition";
+import { formatCurrency } from "@/shared/lib/utils";
 
 export default function SearchPage() {
   const router = useRouter();
@@ -123,6 +126,14 @@ export default function SearchPage() {
     null
   );
 
+  // Add ref for selected property card
+  const selectedPropertyRef = useRef<HTMLDivElement>(null);
+  // Add state for property detail view
+  const [showPropertyDetail, setShowPropertyDetail] = useState(false);
+  const [selectedPropertyId, setSelectedPropertyId] = useState<string | null>(
+    null
+  );
+
   // Load properties on mount and when filters change
   useEffect(() => {
     const sort = {
@@ -153,9 +164,23 @@ export default function SearchPage() {
     }
   }, [filters, sortBy, fetchProperties, initialLoad, router]);
 
-  // Handle property selection from map
+  // Handle property selection from map with enhanced UX
   const handlePropertySelect = (property: MapProperty | null) => {
     setSelectedProperty(property);
+    if (property) {
+      setSelectedPropertyId(property.id);
+    }
+  };
+
+  // Handle property click in list view
+  const handlePropertyClick = (propertyId: string) => {
+    setSelectedPropertyId(propertyId);
+    setShowPropertyDetail(true);
+
+    // After a short delay to show animation, navigate to the property page
+    setTimeout(() => {
+      router.push(`/search/${propertyId}`);
+    }, 400);
   };
 
   // Format price for display
@@ -240,7 +265,7 @@ export default function SearchPage() {
     <PageTransition>
       <div className="w-screen h-screen overflow-hidden bg-background text-foreground relative">
         {/* Search Bar */}
-        <div className="absolute top-2 sm:top-4 left-1/2 -translate-x-1/2 z-30 w-full max-w-3xl pr-6 pl-2 sm:pr-4 sm:pl-4">
+        <div className="absolute top-2 sm:top-4 left-1/2 -translate-x-1/2 z-30 w-full max-w-3xl px-2 sm:pr-10 sm:pl-4">
           <div className="bg-white/70 dark:bg-zinc-900/70 backdrop-blur-sm rounded-xl shadow-lg overflow-hidden">
             <div className="flex sm:flex-row flex-col flex-wrap items-center p-2 sm:p-1 gap-2">
               <div className="relative flex-1 w-full">
@@ -594,32 +619,63 @@ export default function SearchPage() {
               ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
                   {mapProperties.map((property, index) => (
-                    <div
+                    <motion.div
                       key={property.id}
-                      className="group relative bg-card rounded-xl overflow-hidden bg-white dark:bg-zinc-900 border border-border/10 dark:border-zinc-700 shadow hover:shadow-sm transition-all duration-500 transform hover:-translate-y-1 border-l-4"
+                      className={`group relative bg-card rounded-xl overflow-hidden bg-white dark:bg-zinc-900 border border-border/10 dark:border-zinc-700 shadow hover:shadow-md transition-all duration-300 transform hover:-translate-y-2 border-l-4 ${
+                        selectedPropertyId === property.id
+                          ? "ring-2 ring-primary ring-offset-2"
+                          : ""
+                      }`}
+                      ref={
+                        selectedPropertyId === property.id
+                          ? selectedPropertyRef
+                          : null
+                      }
                       style={{ animationDelay: `${index * 50}ms` }}
-                      onClick={() => router.push(`/search/${property.id}`)}
+                      onClick={() => handlePropertyClick(property.id)}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{
+                        duration: 0.4,
+                        delay: index * 0.05,
+                        ease: "easeOut",
+                      }}
+                      whileHover={{
+                        scale: 1.03,
+                        boxShadow: "0 10px 25px rgba(0, 0, 0, 0.1)",
+                      }}
+                      whileTap={{ scale: 0.98 }}
                     >
                       {/* Property image with gradient overlay */}
                       <div className="relative h-60 overflow-hidden">
-                        <img
+                        <motion.img
                           src={property.primaryImage}
                           alt={property.title}
-                          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
+                          className="w-full h-full object-cover"
+                          whileHover={{ scale: 1.15 }}
+                          transition={{ duration: 0.7 }}
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent opacity-70 group-hover:opacity-60 transition-opacity duration-300"></div>
 
                         {/* Price tag */}
-                        <div className="absolute top-4 right-4 bg-white dark:bg-zinc-800 shadow-lg rounded-lg px-3 py-1.5 text-sm font-semibold text-primary">
+                        <motion.div
+                          className="absolute top-4 right-4 bg-white dark:bg-zinc-800 shadow-lg rounded-lg px-3 py-1.5 text-sm font-semibold text-primary"
+                          whileHover={{ scale: 1.05 }}
+                        >
                           {formatPrice(property.price)}
                           <span className="text-xs font-normal text-muted-foreground">
                             /mo
                           </span>
-                        </div>
+                        </motion.div>
 
                         {/* Featured badge */}
                         {property.featured && (
-                          <div className="absolute top-4 left-4 bg-gradient-to-r from-primary to-primary/80 text-white shadow-md rounded-lg px-3 py-1 text-xs font-medium flex items-center gap-1">
+                          <motion.div
+                            className="absolute top-4 left-4 bg-gradient-to-r from-primary to-primary/80 text-white shadow-md rounded-lg px-3 py-1 text-xs font-medium flex items-center gap-1"
+                            initial={{ x: -20, opacity: 0 }}
+                            animate={{ x: 0, opacity: 1 }}
+                            transition={{ delay: 0.2 }}
+                          >
                             <svg
                               width="14"
                               height="14"
@@ -633,7 +689,7 @@ export default function SearchPage() {
                               <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
                             </svg>
                             Featured
-                          </div>
+                          </motion.div>
                         )}
 
                         {/* Property type badge */}
@@ -661,24 +717,33 @@ export default function SearchPage() {
 
                         {/* Property details */}
                         <div className="mt-4 grid grid-cols-3 gap-2">
-                          <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 group-hover:bg-primary/5 transition-colors duration-300 dark:bg-zinc-800 bg-slate-100">
+                          <motion.div
+                            className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 group-hover:bg-primary/5 transition-colors duration-300 dark:bg-zinc-800 bg-slate-100"
+                            whileHover={{ scale: 1.05 }}
+                          >
                             <Bed className="h-4 w-4 mb-1 text-primary/70" />
                             <span className="text-xs font-medium">
                               {property.bedrooms} Beds
                             </span>
-                          </div>
-                          <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 group-hover:bg-primary/5 transition-colors duration-300 dark:bg-zinc-800 bg-slate-100">
+                          </motion.div>
+                          <motion.div
+                            className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 group-hover:bg-primary/5 transition-colors duration-300 dark:bg-zinc-800 bg-slate-100"
+                            whileHover={{ scale: 1.05 }}
+                          >
                             <Bath className="h-4 w-4 mb-1 text-primary/70" />
                             <span className="text-xs font-medium">
                               {property.bathrooms} Baths
                             </span>
-                          </div>
-                          <div className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 group-hover:bg-primary/5 transition-colors duration-300 dark:bg-zinc-800 bg-slate-100">
+                          </motion.div>
+                          <motion.div
+                            className="flex flex-col items-center justify-center p-2 rounded-lg bg-muted/50 group-hover:bg-primary/5 transition-colors duration-300 dark:bg-zinc-800 bg-slate-100"
+                            whileHover={{ scale: 1.05 }}
+                          >
                             <Square className="h-4 w-4 mb-1 text-primary/70" />
                             <span className="text-xs font-medium">
                               {property.squareFeet} sqft
                             </span>
-                          </div>
+                          </motion.div>
                         </div>
 
                         {/* Call to action */}
@@ -690,19 +755,24 @@ export default function SearchPage() {
                           >
                             View Details
                           </Button>
-                          <Button
-                            size="icon"
-                            variant="outline"
-                            className="h-8 w-8 rounded-full hover:bg-primary/5 transition-colors duration-300"
+                          <motion.div
+                            whileHover={{ rotate: 45, scale: 1.1 }}
+                            transition={{ duration: 0.2 }}
                           >
-                            <ArrowUpRight className="h-4 w-4" />
-                          </Button>
+                            <Button
+                              size="icon"
+                              variant="outline"
+                              className="h-8 w-8 rounded-full hover:bg-primary/5 transition-colors duration-300"
+                            >
+                              <ArrowUpRight className="h-4 w-4" />
+                            </Button>
+                          </motion.div>
                         </div>
                       </div>
 
                       {/* Property accent line */}
                       <div className="absolute left-0 top-0 bottom-0 w-1 bg-primary opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               )}
@@ -712,150 +782,257 @@ export default function SearchPage() {
 
         {/* Property Info Overlay */}
         {isMapView && selectedProperty && (
-          <div className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-30 bg-white/95 dark:bg-zinc-900/90 backdrop-blur-sm pl-2 pr-2 py-2 border border-border/10 border-l-4 border-l-primary dark:border-l-primary rounded-xl shadow-lg max-w-lg w-fit sm:w-full dark:border-zinc-700">
-            <div className="flex flex-col sm:flex-row items-center gap-4">
-              <div className="flex-shrink-0 w-full sm:w-32 h-24 bg-muted rounded-lg relative overflow-hidden">
-                <img
-                  src={selectedProperty.primaryImage || "/placeholder.jpg"}
-                  alt={selectedProperty.title}
-                  className="object-cover w-full h-full"
-                />
-                {/* {selectedProperty.featured && (
-                <Badge className="absolute top-1 left-1 bg-yellow-500/90 text-white text-xs">
-                  Featured
-                </Badge>
-              )} */}
-              </div>
-              <div className="flex flex-row gap-4 flex-1">
-                <div className="flex-1 flex flex-col gap-1">
-                  <h3 className="font-medium">{selectedProperty.title}</h3>
-                  <p className="text-sm flex items-center text-muted-foreground gap-1">
-                    <MapPin className="h-3.5 w-3.5" />
-                    {selectedProperty.location}
-                  </p>
+          <AnimatePresence>
+            <motion.div
+              className="absolute bottom-6 sm:bottom-8 left-1/2 -translate-x-1/2 z-30 bg-white/95 dark:bg-zinc-900/90 backdrop-blur-sm pl-2 pr-2 py-2 border border-border/10 border-l-4 border-l-primary dark:border-l-primary rounded-xl shadow-lg max-w-lg w-fit sm:w-full dark:border-zinc-700"
+              initial={{ y: 50, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 50, opacity: 0 }}
+              transition={{ type: "spring", damping: 20, stiffness: 300 }}
+            >
+              <div className="flex flex-col sm:flex-row items-center gap-4">
+                <motion.div
+                  className="flex-shrink-0 w-full sm:w-32 h-24 bg-muted rounded-lg relative overflow-hidden"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ duration: 0.3 }}
+                >
+                  <motion.img
+                    src={selectedProperty.primaryImage || "/placeholder.jpg"}
+                    alt={selectedProperty.title}
+                    className="object-cover w-full h-full"
+                    initial={{ scale: 1 }}
+                    whileHover={{ scale: 1.15 }}
+                    transition={{ duration: 0.6 }}
+                  />
+                </motion.div>
+                <div className="flex flex-row gap-4 flex-1">
+                  <div className="flex-1 flex flex-col gap-1">
+                    <h3 className="font-medium">
+                      {selectedProperty.title.slice(0, 30)}...
+                    </h3>
+                    <motion.p
+                      className="text-sm flex items-center text-muted-foreground gap-1"
+                      initial={{ x: -5, opacity: 0 }}
+                      animate={{ x: 0, opacity: 1 }}
+                      transition={{ delay: 0.1 }}
+                    >
+                      <MapPin className="h-3.5 w-3.5" />
+                      {selectedProperty.location}
+                    </motion.p>
 
-                  <div className="flex gap-3 text-sm text-muted-foreground mt-1">
-                    <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
-                      <Bed className="h-3.5 w-3.5 mr-1" />
-                      {selectedProperty.bedrooms}
-                    </div>
-                    <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
-                      <Bath className="h-3.5 w-3.5 mr-1" />
-                      {selectedProperty.bathrooms}
-                    </div>
-                    <div className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800">
-                      <Square className="h-3.5 w-3.5 mr-1" />
-                      {selectedProperty.squareFeet}
+                    <div className="flex gap-3 text-sm text-muted-foreground mt-1">
+                      <motion.div
+                        className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800"
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                        whileHover={{ scale: 1.05 }}
+                      >
+                        <Bed className="h-3.5 w-3.5 mr-1" />
+                        {selectedProperty.bedrooms}
+                      </motion.div>
+                      <motion.div
+                        className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800"
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                        whileHover={{ scale: 1.05 }}
+                      >
+                        <Bath className="h-3.5 w-3.5 mr-1" />
+                        {selectedProperty.bathrooms}
+                      </motion.div>
+                      <motion.div
+                        className="flex items-center justify-center gap-1 bg-slate-100 rounded-lg px-2 py-1 dark:bg-zinc-800"
+                        initial={{ scale: 0.9, opacity: 0 }}
+                        animate={{ scale: 1, opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                        whileHover={{ scale: 1.05 }}
+                      >
+                        <Square className="h-3.5 w-3.5 mr-1" />
+                        {selectedProperty.squareFeet}
+                      </motion.div>
                     </div>
                   </div>
-                </div>
-                <div className="flex-1 flex flex-col gap-3 justify-center">
-                  <p className="text-primary font-semibold mt-1">
-                    {formatPrice(selectedProperty.price)}/mon
-                  </p>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() =>
-                      router.push(`/search/${selectedProperty.id}`)
-                    }
-                  >
-                    View Details
-                  </Button>
+                  <div className="flex-1 flex flex-col gap-3 justify-center">
+                    <motion.p
+                      className="text-primary font-semibold mt-1"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.5 }}
+                    >
+                      {formatCurrency(selectedProperty.price)}/&#65020;
+                    </motion.p>
+                    <motion.div
+                      initial={{ scale: 0.9, opacity: 0 }}
+                      animate={{ scale: 1, opacity: 1 }}
+                      transition={{ delay: 0.6 }}
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                    >
+                      <Button
+                        variant="default"
+                        size="sm"
+                        onClick={() =>
+                          router.push(`/search/${selectedProperty.id}`)
+                        }
+                        className="flex items-center gap-1.5"
+                      >
+                        View Details
+                        <ArrowUpRight className="h-3.5 w-3.5" />
+                      </Button>
+                    </motion.div>
+                  </div>
                 </div>
               </div>
-            </div>
-          </div>
+            </motion.div>
+          </AnimatePresence>
         )}
 
-        {/* Save Search Button */}
-        {/* {properties.length > 0 && (
-        <div className="absolute bottom-4 right-4 z-30">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="bg-white/90 dark:bg-zinc-800/90 backdrop-blur-sm rounded-full px-4"
-              >
-                <Bookmark
-                  className={`h-4 w-4 mr-2 ${
-                    searchSaved ? "fill-primary text-primary" : ""
-                  }`}
-                />
-                {searchSaved ? "Saved" : "Save Search"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-80 p-0" align="end">
-              <div className="p-4 border-b">
-                <h3 className="font-medium">Save this search</h3>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Get notified when new properties match your criteria
-                </p>
-              </div>
-              <div className="p-4 space-y-4">
-                <div className="space-y-2">
-                  <label className="text-sm font-medium">Search Name</label>
-                  <input
-                    type="text"
-                    placeholder="e.g., Homes in Sanaa"
-                    className="w-full h-9 px-3 rounded-md border border-input bg-transparent"
-                    value={searchName}
-                    onChange={(e) => setSearchName(e.target.value)}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-medium flex items-center justify-between">
-                    <span>Email Notifications</span>
-                    <Switch
-                      checked={emailNotifications}
-                      onCheckedChange={setEmailNotifications}
-                    />
-                  </label>
-                  <p className="text-xs text-muted-foreground">
-                    Receive email alerts for new properties
-                  </p>
-                </div>
-                <Button
-                  className="w-full"
-                  onClick={() => {
-                    setSearchSaved(true);
-                    toast({
-                      title: "Search saved",
-                      description:
-                        "You'll be notified when new properties match your criteria",
-                    });
-                  }}
-                >
-                  Save Search
-                </Button>
-              </div>
-            </PopoverContent>
-          </Popover>
-        </div>
-      )} */}
+        {/* Property Zoom View Overlay */}
+        <AnimatePresence>
+          {showPropertyDetail && selectedPropertyId && (
+            <motion.div
+              className="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowPropertyDetail(false)}
+            >
+              {mapProperties
+                .filter((p) => p.id === selectedPropertyId)
+                .map((property) => (
+                  <motion.div
+                    key={property.id}
+                    className="bg-white dark:bg-zinc-900 rounded-xl overflow-hidden max-w-2xl w-full shadow-2xl"
+                    initial={{ scale: 0.9, y: 20, opacity: 0 }}
+                    animate={{ scale: 1, y: 0, opacity: 1 }}
+                    exit={{ scale: 0.9, y: 20, opacity: 0 }}
+                    transition={{ type: "spring", damping: 25, stiffness: 300 }}
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="relative h-60 sm:h-80 overflow-hidden">
+                      <motion.img
+                        src={property.primaryImage}
+                        alt={property.title}
+                        className="w-full h-full object-cover"
+                        initial={{ scale: 1.2 }}
+                        animate={{ scale: 1 }}
+                        transition={{ duration: 0.7 }}
+                      />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
 
+                      <motion.div
+                        className="absolute top-4 right-4"
+                        initial={{ y: -10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.2 }}
+                      >
+                        <Button
+                          size="icon"
+                          variant="outline"
+                          className="h-8 w-8 rounded-full bg-white/20 backdrop-blur-sm text-white border-white/20"
+                          onClick={() => setShowPropertyDetail(false)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </motion.div>
+
+                      <motion.div
+                        className="absolute bottom-4 left-4 right-4"
+                        initial={{ y: 10, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.3 }}
+                      >
+                        <h2 className="text-2xl font-bold text-white">
+                          {property.title}
+                        </h2>
+                        <p className="text-white/80 flex items-center mt-2">
+                          <MapPin className="h-4 w-4 mr-2" />
+                          {property.location}
+                        </p>
+                      </motion.div>
+                    </div>
+
+                    <div className="p-6">
+                      <motion.div
+                        className="flex justify-between items-center mb-4"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.4 }}
+                      >
+                        <div className="text-xl font-bold text-primary">
+                          {formatPrice(property.price)}
+                          <span className="text-sm font-normal text-muted-foreground">
+                            /month
+                          </span>
+                        </div>
+                        <Badge className="capitalize bg-primary/10 text-primary border-0 px-3 py-1">
+                          {property.propertyType}
+                        </Badge>
+                      </motion.div>
+
+                      <motion.div
+                        className="grid grid-cols-3 gap-3 mb-6"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.5 }}
+                      >
+                        <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-muted/50">
+                          <Bed className="h-5 w-5 mb-1 text-primary" />
+                          <span className="text-sm font-medium">
+                            {property.bedrooms} Bedrooms
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-muted/50">
+                          <Bath className="h-5 w-5 mb-1 text-primary" />
+                          <span className="text-sm font-medium">
+                            {property.bathrooms} Bathrooms
+                          </span>
+                        </div>
+                        <div className="flex flex-col items-center justify-center p-3 rounded-lg bg-muted/50">
+                          <Square className="h-5 w-5 mb-1 text-primary" />
+                          <span className="text-sm font-medium">
+                            {property.squareFeet} sq ft
+                          </span>
+                        </div>
+                      </motion.div>
+
+                      <motion.p
+                        className="text-sm text-muted-foreground mb-6"
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.6 }}
+                      >
+                        {property.description}
+                      </motion.p>
+
+                      <motion.div
+                        initial={{ y: 20, opacity: 0 }}
+                        animate={{ y: 0, opacity: 1 }}
+                        transition={{ delay: 0.7 }}
+                      >
+                        <Button
+                          className="w-full"
+                          onClick={() => router.push(`/search/${property.id}`)}
+                        >
+                          View Full Details
+                          <Move className="ml-2 h-4 w-4" />
+                        </Button>
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                ))}
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Error display */}
         {error && (
           <div className="absolute top-1/2 -translate-y-1/2 left-1/2 -translate-x-1/2 z-30 bg-destructive/95 text-destructive-foreground backdrop-blur-sm p-4 rounded-lg shadow-lg max-w-md">
             <p className="font-medium mb-2">Error loading properties</p>
             <p className="text-sm">{error}</p>
           </div>
         )}
-
-        {/* Property count indicator */}
-        {/* <div className="hidden sm:block absolute top-4.5 left-4 z-30 bg-white/70 dark:bg-black/70 backdrop-blur-sm px-3 py-2 rounded-xl text-sm font-medium shadow-sm">
-          {loading ? (
-            <div className="flex items-center gap-2">
-              <Loader2 className="h-3.5 w-3.5 animate-spin" />
-              Loading properties...
-            </div>
-          ) : (
-            <div className="flex flex-row items-center justify-center gap-2">
-              <Home className="h-4 w-4" />
-              {properties.length} Properties found
-            </div>
-          )}
-        </div> */}
 
         {/* Add the ChatBot component */}
         <ChatBot />

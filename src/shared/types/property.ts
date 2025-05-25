@@ -157,3 +157,11 @@ export interface PropertyFavorite {
   user_id: string;
   created_at: string;
 }
+
+type PropertyWithAgent = Property & {
+  agent?: {
+    id: string;
+    email: string;
+    phone_number: string;
+  };
+};

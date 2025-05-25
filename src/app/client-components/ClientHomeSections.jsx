@@ -7,6 +7,7 @@ import { ScrollTrigger } from "gsap/ScrollTrigger";
 import BlurText from "@/shared/components/animation/BlurText";
 import { ArrowRight } from "lucide-react";
 import SubscriptionSection from "./SubscriptionSection";
+// import ddd from "./public/images/images/ddd.jpg";
 
 // Register GSAP plugins
 if (typeof window !== "undefined") {
@@ -376,7 +377,7 @@ export default function ClientHomeSections() {
             {/* Left image - 5 columns */}
             <div className="lg:col-span-4 overflow-hidden rounded-sm">
               <motion.img
-                src="https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2069&auto=format"
+                src="https://images.unsplash.com/photo-1600566752355-35792bedcfea?q=80&w=2069&auto=format"
                 alt="Elegant Bedroom"
                 className="w-full aspect-[4/3] object-cover rounded-2xl"
                 initial={{ scale: 1 }}

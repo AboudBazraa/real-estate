@@ -15,7 +15,7 @@ const supabase = createClient(
 );
 
 // Default model to use if not specified
-const DEFAULT_MODEL = "mistralai/mistral-7b-instruct:free";
+const DEFAULT_MODEL = "deepseek/deepseek-chat-v3-0324:free";
 
 export async function POST(request: NextRequest) {
   try {

@@ -69,9 +69,9 @@ const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Available models
 const MODELS = [
+  { id: "deepseek/deepseek-chat-v3-0324:free", name: "DeepSeek" },
   { id: "mistralai/mistral-7b-instruct:free", name: "Mistral 7B" },
   { id: "google/gemini-2.0-flash-exp:free", name: "Gemini 2.0 Flash" },
-  { id: "deepseek/deepseek-chat-v3-0324:free", name: "DeepSeek" },
   { id: "meta-llama/llama-4-scout:free", name: "Llama 4 Scout" },
 ];
 
@@ -954,8 +954,7 @@ ${content.split(".").slice(2).join(".")}`;
                 </SheetTitle>
               </div>
               <div className="flex items-center gap-2 mr-6">
-                {/* Map button without tooltip to prevent infinite update loops */}
-                <Button
+                {/* <Button
                   variant="outline"
                   size="icon"
                   className="h-9 w-9 rounded-full"
@@ -963,9 +962,9 @@ ${content.split(".").slice(2).join(".")}`;
                   aria-label="View properties on map"
                 >
                   <MapIcon className="h-4 w-4" />
-                </Button>
+                </Button> */}
 
-                <Select value={selectedModel} onValueChange={setSelectedModel}>
+                {/* <Select value={selectedModel} onValueChange={setSelectedModel}>
                   <SelectTrigger className="w-[160px] h-9 text-xs bg-background/80 border-muted-foreground/20">
                     <SelectValue placeholder="Select a model" />
                   </SelectTrigger>
@@ -979,7 +978,7 @@ ${content.split(".").slice(2).join(".")}`;
                       ))}
                     </SelectGroup>
                   </SelectContent>
-                </Select>
+                </Select> */}
               </div>
             </div>
           </SheetHeader>
@@ -1146,7 +1145,7 @@ ${content.split(".").slice(2).join(".")}`;
               <Button
                 size="icon"
                 variant="default"
-                className="rounded-2xl h-10 w-10 flex-shrink-0 shadow-md absolute right-0 top-1/2 -translate-y-1/2 mr-1"
+                className="rounded-xl h-10 w-10 flex-shrink-0 shadow-md absolute right-0 top-1/2 -translate-y-1/2 mr-1"
                 onClick={handleSendMessage}
                 disabled={loadingState !== "idle" || !input.trim()}
                 aria-label="Send message"

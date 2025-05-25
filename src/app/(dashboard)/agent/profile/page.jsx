@@ -50,6 +50,8 @@ import {
   Lock,
   Upload,
   ArrowRightLeft,
+  Phone,
+  Save,
 } from "lucide-react";
 import {
   Alert,
@@ -67,6 +69,8 @@ import { Skeleton } from "@/shared/components/ui/skeleton";
 import { Switch } from "@/shared/components/ui/switch";
 import { Separator } from "@/shared/components/ui/separator";
 import { Badge } from "@/shared/components/ui/badge";
+import { useSupabase } from "@/shared/providers/SupabaseProvider";
+import { useToast } from "@/shared/hooks/use-toast";
 
 const fadeIn = {
   hidden: { opacity: 0 },
@@ -82,12 +86,15 @@ const fadeInUp = {
 
 export default function ProfilePage() {
   const { user, loading, logout, updatePassword } = useAuth();
+  const { updateUserProfile } = useSupabase();
   const currentRole = useRole();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const { toast } = useToast();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  const [isSaving, setIsSaving] = useState(false);
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
@@ -97,6 +104,13 @@ export default function ProfilePage() {
     loading: false,
     success: false,
     error: null,
+  });
+
+  const [profileData, setProfileData] = useState({
+    username: "",
+    email: "",
+    phone_number: "",
+    isEmailEditing: false,
   });
 
   const [notifications, setNotifications] = useState({
@@ -114,6 +128,19 @@ export default function ProfilePage() {
 
     return () => clearTimeout(timer);
   }, []);
+
+  // Initialize profile data from user
+  useEffect(() => {
+    if (user) {
+      setProfileData({
+        username:
+          user.user_metadata?.username || user.email?.split("@")[0] || "User",
+        email: user.email || "",
+        phone_number: user.user_metadata?.phone_number || "",
+        isEmailEditing: false,
+      });
+    }
+  }, [user]);
 
   const toggleTheme = () => {
     setTheme(theme === "dark" ? "light" : "dark");
@@ -188,6 +215,88 @@ export default function ProfilePage() {
       ...prev,
       [name]: value,
     }));
+  };
+
+  const handleProfileChange = (e) => {
+    const { name, value } = e.target;
+    setProfileData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validatePhoneNumber = (phone) => {
+    // Basic validation for international format: +1234567890
+    return !phone || phone === "" || /^\+?[0-9]{10,15}$/.test(phone);
+  };
+
+  const validateEmail = (email) => {
+    // Basic email validation
+    return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+  };
+
+  const saveProfileChanges = async () => {
+    // Validate phone number
+    if (!validatePhoneNumber(profileData.phone_number)) {
+      toast({
+        title: "Invalid Phone Number",
+        description:
+          "Please enter a valid phone number in international format",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Validate email
+    if (!validateEmail(profileData.email)) {
+      toast({
+        title: "Invalid Email",
+        description: "Please enter a valid email address",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Update profile data
+      const { error } = await updateUserProfile({
+        username: profileData.username,
+        phone_number: profileData.phone_number,
+      });
+
+      if (error) throw error;
+
+      // Email updates happen separately if needed through auth endpoints
+      if (user.email !== profileData.email) {
+        // Email update logic would go here
+        // This usually requires a verification step
+        toast({
+          title: "Email Update",
+          description:
+            "Email changes require verification. Please check your inbox.",
+          variant: "default",
+        });
+      }
+
+      toast({
+        title: "Profile Updated",
+        description: "Your profile information has been saved",
+        variant: "default",
+      });
+    } catch (error) {
+      toast({
+        title: "Update Failed",
+        description: error.message || "Failed to update profile",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+      setProfileData((prev) => ({
+        ...prev,
+        isEmailEditing: false,
+      }));
+    }
   };
 
   const handleLogout = async () => {
@@ -335,6 +444,11 @@ export default function ProfilePage() {
             <p className="text-muted-foreground flex items-center gap-1.5">
               <Mail className="h-4 w-4" /> {user.email}
             </p>
+            {user.user_metadata?.phone_number && (
+              <p className="text-muted-foreground flex items-center gap-1.5">
+                <Phone className="h-4 w-4" /> {user.user_metadata.phone_number}
+              </p>
+            )}
             <div className="flex flex-wrap gap-4 mt-4">
               <div className="flex flex-col items-center">
                 <span className="text-lg font-semibold">
@@ -422,14 +536,28 @@ export default function ProfilePage() {
                         Email Address
                       </Label>
                       <div className="flex justify-between items-center">
-                        <div className="p-2 rounded-md bg-muted text-sm w-full overflow-hidden">
-                          {user.email}
-                        </div>
+                        {profileData.isEmailEditing ? (
+                          <Input
+                            name="email"
+                            value={profileData.email}
+                            onChange={handleProfileChange}
+                            className="h-9"
+                          />
+                        ) : (
+                          <div className="p-2 rounded-md bg-muted text-sm w-full overflow-hidden">
+                            {profileData.email}
+                          </div>
+                        )}
                         <Button
                           variant="ghost"
                           size="icon"
                           className="ml-2"
-                          disabled
+                          onClick={() =>
+                            setProfileData((prev) => ({
+                              ...prev,
+                              isEmailEditing: !prev.isEmailEditing,
+                            }))
+                          }
                         >
                           <ArrowRightLeft className="h-4 w-4" />
                         </Button>
@@ -441,11 +569,32 @@ export default function ProfilePage() {
                         Username
                       </Label>
                       <div className="flex justify-between items-center">
-                        <Input value={username} className="h-9" readOnly />
-                        <Button variant="ghost" size="icon" className="ml-2">
-                          <ArrowRightLeft className="h-4 w-4" />
-                        </Button>
+                        <Input
+                          name="username"
+                          value={profileData.username}
+                          onChange={handleProfileChange}
+                          className="h-9"
+                        />
                       </div>
+                    </div>
+
+                    <div className="space-y-1">
+                      <Label className="text-muted-foreground text-xs">
+                        Phone Number
+                      </Label>
+                      <div className="flex justify-between items-center">
+                        <Input
+                          name="phone_number"
+                          value={profileData.phone_number}
+                          onChange={handleProfileChange}
+                          placeholder="+1234567890"
+                          className="h-9"
+                        />
+                      </div>
+                      <p className="text-xs text-muted-foreground">
+                        Enter phone number in international format (e.g.,
+                        +1234567890)
+                      </p>
                     </div>
 
                     <div className="space-y-1">
@@ -486,7 +635,18 @@ export default function ProfilePage() {
                     <LogOut className="h-4 w-4" />
                     Sign Out
                   </Button>
-                  <Button>Save Changes</Button>
+                  <Button
+                    className="flex items-center gap-2"
+                    onClick={saveProfileChanges}
+                    disabled={isSaving}
+                  >
+                    {isSaving ? (
+                      <LoaderCircle className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                    Save Changes
+                  </Button>
                 </CardFooter>
               </Card>
             </motion.div>

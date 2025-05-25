@@ -32,6 +32,8 @@ import {
   ZoomIn,
   ZoomOut,
   Loader2,
+  MessageSquare,
+  X,
 } from "lucide-react";
 import Image from "next/image";
 import "leaflet/dist/leaflet.css";
@@ -42,6 +44,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/shared/components/ui/tooltip";
+import { ChatBot } from "../components/ChatBot";
 
 // Yemen's coordinates
 const YEMEN_CENTER: [number, number] = [15.5527, 48.5164];
