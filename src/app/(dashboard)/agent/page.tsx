@@ -26,6 +26,8 @@ import {
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Components
 import { Button } from "@/shared/components/ui/button";
@@ -317,6 +319,173 @@ export default function AgentDashboard() {
     );
   }
 
+  // PDF print handler for agent dashboard
+  const handlePrintPDF = () => {
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "pt",
+      format: "a4",
+    });
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let yPos = 50;
+
+    // Title and header
+    doc.setFontSize(24);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Agent Dashboard Report", 40, yPos);
+    yPos += 25;
+
+    doc.setFontSize(12);
+    doc.setTextColor(100, 100, 100);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 40, yPos);
+    yPos += 30;
+
+    if (user && user.email) {
+      doc.setFontSize(14);
+      doc.setTextColor(60, 60, 60);
+      doc.text(`Agent: ${user.email}`, 40, yPos);
+      yPos += 30;
+    }
+
+    // Executive summary
+    doc.setFontSize(16);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Portfolio Overview", 40, yPos);
+    yPos += 20;
+
+    doc.setFontSize(11);
+    doc.setTextColor(60, 60, 60);
+    const summary = `This report summarizes your real estate portfolio and activity metrics. 
+    You currently manage ${stats.totalProperties} properties, with ${stats.availableProperties} available for sale or rent.
+    You have ${stats.scheduledViewings} upcoming property viewings and ${stats.newInquiries} new inquiries.`;
+
+    const splitSummary = doc.splitTextToSize(summary, pageWidth - 80);
+    doc.text(splitSummary, 40, yPos);
+    yPos += splitSummary.length * 15 + 20;
+
+    // Key metrics table
+    doc.setFontSize(16);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Key Performance Metrics", 40, yPos);
+    yPos += 20;
+
+    autoTable(doc, {
+      head: [["Metric", "Value", "Performance"]],
+      body: [
+        ["Total Properties", stats.totalProperties.toString(), ""],
+        [
+          "Available Properties",
+          stats.availableProperties.toString(),
+          `${stats.availablePercentage}% growth`,
+        ],
+        ["Scheduled Viewings", stats.scheduledViewings.toString(), ""],
+        ["New Inquiries", stats.newInquiries.toString(), ""],
+      ],
+      startY: yPos,
+      theme: "grid",
+      headStyles: { fillColor: [99, 102, 241], textColor: 255 },
+      styles: { fontSize: 11 },
+    });
+    // @ts-ignore: lastAutoTable property comes from jspdf-autotable plugin
+    yPos = (doc.lastAutoTable?.finalY || yPos) + 30;
+
+    // Recent properties
+    if (stats.recentProperties && stats.recentProperties.length > 0) {
+      doc.setFontSize(16);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Recent Property Listings", 40, yPos);
+      yPos += 20;
+
+      const propertyData = stats.recentProperties.map((property) => [
+        property.title || "Untitled Property",
+        property.type || "-",
+        property.location?.city || "-",
+        formatCurrency(property.price || 0),
+        property.featured ? "Featured" : "Pending",
+      ]);
+
+      autoTable(doc, {
+        head: [["Property Name", "Type", "Location", "Price", "Status"]],
+        body: propertyData,
+        startY: yPos,
+        theme: "striped",
+        headStyles: { fillColor: [59, 130, 246], textColor: 255 },
+        styles: { fontSize: 11 },
+      });
+      // @ts-ignore: lastAutoTable property comes from jspdf-autotable plugin
+      yPos = (doc.lastAutoTable?.finalY || yPos) + 30;
+    }
+
+    // Add new page for appointments
+    if (stats.upcomingAppointments && stats.upcomingAppointments.length > 0) {
+      doc.addPage();
+      yPos = 50;
+
+      doc.setFontSize(16);
+      doc.setTextColor(40, 40, 40);
+      doc.text("Upcoming Appointments", 40, yPos);
+      yPos += 20;
+
+      const appointmentData = stats.upcomingAppointments.map((apt) => [
+        apt.client?.name || "Client",
+        apt.property?.title || "Property",
+        formatDate(apt.date) || "-",
+        apt.status || "Scheduled",
+      ]);
+
+      autoTable(doc, {
+        head: [["Client", "Property", "Date", "Status"]],
+        body: appointmentData,
+        startY: yPos,
+        theme: "grid",
+        headStyles: { fillColor: [79, 70, 229], textColor: 255 },
+        styles: { fontSize: 11 },
+      });
+      // @ts-ignore: lastAutoTable property comes from jspdf-autotable plugin
+      yPos = (doc.lastAutoTable?.finalY || yPos) + 20;
+    }
+
+    // Analytics overview
+    doc.setFontSize(16);
+    doc.setTextColor(40, 40, 40);
+    doc.text("Analytics Overview", 40, yPos);
+    yPos += 20;
+
+    autoTable(doc, {
+      head: [["Metric", "Value", "Change", "Trend"]],
+      body: [
+        ["Property Views", "127", "+12%", "Positive"],
+        ["Inquiries", "5", "+3%", "Positive"],
+        ["Listing Clicks", "68", "-5%", "Needs attention"],
+      ],
+      startY: yPos,
+      theme: "striped",
+      headStyles: { fillColor: [16, 185, 129], textColor: 255 },
+      styles: { fontSize: 11 },
+    });
+
+    // Footer with page numbers
+    // Get the number of pages (handle TypeScript error with type assertion)
+    const pageCount = (doc as any).internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      doc.setFontSize(10);
+      doc.setTextColor(150, 150, 150);
+      doc.text(
+        `Page ${i} of ${pageCount}`,
+        pageWidth - 100,
+        doc.internal.pageSize.getHeight() - 30
+      );
+      doc.text(
+        "Agent Dashboard Report - Confidential",
+        40,
+        doc.internal.pageSize.getHeight() - 30
+      );
+    }
+
+    doc.save("agent-dashboard-report.pdf");
+  };
+
   return (
     <div className={`h-full flex-1 space-y-8 p-4 ${isRTL ? "rtl" : ""}`}>
       {/* Dashboard Header */}
@@ -328,6 +497,28 @@ export default function AgentDashboard() {
           </p>
         </div>
         <div className="flex items-center space-x-2">
+          <Button
+            variant="outline"
+            onClick={handlePrintPDF}
+            className="flex items-center gap-2"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M6 9V2h12v7"></path>
+              <path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path>
+              <path d="M6 14h12v8H6z"></path>
+            </svg>
+            {t.generateReport || "Generate Report"}
+          </Button>
           <Button asChild>
             <Link href="/agent/addNewProp">
               <Plus className={`${isRTL ? "ml-2" : "mr-2"} h-4 w-4`} />{" "}
