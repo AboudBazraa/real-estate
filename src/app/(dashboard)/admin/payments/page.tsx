@@ -1060,7 +1060,10 @@ export default function PaymentsPage() {
                       className="pl-7"
                       value={newPayment.amount}
                       onChange={(e) =>
-                        setNewPayment({ ...newPayment, amount: e.target.value })
+                        setNewPayment({
+                          ...newPayment,
+                          amount: parseFloat(e.target.value) || 0,
+                        })
                       }
                       step="0.01"
                       min="0"
@@ -1100,9 +1103,9 @@ export default function PaymentsPage() {
                 <div className="col-span-3">
                   <Select
                     value={newPayment.type}
-                    onValueChange={(value) =>
-                      setNewPayment({ ...newPayment, type: value })
-                    }
+                    onValueChange={(
+                      value: "subscription" | "listing" | "commission"
+                    ) => setNewPayment({ ...newPayment, type: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select type" />
@@ -1126,9 +1129,9 @@ export default function PaymentsPage() {
                 <div className="col-span-3">
                   <Select
                     value={newPayment.status}
-                    onValueChange={(value) =>
-                      setNewPayment({ ...newPayment, status: value })
-                    }
+                    onValueChange={(
+                      value: "paid" | "pending" | "failed" | "refunded"
+                    ) => setNewPayment({ ...newPayment, status: value })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select status" />
