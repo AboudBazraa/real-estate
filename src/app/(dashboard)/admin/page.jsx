@@ -10,6 +10,8 @@ import { Loader2, RefreshCw } from "lucide-react";
 import { motion } from "framer-motion";
 import { Button } from "@/shared/components/ui/button";
 import { useToast } from "@/shared/hooks/use-toast";
+import jsPDF from "jspdf";
+import autoTable from "jspdf-autotable";
 
 // Animation variants
 const container = {
@@ -128,6 +130,33 @@ function AdminPage() {
     }
   };
 
+  // PDF print handler (text-based, not screenshot)
+  const handlePrintPDF = () => {
+    const doc = new jsPDF({
+      orientation: "landscape",
+      unit: "pt",
+      format: "a4",
+    });
+    doc.setFontSize(22);
+    doc.text("Dashboard Report", 40, 50);
+    doc.setFontSize(14);
+    doc.text(`Generated: ${new Date().toLocaleString()}`, 40, 70);
+
+    // Table of metrics
+    autoTable(doc, {
+      head: [["Metric", "Value", "Change"]],
+      body: metricsData.map((data) => [data.title, data.value, data.change]),
+      startY: 90,
+      theme: "grid",
+      headStyles: { fillColor: [99, 102, 241] },
+      styles: { fontSize: 12 },
+    });
+
+    // Add more sections as needed (e.g., analytics, charts as images, etc.)
+
+    doc.save("dashboard-report.pdf");
+  };
+
   const metricsData = [
     {
       title: "Total Properties",
@@ -159,69 +188,71 @@ function AdminPage() {
 
   return (
     <div className="p-4 pb-8 w-full mx-auto">
-      <motion.div
-        initial={{ opacity: 0, y: -10 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="flex justify-between items-center mb-6"
-      >
+      <div className="flex justify-between items-center mb-6">
         <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
-        <Button
-          variant="outline"
-          onClick={handleRefresh}
-          disabled={isLoading || isRefreshing}
-          className="flex items-center gap-2"
-        >
-          <RefreshCw
-            className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
-          />
-          {isRefreshing ? "Refreshing..." : "Refresh Data"}
-        </Button>
-      </motion.div>
-
-      {isLoading ? (
-        <div className="flex justify-center items-center h-60 bg-muted/20 rounded-xl">
-          <div className="flex flex-col items-center">
-            <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
-            <p className="text-muted-foreground">Loading dashboard data...</p>
-          </div>
-        </div>
-      ) : (
-        <motion.div variants={container} initial="hidden" animate="show">
-          <motion.div
-            variants={container}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={handlePrintPDF}
+            className="flex items-center gap-2"
           >
-            {metricsData.map((data) => (
-              <motion.div key={data.title} variants={item} className="w-full">
-                <CardDashboard
-                  title={data.title}
-                  icon={data.icon}
-                  value={data.value}
-                  change={data.change}
-                />
-              </motion.div>
-            ))}
-          </motion.div>
-
-          <motion.div variants={item} className="mt-8 mb-6">
-            <h3 className="text-xl font-semibold mb-4">Property Analytics</h3>
-            <TableDemo />
-          </motion.div>
-
-          <motion.div variants={item} className=" mt-8">
-            {/* <div className="bg-card rounded-xl p-6 shadow-sm border">
-                <h3 className="text-lg font-semibold mb-4">Monthly Listings</h3>
-                <ChartOne />
-              </div> */}
-            <div className="bg-card rounded-xl p-6 shadow-sm border dark:border-gray-700 border-gray-300">
-              <h3 className="text-lg font-semibold mb-4">
-                Property Categories
-              </h3>
-              <ChartTwo />
+            Print PDF
+          </Button>
+          <Button
+            variant="outline"
+            onClick={handleRefresh}
+            disabled={isLoading || isRefreshing}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw
+              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+            />
+            {isRefreshing ? "Refreshing..." : "Refresh Data"}
+          </Button>
+        </div>
+      </div>
+      <div id="dashboard-report-section">
+        {isLoading ? (
+          <div className="flex justify-center items-center h-60 bg-muted/20 rounded-xl">
+            <div className="flex flex-col items-center">
+              <Loader2 className="h-8 w-8 animate-spin text-primary mb-2" />
+              <p className="text-muted-foreground">Loading dashboard data...</p>
             </div>
+          </div>
+        ) : (
+          <motion.div variants={container} initial="hidden" animate="show">
+            <motion.div
+              variants={container}
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+            >
+              {metricsData.map((data) => (
+                <motion.div key={data.title} variants={item} className="w-full">
+                  <CardDashboard
+                    title={data.title}
+                    icon={data.icon}
+                    value={data.value}
+                    change={data.change}
+                  />
+                </motion.div>
+              ))}
+            </motion.div>
+
+            <motion.div variants={item} className="mt-8 mb-6">
+              <h3 className="text-xl font-semibold mb-4">Property Analytics</h3>
+              <TableDemo />
+            </motion.div>
+
+            <motion.div variants={item} className=" mt-8">
+              <div className="bg-card rounded-xl p-6 shadow-sm border dark:border-gray-700 border-gray-300">
+                <h3 className="text-lg font-semibold mb-4">
+                  Property Categories
+                </h3>
+                <ChartTwo />
+              </div>
+            </motion.div>
           </motion.div>
-        </motion.div>
-      )}
+        )}
+      </div>
     </div>
   );
 }
