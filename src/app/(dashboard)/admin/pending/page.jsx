@@ -24,6 +24,7 @@ import {
   LayoutList,
   BedDouble,
   Bath,
+  RefreshCcw,
 } from "lucide-react";
 import { useProperties } from "@/shared/hooks/useProperties";
 import { useToast } from "@/shared/hooks/use-toast";
@@ -42,6 +43,9 @@ import {
 import { ScrollArea } from "@/shared/components/ui/scroll-area";
 import { motion } from "framer-motion";
 import Image from "next/image";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+import pendingTranslations from "./translations";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 
 const PLACEHOLDER_IMAGE =
   "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNkYAAAAAYAAjCB0C8AAAAASUVORK5CYII=";
@@ -85,6 +89,10 @@ export default function PendingApprovalsPage() {
   const [loading, setLoading] = useState(true);
   const [selectedProperty, setSelectedProperty] = useState(null);
   const [debugImageUrls, setDebugImageUrls] = useState(false);
+
+  // Add these lines for translation support
+  const { currentLanguage, isRTL } = useTranslation();
+  const t = pendingTranslations[currentLanguage] || pendingTranslations.en;
 
   useEffect(() => {
     // Define the filters to get only non-featured properties
@@ -244,515 +252,463 @@ export default function PendingApprovalsPage() {
   }
 
   return (
-    <div className="space-y-8">
-      <div className="flex items-center justify-between">
+    <div className={`p-6 ${isRTL ? "rtl" : ""}`}>
+      <div
+        className={`flex items-center justify-between mb-6 ${
+          isRTL ? "rtl-flex-row-reverse" : ""
+        }`}
+      >
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Pending Approvals
-          </h1>
-          <p className="text-muted-foreground mt-1">
-            Review and approve property listings
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          {process.env.NODE_ENV === "development" && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setDebugImageUrls(!debugImageUrls)}
-              className="text-xs"
-            >
-              {debugImageUrls ? "Disable" : "Enable"} Image Debug
-            </Button>
+          <h1 className="text-2xl font-bold">{t.pendingApprovals}</h1>
+          <p className="text-muted-foreground">{t.waitingApproval}</p>
+          {!loading && (
+            <p className="text-sm text-muted-foreground mt-1">
+              {pendingCount > 0
+                ? t.propertiesFound.replace("{{count}}", pendingCount)
+                : t.noProperties}
+            </p>
           )}
-          <Badge
-            variant="destructive"
-            className="text-base px-4 py-1.5 rounded-full"
+        </div>
+        <div className="flex items-center gap-2">
+          <LanguageSwitcher />
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              setPendingProperties([]);
+              setSelectedProperty(null);
+              fetchProperties(
+                0,
+                100,
+                { featured: false },
+                undefined,
+                false,
+                false
+              );
+            }}
+            disabled={loading}
+            className={isRTL ? "rtl-flex-row-reverse" : ""}
           >
             {loading ? (
-              <Loader2 className="h-4 w-4 animate-spin mr-2" />
+              <Loader2
+                className={`h-4 w-4 animate-spin ${isRTL ? "ml-2" : "mr-2"}`}
+              />
             ) : (
-              `${pendingCount} Pending`
+              <RefreshCcw className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
             )}
-          </Badge>
+            {t.refresh}
+          </Button>
         </div>
       </div>
 
       {loading ? (
-        <div className="flex justify-center items-center min-h-[400px]">
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="text-center"
-          >
-            <Loader2 className="h-12 w-12 animate-spin mx-auto mb-4 text-primary" />
-            <p className="text-muted-foreground font-medium">
-              Loading pending properties...
-            </p>
-          </motion.div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="md:col-span-1">
+            <Card className="h-[calc(100vh-180px)]">
+              <CardHeader>
+                <Skeleton className="h-6 w-32" />
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  {Array(5)
+                    .fill(0)
+                    .map((_, i) => (
+                      <div key={i} className="flex items-center space-x-4">
+                        <Skeleton className="h-12 w-12 rounded-md" />
+                        <div className="space-y-2">
+                          <Skeleton className="h-4 w-[200px]" />
+                          <Skeleton className="h-4 w-[150px]" />
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+          <div className="md:col-span-2">
+            <Card className="h-[calc(100vh-180px)]">
+              <CardHeader>
+                <Skeleton className="h-6 w-40" />
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-4">
+                  <Skeleton className="h-[250px] w-full rounded-md" />
+                  <div className="space-y-2">
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-full" />
+                    <Skeleton className="h-4 w-2/3" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    <Skeleton className="h-10 w-full" />
+                    <Skeleton className="h-10 w-full" />
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
         </div>
-      ) : pendingProperties.length === 0 ? (
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center py-20 bg-gradient-to-b from-muted/10 to-muted/30 rounded-xl border border-dashed"
-        >
-          <Home className="h-16 w-16 mx-auto text-muted-foreground/60 mb-6" />
-          <h3 className="text-2xl font-medium mb-3">No pending properties</h3>
-          <p className="text-muted-foreground max-w-md mx-auto">
-            All properties have been reviewed. Check back later for new
-            submissions.
-          </p>
-        </motion.div>
-      ) : (
-        <Tabs defaultValue="grid" className="space-y-6">
-          <div className="flex items-center justify-between">
-            <TabsList className="p-1">
-              <TabsTrigger
-                value="grid"
-                className="flex items-center gap-2 px-4"
-              >
-                <Grid className="h-4 w-4" />
-                Grid View
-              </TabsTrigger>
-              <TabsTrigger
-                value="detail"
-                className="flex items-center gap-2 px-4"
-              >
-                <LayoutList className="h-4 w-4" />
-                Detail View
-              </TabsTrigger>
-            </TabsList>
-            <p className="text-sm text-muted-foreground bg-muted/50 px-3 py-1 rounded-full">
-              Showing {pendingProperties.length} pending properties
+      ) : pendingCount === 0 ? (
+        <Card className="w-full p-6 text-center">
+          <CardContent className="pt-6">
+            <AlertCircle className="mx-auto h-12 w-12 text-muted-foreground" />
+            <h3 className="mt-4 text-lg font-semibold">{t.noProperties}</h3>
+            <p className="text-muted-foreground mt-2">
+              {t.allPropertiesApproved}
             </p>
+          </CardContent>
+        </Card>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Property List */}
+          <div className="md:col-span-1">
+            <Card className="h-[calc(100vh-180px)]">
+              <CardHeader>
+                <CardTitle>{t.property}</CardTitle>
+              </CardHeader>
+              <ScrollArea className="h-[calc(100vh-250px)]">
+                <CardContent>
+                  <div className="space-y-4">
+                    {pendingProperties.map((property) => (
+                      <div
+                        key={property.id}
+                        className={`flex items-center space-x-4 cursor-pointer p-2 rounded-md hover:bg-muted ${
+                          selectedProperty?.id === property.id ? "bg-muted" : ""
+                        } ${isRTL ? "flex-row-reverse space-x-reverse" : ""}`}
+                        onClick={() => setSelectedProperty(property)}
+                      >
+                        <div className="relative h-12 w-12 rounded-md overflow-hidden">
+                          <Image
+                            src={getPropertyImageUrl(property)}
+                            alt={property.title || "Property"}
+                            fill
+                            className="object-cover"
+                            onError={(e) => {
+                              e.target.src = "https://placehold.co/600x400";
+                            }}
+                          />
+                        </div>
+                        <div className={isRTL ? "text-right" : ""}>
+                          <p className="font-medium text-sm line-clamp-1">
+                            {property.title || t.propertyTitle}
+                          </p>
+                          <p className="text-xs text-muted-foreground">
+                            {property.address || t.location}
+                          </p>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </CardContent>
+              </ScrollArea>
+            </Card>
           </div>
 
-          <TabsContent value="grid" className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              transition={{ staggerChildren: 0.1 }}
-              className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
-            >
-              {pendingProperties.map((property, index) => (
-                <motion.div
-                  key={property.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <PropertyCard
-                    property={property}
-                    onApprove={handleApprove}
-                    onReject={handleReject}
-                    isLoading={propertiesLoading}
-                  />
-                </motion.div>
-              ))}
-            </motion.div>
-          </TabsContent>
-
-          <TabsContent value="detail" className="space-y-4">
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="grid grid-cols-1 md:grid-cols-3 gap-6"
-            >
-              <div className="md:col-span-1">
-                <Card className="h-full overflow-hidden border shadow-md">
-                  <CardHeader className="bg-muted/30 pb-3">
-                    <CardTitle>Property List</CardTitle>
-                    <CardDescription>
-                      Select a property to review
-                    </CardDescription>
-                  </CardHeader>
-                  <ScrollArea className="h-[600px]">
-                    <div className="px-4 pb-4 space-y-2">
-                      {pendingProperties.map((property) => (
-                        <motion.div
-                          key={property.id}
-                          whileHover={{ scale: 1.02 }}
-                          className={`p-3 rounded-lg cursor-pointer transition-all border ${
-                            selectedProperty &&
-                            selectedProperty.id === property.id
-                              ? "bg-primary text-primary-foreground shadow-md"
-                              : "hover:bg-muted"
-                          }`}
-                          onClick={() => setSelectedProperty(property)}
-                        >
-                          <div className="flex items-center gap-3">
-                            <div className="w-14 h-14 rounded-lg overflow-hidden flex-shrink-0 border relative">
-                              {getPropertyImageUrl(property) ? (
-                                <img
-                                  src={getPropertyImageUrl(property)}
-                                  alt=""
-                                  className="w-full h-full object-cover"
-                                  onError={(e) => {
-                                    console.log(
-                                      "List thumbnail failed to load for property:",
-                                      property.id
-                                    );
-                                    // Replace with home icon on error
-                                    e.target.style.display = "none";
-                                    e.target.parentNode.innerHTML = `<div class="w-full h-full bg-muted flex items-center justify-center">
-                                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-6 w-6 text-muted-foreground/40"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-                                    </div>`;
-                                  }}
-                                />
-                              ) : (
-                                <div className="w-full h-full bg-muted flex items-center justify-center">
-                                  <Home className="h-6 w-6 text-muted-foreground/40" />
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex-1 min-w-0">
-                              <p className="font-medium truncate">
-                                {property.title || `Property #${property.id}`}
-                              </p>
-                              <p
-                                className={`text-sm truncate ${
-                                  selectedProperty &&
-                                  selectedProperty.id === property.id
-                                    ? "text-primary-foreground/80"
-                                    : "text-muted-foreground"
-                                }`}
-                              >
-                                {property.location || "Location not specified"}
-                              </p>
-                            </div>
-                          </div>
-                        </motion.div>
-                      ))}
-                    </div>
-                  </ScrollArea>
-                </Card>
-              </div>
-
-              <div className="md:col-span-2">
-                {selectedProperty ? (
-                  <motion.div
-                    initial={{ opacity: 0, x: 20 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    key={selectedProperty.id}
-                  >
+          {/* Property Details */}
+          <div className="md:col-span-2">
+            <Card className="h-[calc(100vh-180px)]">
+              <CardHeader>
+                <CardTitle>{t.propertyDetails}</CardTitle>
+              </CardHeader>
+              <ScrollArea className="h-[calc(100vh-250px)]">
+                <CardContent>
+                  {selectedProperty ? (
                     <PropertyDetail
                       property={selectedProperty}
-                      onApprove={handleApprove}
-                      onReject={handleReject}
-                      isLoading={propertiesLoading}
+                      onApprove={() => handleApprove(selectedProperty)}
+                      onReject={() => handleReject(selectedProperty)}
+                      isLoading={loading}
+                      isRTL={isRTL}
+                      translations={t}
                     />
-                  </motion.div>
-                ) : (
-                  <Card className="h-full flex items-center justify-center border-none shadow-md">
-                    <CardContent className="text-center py-16">
-                      <AlertCircle className="h-12 w-12 mx-auto text-muted-foreground/60 mb-4" />
-                      <p className="text-muted-foreground text-lg">
-                        Select a property to view details
-                      </p>
-                    </CardContent>
-                  </Card>
-                )}
-              </div>
-            </motion.div>
-          </TabsContent>
-        </Tabs>
+                  ) : (
+                    <div className="flex flex-col items-center justify-center h-full py-12">
+                      <Home className="h-12 w-12 text-muted-foreground mb-4" />
+                      <h3 className="text-lg font-medium">
+                        {t.selectProperty}
+                      </h3>
+                    </div>
+                  )}
+                </CardContent>
+              </ScrollArea>
+            </Card>
+          </div>
+        </div>
       )}
     </div>
   );
 }
 
-function PropertyCard({ property, onApprove, onReject, isLoading }) {
-  const [actionType, setActionType] = useState(null);
-  const [localLoading, setLocalLoading] = useState(false);
-  const [imageError, setImageError] = useState(false);
+function PropertyCard({
+  property,
+  onApprove,
+  onReject,
+  isLoading,
+  isRTL,
+  translations,
+}) {
+  const t = translations || pendingTranslations.en;
 
   const handleApprove = async () => {
-    setActionType("approve");
-    setLocalLoading(true);
-    await onApprove(property);
-    setLocalLoading(false);
-    setActionType(null);
+    if (isLoading) return;
+    await onApprove();
   };
 
   const handleReject = async () => {
-    setActionType("reject");
-    setLocalLoading(true);
-    await onReject(property);
-    setLocalLoading(false);
-    setActionType(null);
+    if (isLoading) return;
+    await onReject();
   };
-
-  const isApprovingLoading = localLoading && actionType === "approve";
-  const isRejectingLoading = localLoading && actionType === "reject";
 
   const handleImageError = () => {
-    console.log("Image failed to load for property:", property.id);
-    console.log("Image URL attempted:", getPropertyImageUrl(property));
-    setImageError(true);
+    // Handle image error
   };
 
-  // Get the image URL
-  const imageUrl = getPropertyImageUrl(property);
-
   return (
-    <Card className="overflow-hidden hover:shadow-lg transition-all duration-300 shadow-md h-full border p-2 pb-3">
-      <div className="relative aspect-video gap-0">
-        {imageError ? (
-          <div className="w-full h-full bg-muted flex items-center justify-center rounded-lg">
-            <Home className="h-12 w-12 text-muted-foreground/40" />
-          </div>
-        ) : (
-          <img
-            src={imageUrl}
-            alt={property.title || `Property ${property.id}`}
-            className="object-cover w-full h-full rounded-lg"
-            onError={handleImageError}
-          />
-        )}
-        <Badge
-          variant="secondary"
-          className="absolute top-3 right-3 font-medium px-3 py-1 bg-black/70 text-white"
-        >
-          PENDING
-        </Badge>
-      </div>
-      <CardHeader className="">
-        <CardTitle className="line-clamp-1 text-xl">
-          <div className="flex items-center justify-between gap-2">
-            <p className="text-xl text-muted-foreground">
-              {property.title || `Property #${property.id}`}
-            </p>
-            <p className="font-semibold text-xl text-primary">
-              {property.price
-                ? `$${property.price.toLocaleString()}`
-                : "Price not set"}
-            </p>
-          </div>
+    <Card className={isRTL ? "rtl property-card" : "property-card"}>
+      <CardHeader className={`pb-2 ${isRTL ? "property-card-header" : ""}`}>
+        <CardTitle className="text-base font-medium">
+          {property.title}
         </CardTitle>
-        <CardDescription className="flex items-center gap-1 text-sm">
-          <MapPin className="h-3.5 w-3.5" />
-          {property.location || "Location not specified"}
-        </CardDescription>
       </CardHeader>
-      <CardContent className="">
-        <div className="flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <Avatar className="h-7 w-7 border-2 border-primary/10">
-              <AvatarImage src={property.agent?.avatar} />
-              <AvatarFallback className="bg-primary/10 text-primary">
-                {property.agent?.name?.charAt(0) || "A"}
-              </AvatarFallback>
-            </Avatar>
-            <span className="text-xs text-muted-foreground truncate max-w-[120px]">
-              {property.agent?.name || property.agent?.email || "Agent"}
-            </span>
+      <CardContent>
+        <div
+          className={`flex items-center gap-4 ${
+            isRTL ? "flex-row-reverse" : ""
+          }`}
+        >
+          <div className="h-12 w-12 rounded-md bg-muted flex items-center justify-center">
+            <Home className="h-6 w-6 text-muted-foreground" />
           </div>
-          <div className="flex items-center text-xs text-muted-foreground bg-muted/30 rounded-md">
-            <Calendar className="h-3.5 w-3.5 " />
-            Submitted: {new Date(property.created_at).toLocaleDateString()}
+          <div className={isRTL ? "text-right" : ""}>
+            <p className="font-medium">{property.address || t.location}</p>
+            <p className="text-sm text-muted-foreground">
+              {t.postedBy}: {property.user_email || "Unknown"}
+            </p>
           </div>
         </div>
+        <div
+          className={`grid grid-cols-2 gap-4 mt-4 ${
+            isRTL ? "property-card-actions" : ""
+          }`}
+        >
+          <Button
+            variant="outline"
+            onClick={handleReject}
+            disabled={isLoading}
+            className={isRTL ? "flex-row-reverse" : ""}
+          >
+            <X className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
+            {t.reject}
+          </Button>
+          <Button
+            onClick={handleApprove}
+            disabled={isLoading}
+            className={isRTL ? "flex-row-reverse" : ""}
+          >
+            <Check className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
+            {t.approve}
+          </Button>
+        </div>
       </CardContent>
-      <CardFooter className="flex justify-start gap-3">
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleReject}
-          disabled={localLoading || isLoading}
-          className="w-[48%] rounded-full"
-        >
-          {isRejectingLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <X className="mr-2 h-4 w-4" />
-          )}
-          Reject
-        </Button>
-        <Button
-          size="sm"
-          onClick={handleApprove}
-          disabled={localLoading || isLoading}
-          className="w-[48%] rounded-full bg-gradient-to-r from-primary to-primary/80"
-        >
-          {isApprovingLoading ? (
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-          ) : (
-            <Check className="mr-2 h-4 w-4" />
-          )}
-          Approve
-        </Button>
-      </CardFooter>
     </Card>
   );
 }
 
-function PropertyDetail({ property, onApprove, onReject, isLoading }) {
-  const [actionType, setActionType] = useState(null);
-  const [localLoading, setLocalLoading] = useState(false);
-  const [imageError, setImageError] = useState(false);
+function PropertyDetail({
+  property,
+  onApprove,
+  onReject,
+  isLoading,
+  isRTL,
+  translations,
+}) {
+  const t = translations || pendingTranslations.en;
 
   const handleApprove = async () => {
-    setActionType("approve");
-    setLocalLoading(true);
-    await onApprove(property);
-    setLocalLoading(false);
-    setActionType(null);
+    if (isLoading) return;
+    await onApprove();
   };
 
   const handleReject = async () => {
-    setActionType("reject");
-    setLocalLoading(true);
-    await onReject(property);
-    setLocalLoading(false);
-    setActionType(null);
+    if (isLoading) return;
+    await onReject();
   };
 
   const handleImageError = () => {
-    console.log("Detail view: Image failed to load for property:", property.id);
-    console.log("Image URL attempted:", getPropertyImageUrl(property));
-    setImageError(true);
+    // Handle image error
   };
 
-  const isApprovingLoading = localLoading && actionType === "approve";
-  const isRejectingLoading = localLoading && actionType === "reject";
-
-  // Get the image URL
-  const imageUrl = getPropertyImageUrl(property);
-
   return (
-    <Card className="h-full border shadow-md overflow-hidden">
-      <CardHeader className="bg-muted/30 ">
-        <div className="flex justify-between items-start">
-          <div>
-            <CardTitle className="text-2xl">
-              {property.title || `Property #${property.id}`}
-            </CardTitle>
-            <CardDescription className="flex items-center mt-1">
-              <MapPin className="h-4 w-4 mr-1" />
-              {property.location || "Location not specified"}
-            </CardDescription>
-          </div>
-          <Badge
-            variant="outline"
-            className="bg-black/70 text-white border-none px-3 py-1"
+    <div className={isRTL ? "rtl property-details" : "property-details"}>
+      <div className="relative h-[250px] w-full rounded-md overflow-hidden mb-6">
+        <Image
+          src={getPropertyImageUrl(property)}
+          alt={property.title || "Property"}
+          fill
+          className="object-cover"
+          onError={(e) => {
+            e.target.src = "https://placehold.co/600x400";
+          }}
+        />
+      </div>
+
+      <div className="space-y-6">
+        <div className={isRTL ? "text-right" : ""}>
+          <h2 className="text-2xl font-bold">{property.title}</h2>
+          <p className="text-muted-foreground">{property.address}</p>
+        </div>
+
+        <div
+          className={`grid grid-cols-2 md:grid-cols-4 gap-4 ${
+            isRTL ? "property-metadata" : ""
+          }`}
+        >
+          <div
+            className={`flex flex-col ${
+              isRTL ? "items-end property-metadata-item" : ""
+            }`}
           >
-            PENDING
-          </Badge>
-        </div>
-      </CardHeader>
-      <CardContent className="">
-        <div className="rounded-xl overflow-hidden shadow-md relative aspect-video">
-          {imageError ? (
-            <div className="w-full h-full bg-muted flex items-center justify-center">
-              <Home className="h-16 w-16 text-muted-foreground/40" />
-            </div>
-          ) : (
-            <img
-              src={imageUrl}
-              alt={property.title || `Property ${property.id}`}
-              className="w-full h-full object-cover"
-              onError={handleImageError}
-            />
-          )}
-        </div>
-
-        <div className="grid grid-cols-2 gap-2">
-          <div className="bg-muted/20 p-4 rounded-xl space-y-1">
-            <p className="text-sm text-muted-foreground">Price</p>
-            <p className="font-semibold text-lg text-primary">
-              {property.price
-                ? `$${property.price.toLocaleString()}`
-                : "Not specified"}
-            </p>
+            <span className="text-sm text-muted-foreground">{t.price}</span>
+            <span className="font-medium">
+              ${property.price?.toLocaleString() || "N/A"}
+            </span>
           </div>
-          <div className="bg-muted/20 p-4 rounded-xl space-y-1">
-            <p className="text-sm text-muted-foreground">Property Type</p>
-            <p className="font-semibold text-lg">
-              {property.type || "Not specified"}
-            </p>
+          <div
+            className={`flex flex-col ${
+              isRTL ? "items-end property-metadata-item" : ""
+            }`}
+          >
+            <span className="text-sm text-muted-foreground">{t.bedrooms}</span>
+            <span className="font-medium">{property.bedrooms || "N/A"}</span>
           </div>
-          <div className="bg-muted/20 p-4 rounded-xl space-y-1 bg-slate-100 mb-2">
-            <p className="text-sm text-muted-foreground">Bedrooms :</p>
-            <p className="font-semibold text-lg flex items-center gap-1">
-              <BedDouble className="h-4 w-4 mr-1" />
-              {property.bedrooms || "Not specified"}
-            </p>
+          <div
+            className={`flex flex-col ${
+              isRTL ? "items-end property-metadata-item" : ""
+            }`}
+          >
+            <span className="text-sm text-muted-foreground">{t.bathrooms}</span>
+            <span className="font-medium">{property.bathrooms || "N/A"}</span>
           </div>
-          <div className="bg-muted/20 p-4 rounded-xl space-y-1 bg-slate-100 mb-2  ">
-            <p className="text-sm text-muted-foreground">Bathrooms :</p>
-            <p className="font-semibold text-lg flex items-center gap-1">
-              <Bath className="h-4 w-4 mr-1" />
-              {property.bathrooms || "Not specified"}
-            </p>
+          <div
+            className={`flex flex-col ${
+              isRTL ? "items-end property-metadata-item" : ""
+            }`}
+          >
+            <span className="text-sm text-muted-foreground">{t.size}</span>
+            <span className="font-medium">
+              {property.size ? `${property.size} sqft` : "N/A"}
+            </span>
           </div>
         </div>
 
-        <div className="space-y-2 bg-slate-100 rounded-xl p-4 mb-2">
-          <p className="text-sm font-medium">Description</p>
-          <p className="text-sm bg-muted/20 p-4 rounded-xl">
+        <div className={isRTL ? "property-description" : ""}>
+          <h3 className="text-lg font-medium mb-2">{t.description}</h3>
+          <p className="text-muted-foreground">
             {property.description || "No description provided."}
           </p>
         </div>
 
-        <div className="bg-gradient-to-r from-primary/10 to-primary/5 rounded-xl px-4 py-2 space-y-3 bg-slate-100">
-          <p className="text-sm font-medium">Agent Information</p>
-          <div className="flex items-center gap-4">
-            <Avatar className="h-12 w-12 border-2 border-primary/20">
-              <AvatarImage src={property.agent?.avatar} />
-              <AvatarFallback className="bg-primary/10 text-primary text-lg">
-                {property.agent?.name?.charAt(0) || "A"}
-              </AvatarFallback>
-            </Avatar>
-            <div>
-              <p className="font-medium">
-                {property.agent?.name || "Name not provided"}
-              </p>
-              <p className="text-sm text-muted-foreground flex items-center">
-                <Mail className="h-3.5 w-3.5 mr-1" />
-                {property.agent?.email || "Email not specified"}
-              </p>
-            </div>
+        <div
+          className={`flex items-center gap-4 ${
+            isRTL ? "property-features" : ""
+          }`}
+        >
+          <div
+            className={`flex items-center ${
+              isRTL ? "flex-row-reverse feature-item" : ""
+            }`}
+          >
+            <BedDouble
+              className={`h-5 w-5 text-muted-foreground ${
+                isRTL ? "ml-2" : "mr-2"
+              }`}
+            />
+            <span>
+              {property.bedrooms || 0} {t.bedrooms}
+            </span>
+          </div>
+          <div
+            className={`flex items-center ${
+              isRTL ? "flex-row-reverse feature-item" : ""
+            }`}
+          >
+            <Bath
+              className={`h-5 w-5 text-muted-foreground ${
+                isRTL ? "ml-2" : "mr-2"
+              }`}
+            />
+            <span>
+              {property.bathrooms || 0} {t.bathrooms}
+            </span>
+          </div>
+          <div
+            className={`flex items-center ${
+              isRTL ? "flex-row-reverse feature-item" : ""
+            }`}
+          >
+            <MapPin
+              className={`h-5 w-5 text-muted-foreground ${
+                isRTL ? "ml-2" : "mr-2"
+              }`}
+            />
+            <span>{property.address || t.location}</span>
           </div>
         </div>
 
-        <div className="text-sm text-muted-foreground bg-muted/20 p-3 rounded-xl ">
-          <p className="flex items-center">
-            <Calendar className="h-4 w-4 mr-2" />
-            Submitted on {new Date(
-              property.created_at
-            ).toLocaleDateString()} at{" "}
-            {new Date(property.created_at).toLocaleTimeString()}
-          </p>
+        <div
+          className={`flex items-center gap-4 ${
+            isRTL ? "property-metadata" : ""
+          }`}
+        >
+          <div
+            className={`flex flex-col ${
+              isRTL ? "items-end property-metadata-item" : ""
+            }`}
+          >
+            <span className="text-sm text-muted-foreground">{t.postedBy}</span>
+            <span className="font-medium">
+              {property.user_email || "Unknown"}
+            </span>
+          </div>
+          <div
+            className={`flex flex-col ${
+              isRTL ? "items-end property-metadata-item" : ""
+            }`}
+          >
+            <span className="text-sm text-muted-foreground">
+              {t.datePosted}
+            </span>
+            <span className="font-medium">
+              {property.created_at
+                ? new Date(property.created_at).toLocaleDateString()
+                : "N/A"}
+            </span>
+          </div>
         </div>
-      </CardContent>
-      <CardFooter className="flex gap-4 ">
-        <Button
-          variant="outline"
-          onClick={handleReject}
-          disabled={localLoading || isLoading}
-          className="flex-1 py-6 rounded-xl"
+
+        <div
+          className={`grid grid-cols-2 gap-4 mt-6 ${
+            isRTL ? "approval-buttons" : ""
+          }`}
         >
-          {isRejectingLoading ? (
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          ) : (
-            <X className="mr-2 h-5 w-5" />
-          )}
-          Reject Property
-        </Button>
-        <Button
-          onClick={handleApprove}
-          disabled={localLoading || isLoading}
-          className="flex-1 py-6 rounded-xl bg-gradient-to-r from-primary to-primary/80"
-        >
-          {isApprovingLoading ? (
-            <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-          ) : (
-            <Check className="mr-2 h-5 w-5" />
-          )}
-          Approve Property
-        </Button>
-      </CardFooter>
-    </Card>
+          <Button
+            variant="outline"
+            onClick={handleReject}
+            disabled={isLoading}
+            className={isRTL ? "flex-row-reverse" : ""}
+          >
+            <X className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
+            {t.reject}
+          </Button>
+          <Button
+            onClick={handleApprove}
+            disabled={isLoading}
+            className={isRTL ? "flex-row-reverse" : ""}
+          >
+            <Check className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
+            {t.approve}
+          </Button>
+        </div>
+      </div>
+    </div>
   );
 }

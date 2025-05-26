@@ -1,0 +1,145 @@
+/* RTL Styles for Agent Dashboard */
+
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+.rtl .card-header {
+  text-align: right;
+}
+
+.rtl .property-card {
+  direction: rtl;
+}
+
+.rtl .dashboard-stats .stat-card {
+  direction: rtl;
+}
+
+.rtl .appointments-card {
+  direction: rtl;
+}
+
+.rtl .activity-card {
+  direction: rtl;
+}
+
+/* Badge positioning in RTL mode */
+.rtl .badge {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Icon spacing in RTL mode */
+.rtl .icon-left {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+.rtl .icon-right {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+/* Button content direction in RTL mode */
+.rtl button span,
+.rtl a span {
+  direction: rtl;
+}
+
+/* Hover cards in RTL */
+.rtl .hover-card-content {
+  direction: rtl;
+}
+
+/* Forms in RTL */
+.rtl form label {
+  text-align: right;
+}
+
+.rtl .form-divider {
+  direction: rtl;
+}
+
+/* Icon rotation for certain directional icons */
+.rtl .icon-arrow-right {
+  transform: rotate(180deg);
+}
+
+/* Border adjustments for RTL */
+.rtl .border-l {
+  border-left: none;
+  border-right: 1px solid;
+}
+
+.rtl .border-r {
+  border-right: none;
+  border-left: 1px solid;
+}
+
+/* Margin/padding adjustments */
+.rtl .ml-auto {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.rtl .mr-auto {
+  margin-right: 0;
+  margin-left: auto;
+}
+
+.rtl .pl-3 {
+  padding-left: 0;
+  padding-right: 0.75rem;
+}
+
+.rtl .pr-3 {
+  padding-right: 0;
+  padding-left: 0.75rem;
+}
+
+/* Fix for dropdown menus in RTL */
+.rtl .dropdown-menu {
+  direction: rtl;
+}
+
+/* Fix for modals in RTL */
+.rtl .modal-content {
+  direction: rtl;
+}
+
+/* Calendar component in RTL */
+.rtl .calendar {
+  direction: rtl;
+}
+
+.rtl .calendar-header {
+  direction: rtl;
+}
+
+.rtl .calendar-days {
+  direction: rtl;
+}
+
+/* Tables in RTL */
+.rtl table th,
+.rtl table td {
+  text-align: right;
+}
+
+/* Making flexbox direction work correctly for RTL */
+.rtl-reverse-flex {
+  flex-direction: row-reverse !important;
+}
+
+/* Ensure tooltips work correctly in RTL */
+.rtl .tooltip {
+  direction: rtl;
+}
+
+/* Ensure scroll behavior works correctly */
+.rtl .overflow-x-auto,
+.rtl .overflow-y-auto {
+  direction: rtl;
+}

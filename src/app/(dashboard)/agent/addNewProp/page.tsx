@@ -11,8 +11,19 @@ import {
 } from "@/shared/components/ui/tooltip";
 import { Button } from "@/shared/components/ui/button";
 import AddProperty from "./components/add-property";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 
 export default function AddNewPropPage() {
+  const translations = {
+    en: {
+      addNewProperty: "Add New Property",
+    },
+    ar: {
+      addNewProperty: "إضافة عقار جديد",
+    },
+  };
+  const { currentLanguage, isRTL } = useTranslation();
+  const t = translations[currentLanguage === "ar" ? "ar" : "en"];
   const { theme, setTheme } = useTheme();
 
   const toggleTheme = () => {
@@ -27,7 +38,9 @@ export default function AddNewPropPage() {
       transition={{ duration: 0.4 }}
     >
       <div className="mb-6 flex items-center justify-between">
-        <h1 className="text-3xl font-bold tracking-tight">Add New Property</h1>
+        <h1 className="text-3xl font-bold tracking-tight   ">
+          {t.addNewProperty}
+        </h1>
         {/* <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>

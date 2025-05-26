@@ -55,6 +55,10 @@ import { ScrollArea, ScrollBar } from "@/shared/components/ui/scroll-area";
 import { useUser } from "@/shared/providers/UserProvider";
 import { useSupabase } from "@/shared/providers/SupabaseProvider";
 import { useProperties } from "@/shared/hooks/useProperties";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+
+// Translations
+import agentDashboardTranslations from "./translations/agentDashboard";
 
 // Services
 import {
@@ -202,6 +206,13 @@ export default function AgentDashboard() {
   const { toast } = useToast();
   const router = useRouter();
   const { deleteProperty } = useProperties();
+  const { currentLanguage, isRTL } = useTranslation();
+
+  // Get translations based on current language
+  const t =
+    agentDashboardTranslations[
+      currentLanguage as keyof typeof agentDashboardTranslations
+    ] || agentDashboardTranslations.en;
 
   const [isLoading, setIsLoading] = useState(true);
   const [stats, setStats] = useState<ExtendedDashboardStats>({
@@ -288,17 +299,17 @@ export default function AgentDashboard() {
       <div className="flex items-center justify-center min-h-screen p-4">
         <Card className="w-full max-w-md">
           <CardHeader>
-            <CardTitle className="text-center">Access Denied</CardTitle>
+            <CardTitle className="text-center">{t.accessDenied}</CardTitle>
           </CardHeader>
           <CardContent>
-            <p className="text-center mb-4">
-              You need to be logged in to access the agent dashboard.
+            <p className={`text-center mb-4 ${isRTL ? "rtl text-right" : ""}`}>
+              {t.loginRequired}
             </p>
             <Button
               onClick={() => router.push("/auth/login")}
               className="w-full"
             >
-              Log In
+              {t.logIn}
             </Button>
           </CardContent>
         </Card>
@@ -307,19 +318,20 @@ export default function AgentDashboard() {
   }
 
   return (
-    <div className="h-full flex-1 space-y-8 p-4">
+    <div className={`h-full flex-1 space-y-8 p-4 ${isRTL ? "rtl" : ""}`}>
       {/* Dashboard Header */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-2 sm:space-y-0 gap-4">
         <div>
-          <h2 className="text-3xl font-bold tracking-tight">Dashboard</h2>
+          <h2 className="text-3xl font-bold tracking-tight">{t.dashboard}</h2>
           <p className="text-muted-foreground">
-            Manage your properties and appointments
+            {t.managePropertiesAndAppointments}
           </p>
         </div>
         <div className="flex items-center space-x-2">
           <Button asChild>
             <Link href="/agent/addNewProp">
-              <Plus className="mr-2 h-4 w-4" /> Add Property
+              <Plus className={`${isRTL ? "ml-2" : "mr-2"} h-4 w-4`} />{" "}
+              {t.addProperty}
             </Link>
           </Button>
         </div>
@@ -333,6 +345,16 @@ export default function AgentDashboard() {
         newInquiries={stats.newInquiries}
         availablePercentage={stats.availablePercentage}
         isLoading={isLoading}
+        translations={{
+          totalProperties: t.totalProperties,
+          verifiedProperties: t.verifiedProperties,
+          scheduledViewings: t.scheduledViewings,
+          newInquiries: t.newInquiries,
+          viewAllProperties: t.viewAllProperties,
+          viewSchedule: t.viewSchedule,
+          viewInquiries: t.viewInquiries,
+        }}
+        isRTL={isRTL}
       />
 
       {/* Properties & Appointments Section */}
@@ -344,6 +366,14 @@ export default function AgentDashboard() {
               properties={stats.recentProperties}
               isLoading={isLoading}
               onDelete={handleDeleteProperty}
+              translations={{
+                recentProperties: t.recentProperties,
+                viewAll: t.viewAll,
+                noPropertiesYet: t.noPropertiesYet,
+                addYourFirstProperty: t.addYourFirstProperty,
+                addProperty: t.addProperty,
+              }}
+              isRTL={isRTL}
             />
           </div>
         </div>
@@ -353,6 +383,16 @@ export default function AgentDashboard() {
           <UpcomingAppointments
             appointments={stats.upcomingAppointments}
             isLoading={isLoading}
+            translations={{
+              upcomingAppointments: t.upcomingAppointments,
+              viewAll: t.viewAll,
+              with: t.with,
+              viewDetails: t.viewDetails,
+              noUpcomingAppointments: t.noUpcomingAppointments,
+              scheduledAppointmentsWillAppear:
+                t.scheduledAppointmentsWillAppear,
+            }}
+            isRTL={isRTL}
           />
         </div>
 
@@ -361,6 +401,12 @@ export default function AgentDashboard() {
           <RecentActivity
             activities={stats.recentActivity}
             isLoading={isLoading}
+            translations={{
+              recentActivity: t.recentActivity,
+              noRecentActivity: t.noRecentActivity,
+              recentActivityWillAppear: t.recentActivityWillAppear,
+            }}
+            isRTL={isRTL}
           />
         </div>
 
@@ -368,7 +414,7 @@ export default function AgentDashboard() {
         <div className="col-span-7 lg:col-span-3">
           <Card className="h-full">
             <CardHeader>
-              <CardTitle>Analytics Overview</CardTitle>
+              <CardTitle>{t.analyticsOverview}</CardTitle>
             </CardHeader>
             <CardContent>
               {isLoading ? (
@@ -390,22 +436,28 @@ export default function AgentDashboard() {
               ) : (
                 <div className="space-y-6">
                   <AnalyticsItem
-                    label="Property Views"
+                    label={t.propertyViews}
                     value={127}
                     change={12}
                     isPositive={true}
+                    isRTL={isRTL}
+                    total={t.total}
                   />
                   <AnalyticsItem
-                    label="Inquiries"
+                    label={t.inquiries}
                     value={5}
                     change={3}
                     isPositive={true}
+                    isRTL={isRTL}
+                    total={t.total}
                   />
                   <AnalyticsItem
-                    label="Listing Clicks"
+                    label={t.listingClicks}
                     value={68}
                     change={-5}
                     isPositive={false}
+                    isRTL={isRTL}
+                    total={t.total}
                   />
                   <div className="pt-4">
                     <Button
@@ -415,7 +467,7 @@ export default function AgentDashboard() {
                       className="w-full"
                     >
                       <Link href="/agent/analytics">
-                        View Detailed Analytics
+                        {t.viewDetailedAnalytics}
                       </Link>
                     </Button>
                   </div>
@@ -434,6 +486,8 @@ interface AnalyticsItemProps {
   value: number;
   change: number;
   isPositive: boolean;
+  isRTL?: boolean;
+  total: string;
 }
 
 function AnalyticsItem({
@@ -441,15 +495,21 @@ function AnalyticsItem({
   value,
   change,
   isPositive,
+  isRTL = false,
+  total,
 }: AnalyticsItemProps) {
   return (
     <div className="space-y-1.5">
-      <div className="flex justify-between items-center">
+      <div
+        className={`flex justify-between items-center ${
+          isRTL ? "flex-row-reverse" : ""
+        }`}
+      >
         <span className="text-sm font-medium">{label}</span>
         <span
           className={`text-sm font-medium flex items-center ${
             isPositive ? "text-green-600" : "text-red-600"
-          }`}
+          } ${isRTL ? "flex-row-reverse" : ""}`}
         >
           {isPositive ? "↑" : "↓"} {Math.abs(change)}%
         </span>
@@ -457,10 +517,17 @@ function AnalyticsItem({
       <div className="h-2 w-full bg-gray-100 rounded-full overflow-hidden">
         <div
           className={`h-full ${isPositive ? "bg-green-600" : "bg-red-600"}`}
-          style={{ width: `${Math.min(100, (value / 150) * 100)}%` }}
+          style={{
+            width: `${Math.min(100, (value / 150) * 100)}%`,
+            float: isRTL ? "right" : "left",
+          }}
         ></div>
       </div>
-      <p className="text-xs text-muted-foreground">Total: {value}</p>
+      <p
+        className={`text-xs text-muted-foreground ${isRTL ? "text-right" : ""}`}
+      >
+        {total}: {value}
+      </p>
     </div>
   );
 }

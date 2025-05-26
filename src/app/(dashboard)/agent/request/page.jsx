@@ -26,6 +26,7 @@ import {
 import { Input } from "@/shared/components/ui/input";
 import { useToast } from "@/shared/hooks/use-toast";
 import { useTheme } from "next-themes";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 import {
   Dialog,
   DialogContent,
@@ -119,6 +120,70 @@ export default function MeetingRequestsPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const { toast } = useToast();
   const { theme, setTheme } = useTheme();
+  const { currentLanguage, isRTL } = useTranslation();
+
+  // Translations
+  const translations = {
+    en: {
+      meetingRequests: "Meeting Requests",
+      searchPlaceholder: "Search by property or client name...",
+      all: "All",
+      pending: "Pending",
+      accepted: "Accepted",
+      declined: "Declined",
+      noRequests: "No meeting requests found",
+      noRequestsMessage:
+        "When clients request property viewings, they will appear here.",
+      loading: "Loading requests...",
+      // Request Details
+      requestDetails: "Request Details",
+      clientInformation: "Client Information",
+      email: "Email",
+      phone: "Phone",
+      requestedDateTime: "Requested Date & Time",
+      message: "Message",
+      property: "Property",
+      accept: "Accept",
+      decline: "Decline",
+      close: "Close",
+      // Toast Messages
+      requestAccepted: "Request Accepted",
+      requestAcceptedMessage:
+        "You have accepted the request. A notification has been sent to the client.",
+      requestDeclined: "Request Declined",
+      requestDeclinedMessage:
+        "You have declined the request. A notification has been sent to the client.",
+    },
+    ar: {
+      meetingRequests: "طلبات الاجتماع",
+      searchPlaceholder: "البحث حسب العقار أو اسم العميل...",
+      all: "الكل",
+      pending: "قيد الانتظار",
+      accepted: "مقبول",
+      declined: "مرفوض",
+      noRequests: "لم يتم العثور على طلبات اجتماع",
+      noRequestsMessage: "عندما يطلب العملاء مشاهدة العقارات، ستظهر هنا.",
+      loading: "جاري تحميل الطلبات...",
+      // Request Details
+      requestDetails: "تفاصيل الطلب",
+      clientInformation: "معلومات العميل",
+      email: "البريد الإلكتروني",
+      phone: "الهاتف",
+      requestedDateTime: "التاريخ والوقت المطلوب",
+      message: "الرسالة",
+      property: "العقار",
+      accept: "قبول",
+      decline: "رفض",
+      close: "إغلاق",
+      // Toast Messages
+      requestAccepted: "تم قبول الطلب",
+      requestAcceptedMessage: "لقد قبلت الطلب. تم إرسال إشعار إلى العميل.",
+      requestDeclined: "تم رفض الطلب",
+      requestDeclinedMessage: "لقد رفضت الطلب. تم إرسال إشعار إلى العميل.",
+    },
+  };
+
+  const t = translations[currentLanguage === "ar" ? "ar" : "en"];
 
   // Simulate loading data
   useEffect(() => {
@@ -157,9 +222,8 @@ export default function MeetingRequestsPage() {
       )
     );
     toast({
-      title: "Request Accepted",
-      description:
-        "You have accepted the request. A notification has been sent to the client.",
+      title: t.requestAccepted,
+      description: t.requestAcceptedMessage,
     });
   };
 
@@ -170,9 +234,8 @@ export default function MeetingRequestsPage() {
       )
     );
     toast({
-      title: "Request Declined",
-      description:
-        "You have declined the request. A notification has been sent to the client.",
+      title: t.requestDeclined,
+      description: t.requestDeclinedMessage,
     });
   };
 
@@ -198,132 +261,127 @@ export default function MeetingRequestsPage() {
   };
 
   return (
-    <motion.div
-      className="container mx-auto p-2 md:p-4 space-y-6"
-      initial="hidden"
-      animate="visible"
-      variants={fadeIn}
-    >
-      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Meeting Requests
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Manage your property viewing requests from clients
-          </p>
-        </div>
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={toggleTheme}
-                className="rounded-full"
-              >
-                <SunMoon className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>Toggle theme</TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
-      </div>
+    <div className={`w-full mx-auto ${isRTL ? "rtl" : ""}`}>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        className="mb-8"
+      >
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">{t.meetingRequests}</h1>
+          </div>
 
-      <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
-        <div className="flex flex-col sm:flex-row gap-3 w-full">
-          <div className="relative w-full md:w-80">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleTheme}
+              className="hidden sm:flex"
+            >
+              <SunMoon className="h-[1.2rem] w-[1.2rem]" />
+            </Button>
+          </div>
+        </div>
+
+        {/* Search & Filter */}
+        <div className="mt-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div className="w-full sm:w-auto relative">
+            <Search
+              className={`absolute ${
+                isRTL ? "left-3" : "left-3"
+              } top-2.5 h-4 w-4 text-muted-foreground`}
+            />
             <Input
-              type="search"
-              placeholder="Search by property or client..."
-              className="w-full pl-8"
+              placeholder={t.searchPlaceholder}
+              className={`${
+                isRTL ? "pr-10" : "pl-10"
+              } w-full sm:w-[300px] h-10`}
               value={searchTerm}
               onChange={handleSearchChange}
             />
           </div>
 
-          <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="w-full sm:w-40">
-              <SelectValue placeholder="Filter by status" />
+          <Select
+            value={statusFilter}
+            onValueChange={setStatusFilter}
+            className="w-full sm:w-[150px]"
+          >
+            <SelectTrigger>
+              <SelectValue />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="all">All Requests</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="accepted">Accepted</SelectItem>
-              <SelectItem value="declined">Declined</SelectItem>
+              <SelectItem value="all">{t.all}</SelectItem>
+              <SelectItem value="pending">{t.pending}</SelectItem>
+              <SelectItem value="accepted">{t.accepted}</SelectItem>
+              <SelectItem value="declined">{t.declined}</SelectItem>
             </SelectContent>
           </Select>
         </div>
+      </motion.div>
 
-        <Badge className="w-fit hidden md:flex">
-          {meetingRequests.filter((req) => req.status === "Pending").length}{" "}
-          Pending Requests
-        </Badge>
-      </div>
-
+      {/* Meeting Requests List */}
       <AnimatePresence mode="wait">
         {isLoading ? (
           <motion.div
             key="loading"
-            className="space-y-4"
+            variants={fadeInUp}
             initial="hidden"
             animate="visible"
             exit="exit"
-            variants={fadeIn}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
           >
-            {[1, 2, 3].map((i) => (
-              <Card key={`skeleton-${i}`} className="overflow-hidden">
-                <CardHeader className="pb-2">
-                  <Skeleton className="h-6 w-3/4" />
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-                    <div className="space-y-2 w-full">
-                      <Skeleton className="h-4 w-full max-w-[300px]" />
-                      <Skeleton className="h-4 w-full max-w-[400px]" />
-                      <div className="flex items-center gap-4">
-                        <Skeleton className="h-4 w-[100px]" />
-                        <Skeleton className="h-4 w-[100px]" />
+            {Array(6)
+              .fill("")
+              .map((_, index) => (
+                <Card
+                  key={`loading-${index}`}
+                  className="overflow-hidden border"
+                >
+                  <CardHeader className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1.5 flex-1">
+                        <Skeleton className="h-5 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
                       </div>
+                      <Skeleton className="h-6 w-16 rounded-full" />
                     </div>
-                    <div className="flex gap-2">
+                  </CardHeader>
+                  <CardContent className="p-4 pt-0 space-y-3">
+                    <Skeleton className="h-4 w-4/5" />
+                    <Skeleton className="h-4 w-2/3" />
+                    <div className="flex items-center justify-between mt-2">
                       <Skeleton className="h-8 w-20" />
-                      <Skeleton className="h-8 w-20" />
+                      <Skeleton className="h-8 w-8 rounded-full" />
                     </div>
-                  </div>
-                  <Skeleton className="h-20 w-full" />
-                </CardContent>
-              </Card>
-            ))}
+                  </CardContent>
+                </Card>
+              ))}
           </motion.div>
         ) : filteredRequests.length === 0 ? (
           <motion.div
             key="empty"
-            className="text-center py-16 rounded-xl border border-dashed bg-muted/20"
+            variants={fadeInUp}
             initial="hidden"
             animate="visible"
             exit="exit"
-            variants={fadeIn}
+            className="flex flex-col items-center justify-center py-12 text-center"
           >
-            <div className="mx-auto w-fit p-4 rounded-full bg-muted mb-4">
-              <MessageCircle className="h-8 w-8 text-muted-foreground" />
-            </div>
-            <p className="text-xl font-medium mb-2">No requests found</p>
-            <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-              {searchTerm
-                ? "No requests match your search criteria. Try adjusting your filters."
-                : "You don't have any meeting requests yet."}
+            <MessageCircle className="h-12 w-12 mb-4 text-gray-400" />
+            <h3 className="text-lg font-medium mb-1">{t.noRequests}</h3>
+            <p className="text-muted-foreground max-w-sm">
+              {t.noRequestsMessage}
             </p>
           </motion.div>
         ) : (
           <motion.div
-            key="content"
-            className="space-y-4"
+            key="requests"
+            variants={fadeInUp}
             initial="hidden"
             animate="visible"
             exit="exit"
-            variants={fadeIn}
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
           >
             {filteredRequests.map((request, index) => (
               <MeetingRequestCard
@@ -334,111 +392,112 @@ export default function MeetingRequestsPage() {
                 onClick={handleRequestClick}
                 index={index}
                 getStatusColor={getStatusColor}
+                t={t}
+                isRTL={isRTL}
               />
             ))}
           </motion.div>
         )}
       </AnimatePresence>
 
-      <Dialog open={selectedRequest !== null} onOpenChange={handleModalClose}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Meeting Request Details</DialogTitle>
-            <DialogDescription>
-              View the complete details of this meeting request
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedRequest && (
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-semibold">
-                    {selectedRequest.propertyTitle}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedRequest.propertyAddress}
-                  </p>
-                </div>
-                <Badge className={`${getStatusColor(selectedRequest.status)}`}>
-                  {selectedRequest.status}
-                </Badge>
-              </div>
-
-              <div className="space-y-3 border-y py-4">
-                <div className="flex items-start gap-2">
-                  <User className="h-4 w-4 mt-0.5 text-muted-foreground" />
+      {/* Request Details Dialog */}
+      <Dialog open={!!selectedRequest} onOpenChange={handleModalClose}>
+        {selectedRequest && (
+          <DialogContent className={`sm:max-w-[500px] ${isRTL ? "rtl" : ""}`}>
+            <DialogHeader>
+              <DialogTitle>{t.requestDetails}</DialogTitle>
+              <DialogDescription>
+                {selectedRequest.propertyTitle}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-2">
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">{t.clientInformation}</h4>
+                <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <p className="font-medium">{selectedRequest.clientName}</p>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedRequest.clientEmail}
+                    <p className="text-xs text-muted-foreground">
+                      {t.clientInformation}
                     </p>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedRequest.clientPhone}
-                    </p>
+                    <p className="text-sm">{selectedRequest.clientName}</p>
                   </div>
-                </div>
-
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center gap-2">
-                    <Calendar className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      {selectedRequest.requestedDate}
-                    </span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t.email}</p>
+                    <p className="text-sm">{selectedRequest.clientEmail}</p>
                   </div>
-                  <div className="flex items-center gap-2">
-                    <Clock className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm">
-                      {selectedRequest.requestedTime}
-                    </span>
+                  <div>
+                    <p className="text-xs text-muted-foreground">{t.phone}</p>
+                    <p className="text-sm">{selectedRequest.clientPhone}</p>
                   </div>
                 </div>
               </div>
 
-              <div>
-                <p className="font-medium mb-2">Client Message:</p>
-                <div className="rounded-md bg-muted p-3 text-sm">
-                  <p>{selectedRequest.message}</p>
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">{t.requestedDateTime}</h4>
+                <div className="flex items-center gap-2">
+                  <Calendar className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">
+                    {selectedRequest.requestedDate},{" "}
+                    {selectedRequest.requestedTime}
+                  </span>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">{t.property}</h4>
+                <div className="flex items-center gap-2">
+                  <MapPin className="h-4 w-4 text-muted-foreground" />
+                  <span className="text-sm">
+                    {selectedRequest.propertyAddress}
+                  </span>
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <h4 className="font-medium text-sm">{t.message}</h4>
+                <p className="text-sm border rounded-md p-3 bg-muted/50">
+                  {selectedRequest.message}
+                </p>
               </div>
             </div>
-          )}
-
-          <DialogFooter className="flex flex-col sm:flex-row gap-2 sm:justify-between sm:space-x-0">
-            {selectedRequest && selectedRequest.status === "Pending" && (
-              <>
-                <Button
-                  variant="outline"
-                  onClick={() => {
-                    handleDeclineRequest(selectedRequest.id);
-                    handleModalClose();
-                  }}
-                  className="w-full sm:w-auto"
-                >
-                  <XCircle className="mr-2 h-4 w-4" />
-                  Decline
+            <DialogFooter
+              className={`gap-2 ${isRTL ? "flex-row-reverse" : ""}`}
+            >
+              {selectedRequest.status === "Pending" ? (
+                <>
+                  <Button
+                    variant="outline"
+                    onClick={() => {
+                      handleDeclineRequest(selectedRequest.id);
+                      handleModalClose();
+                    }}
+                    className={`${isRTL ? "flex-row-reverse" : ""}`}
+                  >
+                    <XCircle className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
+                    {t.decline}
+                  </Button>
+                  <Button
+                    onClick={() => {
+                      handleAcceptRequest(selectedRequest.id);
+                      handleModalClose();
+                    }}
+                    className={`${isRTL ? "flex-row-reverse" : ""}`}
+                  >
+                    <CheckCircle
+                      className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`}
+                    />
+                    {t.accept}
+                  </Button>
+                </>
+              ) : (
+                <Button variant="outline" onClick={handleModalClose}>
+                  {t.close}
                 </Button>
-                <Button
-                  onClick={() => {
-                    handleAcceptRequest(selectedRequest.id);
-                    handleModalClose();
-                  }}
-                  className="w-full sm:w-auto"
-                >
-                  <CheckCircle className="mr-2 h-4 w-4" />
-                  Accept
-                </Button>
-              </>
-            )}
-            {selectedRequest && selectedRequest.status !== "Pending" && (
-              <Button onClick={handleModalClose} className="w-full sm:w-auto">
-                Close
-              </Button>
-            )}
-          </DialogFooter>
-        </DialogContent>
+              )}
+            </DialogFooter>
+          </DialogContent>
+        )}
       </Dialog>
-    </motion.div>
+    </div>
   );
 }
 
@@ -449,90 +508,107 @@ function MeetingRequestCard({
   onClick,
   index,
   getStatusColor,
+  t,
+  isRTL,
 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-      whileHover={{ y: -2, transition: { duration: 0.2 } }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.3, delay: index * 0.05 },
+      }}
     >
-      <Card
-        onClick={() => onClick(request)}
-        className="overflow-hidden cursor-pointer transition-all hover:shadow-md"
-      >
-        <CardHeader className="pb-2">
-          <div className="flex flex-col justify-between gap-2 sm:flex-row sm:items-center">
-            <CardTitle className="text-base">{request.propertyTitle}</CardTitle>
-            <Badge className={`w-fit ${getStatusColor(request.status)}`}>
+      <Card className="overflow-hidden cursor-pointer border transition-all hover:shadow-md">
+        <CardHeader className="p-4">
+          <div className="flex justify-between items-start">
+            <div className="space-y-1">
+              <CardTitle className="text-base">{request.clientName}</CardTitle>
+              <CardDescription className="line-clamp-1">
+                {request.propertyTitle}
+              </CardDescription>
+            </div>
+            <Badge className={getStatusColor(request.status)}>
               {request.status}
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center gap-1 text-sm">
-                <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>{request.propertyAddress}</span>
-              </div>
-              <div className="flex flex-col sm:flex-row sm:items-center sm:gap-2 text-sm">
-                <div className="flex items-center gap-1">
-                  <User className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>{request.clientName}</span>
-                </div>
-                <span className="hidden sm:inline text-muted-foreground">
-                  •
-                </span>
-                <span className="text-muted-foreground">
-                  {request.clientPhone}
-                </span>
-              </div>
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>{request.requestedDate}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>{request.requestedTime}</span>
-                </div>
-              </div>
-            </div>
-
-            {request.status === "Pending" && (
-              <div className="flex gap-2 self-end md:self-start">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDecline(request.id);
-                  }}
-                  className="group"
-                >
-                  <XCircle className="mr-1 h-4 w-4 text-red-500 group-hover:text-red-600" />
-                  Decline
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAccept(request.id);
-                  }}
-                  className="group"
-                >
-                  <CheckCircle className="mr-1 h-4 w-4" />
-                  Accept
-                </Button>
-              </div>
-            )}
+        <CardContent className="p-4 pt-0 space-y-3">
+          <div className="flex items-center gap-2">
+            <MapPin className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm line-clamp-1">
+              {request.propertyAddress}
+            </span>
           </div>
 
-          <div className="rounded-md bg-muted p-3 text-sm">
-            <p className="line-clamp-2">{request.message}</p>
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center gap-1 text-sm">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span>{request.requestedDate}</span>
+            </div>
+            <div className="flex items-center gap-1 text-sm">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span>{request.requestedTime}</span>
+            </div>
           </div>
         </CardContent>
+        <CardFooter className="p-4 pt-0 flex justify-between">
+          {request.status === "Pending" ? (
+            <div className={`flex gap-2 ${isRTL ? "flex-row-reverse" : ""}`}>
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="h-8 w-8 p-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDecline(request.id);
+                      }}
+                    >
+                      <XCircle className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t.decline}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      size="sm"
+                      className="h-8 w-8 p-0"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onAccept(request.id);
+                      }}
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>{t.accept}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+          ) : (
+            <div className="flex-1"></div>
+          )}
+          <Button
+            size="sm"
+            variant="ghost"
+            className="h-8"
+            onClick={() => onClick(request)}
+          >
+            {t.requestDetails}
+          </Button>
+        </CardFooter>
       </Card>
     </motion.div>
   );

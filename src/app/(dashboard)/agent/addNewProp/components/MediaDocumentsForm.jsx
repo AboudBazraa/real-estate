@@ -9,10 +9,38 @@ import {
 import { Button } from "@/shared/components/ui/button";
 import { Upload, X, Image as ImageIcon } from "lucide-react";
 import Image from "next/image";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 
 export function MediaDocumentsForm({ setImages }) {
+  const { currentLanguage, isRTL } = useTranslation();
   const [previewImages, setPreviewImages] = useState([]);
   const [isDragging, setIsDragging] = useState(false);
+
+  // Translations
+  const translations = {
+    en: {
+      mediaDocuments: "Media & Documents",
+      mediaDescription: "Upload photos and documents related to the property.",
+      dragDrop: "Drag & drop files here or click to browse",
+      supportedFormats: "Supports JPEG, PNG, GIF (max 10MB each)",
+      browseFiles: "Browse Files",
+      uploadedImages: "Uploaded Images",
+      noImages:
+        "No images uploaded yet. Add some to enhance your property listing.",
+    },
+    ar: {
+      mediaDocuments: "الوسائط والمستندات",
+      mediaDescription: "قم بتحميل الصور والمستندات المتعلقة بالعقار.",
+      dragDrop: "اسحب وأفلت الملفات هنا أو انقر للتصفح",
+      supportedFormats: "يدعم JPEG و PNG و GIF (بحد أقصى 10 ميجابايت لكل منها)",
+      browseFiles: "تصفح الملفات",
+      uploadedImages: "الصور المحملة",
+      noImages:
+        "لم يتم تحميل أي صور حتى الآن. أضف بعضها لتحسين قائمة العقار الخاص بك.",
+    },
+  };
+
+  const t = translations[currentLanguage === "ar" ? "ar" : "en"];
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -73,12 +101,10 @@ export function MediaDocumentsForm({ setImages }) {
   };
 
   return (
-    <Card>
+    <Card className={isRTL ? "rtl" : ""}>
       <CardHeader>
-        <CardTitle>Media & Documents</CardTitle>
-        <CardDescription>
-          Upload photos and documents related to the property.
-        </CardDescription>
+        <CardTitle>{t.mediaDocuments}</CardTitle>
+        <CardDescription>{t.mediaDescription}</CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
         <div
@@ -91,11 +117,9 @@ export function MediaDocumentsForm({ setImages }) {
         >
           <div className="flex flex-col items-center justify-center gap-2">
             <Upload className="h-10 w-10 text-muted-foreground" />
-            <p className="text-sm font-medium">
-              Drag & drop files here or click to browse
-            </p>
+            <p className="text-sm font-medium">{t.dragDrop}</p>
             <p className="text-xs text-muted-foreground">
-              Supports JPEG, PNG, GIF (max 10MB each)
+              {t.supportedFormats}
             </p>
             <input
               id="file-upload"
@@ -113,7 +137,7 @@ export function MediaDocumentsForm({ setImages }) {
                 className="mt-2"
                 asChild
               >
-                <span>Browse Files</span>
+                <span>{t.browseFiles}</span>
               </Button>
             </label>
           </div>
@@ -121,7 +145,7 @@ export function MediaDocumentsForm({ setImages }) {
 
         {previewImages.length > 0 && (
           <div className="space-y-2">
-            <h3 className="text-sm font-medium">Uploaded Images</h3>
+            <h3 className="text-sm font-medium">{t.uploadedImages}</h3>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
               {previewImages.map((image, index) => (
                 <div
@@ -152,9 +176,7 @@ export function MediaDocumentsForm({ setImages }) {
         {previewImages.length === 0 && (
           <div className="flex flex-col items-center justify-center p-6 border rounded-md">
             <ImageIcon className="h-10 w-10 text-gray-400 mb-2" />
-            <p className="text-sm text-muted-foreground">
-              No images uploaded yet. Add some to enhance your property listing.
-            </p>
+            <p className="text-sm text-muted-foreground">{t.noImages}</p>
           </div>
         )}
       </CardContent>

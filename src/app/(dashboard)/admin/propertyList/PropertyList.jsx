@@ -13,6 +13,8 @@ import { PropertyDetailsModal } from "../../agent/components/PropertyDetailsModa
 import { PropertyEditForm } from "../../agent/components/PropertyEditForm";
 import { DeleteConfirmationModal } from "../../agent/components/DeleteConfirmationModal";
 import { useToast } from "@/shared/hooks/use-toast";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+import propertyListTranslations from "./translations";
 
 // Animation variants for tab transitions
 const tabVariants = {
@@ -37,6 +39,11 @@ export default function PropertyList({ properties }) {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
+
+  // Add translation support
+  const { currentLanguage, isRTL } = useTranslation();
+  const t =
+    propertyListTranslations[currentLanguage] || propertyListTranslations.en;
 
   const handleViewProperty = (id) => {
     setSelectedPropertyId(id);
@@ -63,8 +70,8 @@ export default function PropertyList({ properties }) {
       // await deleteProperty(selectedPropertyId);
 
       toast({
-        title: "Property deleted",
-        description: "The property has been successfully deleted.",
+        title: t.propertyDeleted,
+        description: t.propertyDeletedMessage,
         variant: "success",
       });
 
@@ -72,8 +79,8 @@ export default function PropertyList({ properties }) {
       setIsDeleteModalOpen(false);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete the property. Please try again.",
+        title: t.error,
+        description: t.deleteError,
         variant: "destructive",
       });
     } finally {
@@ -86,6 +93,7 @@ export default function PropertyList({ properties }) {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.5 }}
+      className={isRTL ? "rtl" : ""}
     >
       <Tabs
         defaultValue="List"
@@ -97,12 +105,12 @@ export default function PropertyList({ properties }) {
           animate={{ y: 0, opacity: 1 }}
           transition={{ delay: 0.2, duration: 0.5 }}
         >
-          <TabsList className="w-48">
+          <TabsList className={`w-48 ${isRTL ? "tabs-list" : ""}`}>
             <TabsTrigger value="List" className="w-full">
-              List
+              {t.list}
             </TabsTrigger>
             <TabsTrigger value="View" className="w-full">
-              View
+              {t.view}
             </TabsTrigger>
           </TabsList>
         </motion.div>
@@ -115,6 +123,7 @@ export default function PropertyList({ properties }) {
                 initial="hidden"
                 animate="visible"
                 exit="exit"
+                className={isRTL ? "table-container" : ""}
               >
                 <DataTableDemo
                   data={properties}
@@ -147,6 +156,7 @@ export default function PropertyList({ properties }) {
           propertyId={selectedPropertyId}
           isOpen={isDetailsModalOpen}
           onClose={() => setIsDetailsModalOpen(false)}
+          className={isRTL ? "modal-content" : ""}
         />
       )}
 
@@ -159,11 +169,12 @@ export default function PropertyList({ properties }) {
           onSaved={() => {
             setIsEditModalOpen(false);
             toast({
-              title: "Property updated",
-              description: "The property has been successfully updated.",
+              title: t.propertyUpdated,
+              description: t.propertyUpdatedMessage,
               variant: "success",
             });
           }}
+          className={isRTL ? "modal-content" : ""}
         />
       )}
 
@@ -173,11 +184,12 @@ export default function PropertyList({ properties }) {
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={confirmDelete}
         isLoading={isDeleting}
-        title="Delete Property"
-        description="Are you sure you want to delete this property? This action cannot be undone."
+        title={t.deleteProperty}
+        description={t.deleteConfirmation}
         itemName={
           properties.find((p) => p.id === selectedPropertyId)?.title || ""
         }
+        className={isRTL ? "modal-content" : ""}
       />
     </motion.div>
   );

@@ -59,9 +59,20 @@ export default function AboutHero() {
           ref={titleRef}
           className="about-title absolute inset-0 flex items-center justify-center z-20"
         >
-          <BlurText
-            text="About Us"
+          {/* <BlurText
+            text=" Us"
             className="text-black dark:text-white text-4xl sm:text-5xl md:text-6xl lg:text-8xl xl:text-9xl font-bold tracking-wide"
+          /> */}
+          <BlurText
+            className="text-black dark:text-white text-4xl sm:text-5xl md:text-6xl lg:text-8xl xl:text-9xl font-bold tracking-wide"
+            text={
+              typeof window !== "undefined" &&
+              (document?.documentElement?.lang === "ar" ||
+                (typeof navigator !== "undefined" &&
+                  navigator.language?.startsWith("ar")))
+                ? "من نحن"
+                : "About Us"
+            }
           />
         </div>
       </div>

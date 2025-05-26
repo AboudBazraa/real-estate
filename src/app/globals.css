@@ -1,4 +1,11 @@
 @import "tailwindcss";
+@import "../app/(dashboard)/agent/styles/rtl.css";
+@import "../app/(dashboard)/admin/userList/styles/rtl.css";
+@import "../app/(dashboard)/admin/pending/styles/rtl.css";
+@import "../app/(dashboard)/admin/propertyList/styles/rtl.css";
+@import "../app/(dashboard)/admin/payments/styles/rtl.css";
+@import "../app/(dashboard)/admin/commissions/styles/rtl.css";
+@import "../app/(dashboard)/admin/subscriptions/styles/rtl.css";
 
 @plugin 'tailwindcss-animate';
 
@@ -109,6 +116,107 @@
       animation: pulseThumbDark 1.5s infinite alternate;
     }
   }
+
+  /* RTL Support Classes */
+  .rtl {
+    direction: rtl;
+    text-align: right;
+  }
+
+  .rtl-reverse-flex {
+    display: flex;
+    flex-direction: row-reverse;
+  }
+
+  .rtl-content {
+    direction: rtl;
+  }
+
+  .rtl-submenu {
+    border-right: 1px solid var(--color-sidebar-border) !important;
+    border-left: none !important;
+    margin-right: 0.875rem !important;
+    margin-left: 0 !important;
+    padding-right: 0.625rem !important;
+    padding-left: 0 !important;
+  }
+
+  /* Fix sidebar menu hover indicator for RTL */
+  .rtl [data-sidebar="menu-sub"] {
+    border-left: none !important;
+    border-right: 1px solid hsl(var(--sidebar-border)) !important;
+    margin-left: 0 !important;
+    margin-right: 0.875rem !important;
+    padding-left: 0 !important;
+    padding-right: 0.625rem !important;
+    transform: translateX(0) !important;
+  }
+
+  .rtl [data-sidebar="menu-sub-button"] {
+    transform: translateX(0) !important;
+  }
+
+  /* Override active and hover indicator positioning for RTL */
+  .rtl [data-sidebar="menu-sub"]::before {
+    left: auto;
+    right: -1px;
+  }
+
+  .rtl [data-sidebar="menu-button"][data-active="true"]::before,
+  .rtl [data-sidebar="menu-sub-button"][data-active="true"]::before {
+    left: auto;
+    right: -2px;
+    border-left: none;
+    border-right: 2px solid hsl(var(--sidebar-accent-foreground));
+  }
+
+  .rtl [data-sidebar="menu-button"]:hover::before,
+  .rtl [data-sidebar="menu-sub-button"]:hover::before {
+    left: auto;
+    right: -2px;
+    border-left: none;
+    border-right: 2px solid hsl(var(--sidebar-accent-foreground));
+  }
+
+  /* Fix for active indicators in nav-main */
+  .rtl .bg-zinc-200::before,
+  .rtl .dark .bg-zinc-800::before {
+    content: "";
+    position: absolute;
+    right: 0;
+    left: auto !important;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background-color: currentColor;
+  }
+
+  /* Add hover indicator on the right side for RTL navigation items */
+  .rtl [role="navigation"] a:hover::before {
+    content: "";
+    position: absolute;
+    right: 0;
+    left: auto;
+    top: 0;
+    height: 100%;
+    width: 2px;
+    background-color: hsl(var(--sidebar-accent-foreground));
+  }
+
+  .rtl-footer {
+    direction: rtl;
+  }
+
+  /* Flip icons in RTL mode */
+  .rtl-flip {
+    transform: scaleX(-1);
+  }
+
+  /* Fix dropdown positioning in RTL */
+  [dir="rtl"] .dropdown-menu {
+    left: 0;
+    right: auto;
+  }
 }
 
 @layer base {
@@ -168,6 +276,18 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+  }
+
+  /* RTL document settings */
+  html[dir="rtl"] {
+    direction: rtl;
+    text-align: right;
+  }
+
+  /* Fix sidebar borders in RTL mode */
+  html[dir="rtl"] .sidebar {
+    border-left: 1px solid hsl(var(--sidebar-border));
+    border-right: none;
   }
 }
 

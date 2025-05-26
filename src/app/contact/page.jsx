@@ -1,3 +1,4 @@
+"use client";
 import { Suspense } from "react";
 import { MainNav } from "@/shared/components/NavBar";
 import Footer from "@/shared/components/Footer";
@@ -6,8 +7,11 @@ import Spinner from "@/shared/components/ui/spinner";
 import ContactForm from "./client-components/ContactForm";
 import { MapPin, Phone, Mail, ArrowRight, ArrowDownRight } from "lucide-react";
 import BlurText from "@/shared/components/animation/BlurText";
+import { useLanguage } from "@/app/providers/LanguageProvider";
 
 export default function ContactPage() {
+  const { locale, t } = useLanguage();
+
   return (
     <PageTransition>
       <div className="min-h-screen flex flex-col dark:bg-zinc-950 ">
@@ -23,64 +27,71 @@ export default function ContactPage() {
                 <div className="flex flex-col justify-center h-full p-5">
                   <div>
                     <BlurText
-                      text="Let's get"
+                      text={locale === "ar" ? "لنتواصل" : "Let's get"}
                       className="text-zinc-900 dark:text-white text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight"
                     />
                     <BlurText
-                      text="in touch"
+                      text={locale === "ar" ? "معاً" : "in touch"}
                       className="text-zinc-900 dark:text-white text-5xl sm:text-6xl lg:text-7xl font-bold tracking-tight"
                     />
                     <p className="mt-6 text-lg text-zinc-600 dark:text-zinc-400 max-w-md">
-                      Great! We're excited to hear from you and let's start
-                      something special together. Call us for any inquiry.
+                      {locale === "ar"
+                        ? "رائع! نحن متحمسون لسماعك ودعنا نبدأ شيئًا مميزًا معًا. اتصل بنا لأي استفسار."
+                        : "Great! We're excited to hear from you and let's start something special together. Call us for any inquiry."}
                     </p>
                   </div>
 
                   <div className="mt-8 space-y-6">
                     <BlurText
-                      text="Don't be afraid to say hello with us!"
+                      text={
+                        locale === "ar"
+                          ? "لا تتردد في التواصل معنا!"
+                          : "Don't be afraid to say hello with us!"
+                      }
                       className="text-zinc-900 dark:text-white text-2xl font-semibold"
                     />
 
                     <div className="space-y-5 mt-6">
-                      <div className="flex items-start space-x-4">
+                      <div className="flex items-start space-x-4 rtl:space-x-reverse">
                         <Phone className="w-5 h-5 text-zinc-900 dark:text-white mt-1" />
                         <div>
                           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                            Phone
+                            {locale === "ar" ? "الهاتف" : "Phone"}
                           </p>
                           <a
-                            href="tel:+967735768797"
+                            href="tel:+12578385379"
                             className="text-zinc-900 dark:text-white hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
                           >
-                            +967 (735)768-797
+                            +1 (257) 838-5379
                           </a>
                         </div>
                       </div>
 
-                      <div className="flex items-start space-x-4">
+                      <div className="flex items-start space-x-4 rtl:space-x-reverse">
                         <Mail className="w-5 h-5 text-zinc-900 dark:text-white mt-1" />
                         <div>
                           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                            Email
+                            {locale === "ar" ? "البريد الإلكتروني" : "Email"}
                           </p>
                           <a
-                            href="mailto:abodmohd880@gmail.com"
+                            href="mailto:hello@mirageestate.com"
                             className="text-zinc-900 dark:text-white hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
                           >
-                            abodmohd880@gmail.com
+                            hello@mirageestate.com
                           </a>
                         </div>
                       </div>
 
-                      <div className="flex items-start space-x-4">
+                      <div className="flex items-start space-x-4 rtl:space-x-reverse">
                         <MapPin className="w-5 h-5 text-zinc-900 dark:text-white mt-1" />
                         <div>
                           <p className="text-sm text-zinc-500 dark:text-zinc-400">
-                            Office
+                            {locale === "ar" ? "المكتب" : "Office"}
                           </p>
                           <p className="text-zinc-900 dark:text-white">
-                            230 Al Mhabh Street Al Mukalla, Hadramoot, Yemen
+                            {locale === "ar"
+                              ? "230 شارع نورمان نيويورك، كيبيك (الولايات المتحدة) H8R 1A1"
+                              : "230 Norman Street New York, QC (USA) H8R 1A1"}
                           </p>
                           <a
                             href="https://maps.google.com?q=230+Norman+Street+New+York"
@@ -88,8 +99,10 @@ export default function ContactPage() {
                             rel="noopener noreferrer"
                             className="inline-flex items-center text-sm text-zinc-900 dark:text-white mt-1 hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
                           >
-                            See on Google Map
-                            <ArrowRight className="ml-1 w-3 h-3" />
+                            {locale === "ar"
+                              ? "اعرض على خرائط جوجل"
+                              : "See on Google Map"}
+                            <ArrowRight className="ml-1 rtl:mr-1 rtl:ml-0 w-3 h-3 rtl:rotate-180" />
                           </a>
                         </div>
                       </div>
@@ -100,11 +113,15 @@ export default function ContactPage() {
                 {/* Right Column - Contact Form */}
                 <div className="grid lg:grid-row-4 h-full lg:border-x-2 border-y-2 lg:border-y-0 border-zinc-300 dark:border-zinc-700 border-dashed">
                   <div className="row-span-4 flex items-end justify-start p-4">
-                    <ArrowDownRight className="w-14 h-14 text-zinc-900 dark:text-white" />
+                    <ArrowDownRight
+                      className={`w-14 h-14 text-zinc-900 dark:text-white ${
+                        locale === "ar" ? "rotate-90" : ""
+                      }`}
+                    />
                   </div>
                   <div className="row-span-1 bg-black p-2 sm:p-4">
                     <h2 className="text-2xl font-semibold mb-4 text-white">
-                      Contact
+                      {locale === "ar" ? "اتصل بنا" : "Contact"}
                     </h2>
                     <Suspense
                       fallback={

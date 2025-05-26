@@ -5,6 +5,9 @@ import PropertyList from "./PropertyList";
 import { useProperties } from "@/shared/hooks/useProperties";
 import { Loader2, RefreshCw } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+import propertyListTranslations from "./translations";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 
 // Animation variants
 const container = {
@@ -40,6 +43,11 @@ export default function PropertyListPage() {
   const [isInitializing, setIsInitializing] = useState(true);
   const [retryCount, setRetryCount] = useState(0);
 
+  // Add translation support
+  const { currentLanguage, isRTL } = useTranslation();
+  const t =
+    propertyListTranslations[currentLanguage] || propertyListTranslations.en;
+
   useEffect(() => {
     let isMounted = true;
     const loadProperties = async () => {
@@ -72,7 +80,11 @@ export default function PropertyListPage() {
 
   if (isInitializing || loading) {
     return (
-      <div className="flex justify-center items-center h-[70vh] w-full">
+      <div
+        className={`flex justify-center items-center h-[70vh] w-full ${
+          isRTL ? "rtl" : ""
+        }`}
+      >
         <motion.div
           className="bg-background/80 backdrop-blur-sm p-8 rounded-lg shadow-lg border border-border/50"
           initial={{ opacity: 0, scale: 0.9 }}
@@ -88,13 +100,13 @@ export default function PropertyListPage() {
             >
               <motion.div
                 className="absolute inset-0"
-                animate={{ 
+                animate={{
                   rotate: 360,
                 }}
                 transition={{
                   duration: 2,
                   repeat: Infinity,
-                  ease: "linear"
+                  ease: "linear",
                 }}
               >
                 <div className="w-full h-full rounded-full border-t-4 border-primary opacity-75"></div>
@@ -109,7 +121,7 @@ export default function PropertyListPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
             >
-              Loading Properties
+              {t.loading}
             </motion.h3>
             <motion.p
               className="text-muted-foreground text-center max-w-xs"
@@ -117,7 +129,7 @@ export default function PropertyListPage() {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              Please wait while we fetch the latest property listings for you.
+              {t.loadingDescription}
             </motion.p>
           </div>
         </motion.div>
@@ -128,7 +140,9 @@ export default function PropertyListPage() {
   if (error) {
     return (
       <motion.div
-        className="flex justify-center items-center h-64"
+        className={`flex justify-center items-center h-64 ${
+          isRTL ? "rtl" : ""
+        }`}
         variants={fadeIn}
         initial="hidden"
         animate="show"
@@ -140,7 +154,7 @@ export default function PropertyListPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
           >
-            Failed to load properties
+            {t.failedToLoad}
           </motion.p>
           <motion.p
             className="text-muted-foreground mb-4"
@@ -157,9 +171,11 @@ export default function PropertyListPage() {
           >
             <button
               onClick={handleRetry}
-              className="px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors"
+              className={`px-4 py-2 rounded-md bg-primary text-primary-foreground hover:bg-primary/90 transition-colors ${
+                isRTL ? "rtl-flex-row-reverse" : ""
+              }`}
             >
-              Try Again
+              {t.tryAgain}
             </button>
           </motion.div>
         </div>
@@ -170,14 +186,18 @@ export default function PropertyListPage() {
   return (
     <AnimatePresence>
       <motion.div
-        className="flex flex-col gap-4"
+        className={`flex flex-col gap-4 ${isRTL ? "rtl" : ""}`}
         variants={container}
         initial="hidden"
         animate="show"
       >
-        {/* <motion.div variants={item}>
-          <AddPropertyForm />
-        </motion.div> */}
+        <motion.div
+          variants={item}
+          className="flex justify-between items-center"
+        >
+          <h1 className="text-2xl font-bold">{t.propertyList}</h1>
+          <LanguageSwitcher />
+        </motion.div>
         <motion.div variants={item}>
           <PropertyList properties={properties} />
         </motion.div>

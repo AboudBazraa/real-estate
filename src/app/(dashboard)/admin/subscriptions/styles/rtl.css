@@ -1,0 +1,143 @@
+/* RTL styles for subscriptions page */
+
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Card headers and content */
+.rtl .card-header,
+.rtl .card-title,
+.rtl .card-description {
+  text-align: right;
+}
+
+/* Flexbox adjustments */
+.rtl .rtl-flex-row-reverse {
+  flex-direction: row-reverse !important;
+}
+
+.rtl .rtl-ml-auto {
+  margin-right: auto !important;
+  margin-left: 0 !important;
+}
+
+.rtl .rtl-mr-auto {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+/* Icon spacing */
+.rtl .rtl-icon-flip {
+  transform: scaleX(-1);
+}
+
+.rtl .rtl-icon-mr {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+.rtl .rtl-icon-ml {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+/* Table styles */
+.rtl .table-container th,
+.rtl .table-container td,
+.rtl th,
+.rtl td {
+  text-align: right;
+}
+
+.rtl .table-header {
+  flex-direction: row-reverse;
+}
+
+.rtl .table-actions {
+  flex-direction: row-reverse;
+}
+
+/* Subscription plan card styles */
+.rtl .plan-card {
+  text-align: right;
+}
+
+.rtl .plan-card-header {
+  flex-direction: row-reverse;
+}
+
+.rtl .plan-features {
+  text-align: right;
+}
+
+.rtl .plan-feature-item {
+  flex-direction: row-reverse;
+}
+
+.rtl .feature-icon {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Stat card styles */
+.rtl .stat-card {
+  text-align: right;
+}
+
+.rtl .stat-card-content {
+  direction: rtl;
+}
+
+.rtl .stat-icon {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Status indicators */
+.rtl .status-indicator {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+.rtl .status-badge {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* Tabs */
+.rtl .tabs-list {
+  flex-direction: row-reverse;
+}
+
+/* Form and input styles */
+.rtl .form-group label {
+  text-align: right;
+}
+
+.rtl .form-row {
+  flex-direction: row-reverse;
+}
+
+.rtl .dialog-content {
+  text-align: right;
+}
+
+.rtl .dialog-footer {
+  flex-direction: row-reverse;
+}
+
+/* Search and filter components */
+.rtl .search-filter-container {
+  flex-direction: row-reverse;
+}
+
+.rtl .filter-group {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Dropdown menus */
+.rtl .dropdown-menu-content {
+  text-align: right;
+}

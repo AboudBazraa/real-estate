@@ -13,6 +13,7 @@ import { MapPin, Loader2, Target, Check, LocateFixed, Map } from "lucide-react";
 import { Button } from "@/shared/components/ui/button";
 import { useToast } from "@/shared/hooks/use-toast";
 import dynamic from "next/dynamic";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -41,6 +42,7 @@ const MapComponent = dynamic(() => import("./MapComponent"), {
 const IP_LOCATION_API = "https://ipapi.co/json/";
 
 export function LocationForm({ data, onChange }) {
+  const { currentLanguage, isRTL } = useTranslation();
   const [isLoading, setIsLoading] = useState(false);
   const [locationSource, setLocationSource] = useState("");
   const [permissionStatus, setPermissionStatus] = useState(null);
@@ -50,6 +52,117 @@ export function LocationForm({ data, onChange }) {
   const [mapKey, setMapKey] = useState(0);
   const [accuracy, setAccuracy] = useState(null);
   const [isMapMode, setIsMapMode] = useState(false);
+
+  // Translations
+  const translations = {
+    en: {
+      locationDetails: "Location Details",
+      locationDescription: "Enter the location information for this property.",
+      showForm: "Show Form",
+      showMap: "Show Map",
+      streetAddress: "Street Address",
+      streetAddressPlaceholder: "Street address",
+      city: "City",
+      cityPlaceholder: "City",
+      stateProvince: "State/Province",
+      stateProvincePlaceholder: "State/Province",
+      zipPostalCode: "Zip/Postal Code",
+      zipPostalCodePlaceholder: "Zip/Postal code",
+      country: "Country",
+      countryPlaceholder: "Country",
+      latitude: "Latitude",
+      latitudePlaceholder: "Latitude",
+      longitude: "Longitude",
+      longitudePlaceholder: "Longitude",
+      gettingLocation: "Getting location...",
+      getMyLocation: "Get My Location",
+      locationPermissionRequired: "Location permission required",
+      enableLocationAccess:
+        "Please enable location access in your browser settings",
+      locationUpdated: "Location updated",
+      addressUpdated: "Address updated",
+      addressUpdatedDescription:
+        "Location details have been filled automatically.",
+      mapPositionUpdated: "Map position has been updated.",
+      mapPreview: "Map preview would be displayed here",
+      mapInstructions:
+        'Use "Get My Location" button or enter coordinates manually',
+      currentLocation: "Current Location:",
+      showOnMap: "Show on Map",
+      confirmLocation: "Confirm Location",
+      gpsLocationDetected:
+        "Your location has been detected. The accuracy may vary based on your device and environment.",
+      ipLocationDetected:
+        "We've found an approximate location based on your IP address.",
+      cancel: "Cancel",
+      useThisLocation: "Use This Location",
+      lowAccuracy: "Low accuracy detected",
+      lowAccuracyDescription:
+        "Your location was found with {{accuracy}}m accuracy. You can fine-tune it on the map.",
+      usingApproxLocation: "Using approximate location",
+      usingApproxDescription:
+        "Precise location unavailable. Using IP-based location - please adjust manually on the map.",
+      locationError: "Location error",
+      locationErrorDescription:
+        "Could not determine your location. Please enter coordinates manually or try again.",
+      coordinatesSet:
+        "Coordinates have been set. You can fine-tune by dragging the marker.",
+      updateAddress: "Update Address Fields from Map Location",
+    },
+    ar: {
+      locationDetails: "تفاصيل الموقع",
+      locationDescription: "أدخل معلومات الموقع لهذا العقار.",
+      showForm: "عرض النموذج",
+      showMap: "عرض الخريطة",
+      streetAddress: "عنوان الشارع",
+      streetAddressPlaceholder: "عنوان الشارع",
+      city: "المدينة",
+      cityPlaceholder: "المدينة",
+      stateProvince: "الولاية/المقاطعة",
+      stateProvincePlaceholder: "الولاية/المقاطعة",
+      zipPostalCode: "الرمز البريدي",
+      zipPostalCodePlaceholder: "الرمز البريدي",
+      country: "البلد",
+      countryPlaceholder: "البلد",
+      latitude: "خط العرض",
+      latitudePlaceholder: "خط العرض",
+      longitude: "خط الطول",
+      longitudePlaceholder: "خط الطول",
+      gettingLocation: "جاري تحديد الموقع...",
+      getMyLocation: "الحصول على موقعي",
+      locationPermissionRequired: "إذن الموقع مطلوب",
+      enableLocationAccess: "يرجى تمكين الوصول إلى الموقع في إعدادات المتصفح",
+      locationUpdated: "تم تحديث الموقع",
+      addressUpdated: "تم تحديث العنوان",
+      addressUpdatedDescription: "تم ملء تفاصيل الموقع تلقائيًا.",
+      mapPositionUpdated: "تم تحديث موقع الخريطة.",
+      mapPreview: "ستعرض معاينة الخريطة هنا",
+      mapInstructions: 'استخدم زر "الحصول على موقعي" أو أدخل الإحداثيات يدويًا',
+      currentLocation: "الموقع الحالي:",
+      showOnMap: "عرض على الخريطة",
+      confirmLocation: "تأكيد الموقع",
+      gpsLocationDetected:
+        "تم اكتشاف موقعك. قد تختلف الدقة بناءً على جهازك وبيئتك.",
+      ipLocationDetected:
+        "لقد وجدنا موقعًا تقريبيًا بناءً على عنوان IP الخاص بك.",
+      cancel: "إلغاء",
+      useThisLocation: "استخدم هذا الموقع",
+      lowAccuracy: "تم اكتشاف دقة منخفضة",
+      lowAccuracyDescription:
+        "تم العثور على موقعك بدقة {{accuracy}} متر. يمكنك ضبطه على الخريطة.",
+      usingApproxLocation: "استخدام موقع تقريبي",
+      usingApproxDescription:
+        "الموقع الدقيق غير متوفر. استخدام موقع يعتمد على IP - يرجى التعديل يدويًا على الخريطة.",
+      locationError: "خطأ في الموقع",
+      locationErrorDescription:
+        "تعذر تحديد موقعك. يرجى إدخال الإحداثيات يدويًا أو المحاولة مرة أخرى.",
+      coordinatesSet:
+        "تم تعيين الإحداثيات. يمكنك الضبط الدقيق عن طريق سحب العلامة.",
+      updateAddress: "تحديث حقول العنوان من موقع الخريطة",
+    },
+  };
+
+  const t = translations[currentLanguage === "ar" ? "ar" : "en"];
 
   // Check for geolocation permissions when component mounts
   useEffect(() => {
@@ -164,10 +277,11 @@ export function LocationForm({ data, onChange }) {
       // If accuracy is poor (> 100 meters), show confirmation dialog
       if (location.accuracy > 100) {
         toast({
-          title: "Low accuracy detected",
-          description: `Your location was found with ${Math.round(
-            location.accuracy
-          )}m accuracy. You can fine-tune it on the map.`,
+          title: t.lowAccuracy,
+          description: t.lowAccuracyDescription.replace(
+            "{{accuracy}}",
+            Math.round(location.accuracy)
+          ),
           variant: "warning",
         });
       }
@@ -191,9 +305,8 @@ export function LocationForm({ data, onChange }) {
         setShowConfirmDialog(true);
 
         toast({
-          title: "Using approximate location",
-          description:
-            "Precise location unavailable. Using IP-based location - please adjust manually on the map.",
+          title: t.usingApproxLocation,
+          description: t.usingApproxDescription,
           variant: "warning",
         });
       } catch (ipError) {
@@ -201,9 +314,8 @@ export function LocationForm({ data, onChange }) {
 
         toast({
           variant: "destructive",
-          title: "Location error",
-          description:
-            "Could not determine your location. Please enter coordinates manually or try again.",
+          title: t.locationError,
+          description: t.locationErrorDescription,
         });
       }
     } finally {
@@ -220,9 +332,8 @@ export function LocationForm({ data, onChange }) {
       setIsMapMode(true);
 
       toast({
-        title: "Location updated",
-        description:
-          "Coordinates have been set. You can fine-tune by dragging the marker.",
+        title: t.locationUpdated,
+        description: t.coordinatesSet,
       });
     }
   };
@@ -247,8 +358,8 @@ export function LocationForm({ data, onChange }) {
         onChange("country", address.country || "");
 
         toast({
-          title: "Address updated",
-          description: "Location details have been filled automatically.",
+          title: t.addressUpdated,
+          description: t.addressUpdatedDescription,
         });
       }
     } catch (error) {
@@ -266,8 +377,8 @@ export function LocationForm({ data, onChange }) {
       updateAddressFromCoordinates(newPosition[0], newPosition[1]);
 
       toast({
-        title: "Location updated",
-        description: "Map position has been updated.",
+        title: t.locationUpdated,
+        description: t.mapPositionUpdated,
       });
     }
   };
@@ -279,10 +390,10 @@ export function LocationForm({ data, onChange }) {
 
   return (
     <>
-      <Card>
+      <Card className={isRTL ? "rtl" : ""}>
         <CardHeader>
           <CardTitle className="flex justify-between items-center">
-            <span>Location Details</span>
+            <span>{t.locationDetails}</span>
             {data.latitude && data.longitude && (
               <Button
                 variant="outline"
@@ -290,13 +401,11 @@ export function LocationForm({ data, onChange }) {
                 className="md:hidden"
                 onClick={toggleMapMode}
               >
-                {isMapMode ? "Show Form" : "Show Map"}
+                {isMapMode ? t.showForm : t.showMap}
               </Button>
             )}
           </CardTitle>
-          <CardDescription>
-            Enter the location information for this property.
-          </CardDescription>
+          <CardDescription>{t.locationDescription}</CardDescription>
         </CardHeader>
 
         <CardContent className="space-y-4">
@@ -304,34 +413,34 @@ export function LocationForm({ data, onChange }) {
             className={`space-y-4 ${isMapMode ? "hidden md:block" : "block"}`}
           >
             <div>
-              <Label htmlFor="address">Street Address</Label>
+              <Label htmlFor="address">{t.streetAddress}</Label>
               <Input
                 id="address"
                 type="text"
                 value={data.address}
-                placeholder="Street address"
+                placeholder={t.streetAddressPlaceholder}
                 onChange={handleChange}
               />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="city">City</Label>
+                <Label htmlFor="city">{t.city}</Label>
                 <Input
                   id="city"
                   type="text"
                   value={data.city}
-                  placeholder="City"
+                  placeholder={t.cityPlaceholder}
                   onChange={handleChange}
                 />
               </div>
               <div>
-                <Label htmlFor="state">State/Province</Label>
+                <Label htmlFor="state">{t.stateProvince}</Label>
                 <Input
                   id="state"
                   type="text"
                   value={data.state}
-                  placeholder="State/Province"
+                  placeholder={t.stateProvincePlaceholder}
                   onChange={handleChange}
                 />
               </div>
@@ -339,22 +448,22 @@ export function LocationForm({ data, onChange }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="zip_code">Zip/Postal Code</Label>
+                <Label htmlFor="zip_code">{t.zipPostalCode}</Label>
                 <Input
                   id="zip_code"
                   type="text"
                   value={data.zip_code}
-                  placeholder="Zip/Postal code"
+                  placeholder={t.zipPostalCodePlaceholder}
                   onChange={handleChange}
                 />
               </div>
               <div>
-                <Label htmlFor="country">Country</Label>
+                <Label htmlFor="country">{t.country}</Label>
                 <Input
                   id="country"
                   type="text"
                   value={data.country}
-                  placeholder="Country"
+                  placeholder={t.countryPlaceholder}
                   onChange={handleChange}
                 />
               </div>
@@ -362,24 +471,24 @@ export function LocationForm({ data, onChange }) {
 
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="latitude">Latitude</Label>
+                <Label htmlFor="latitude">{t.latitude}</Label>
                 <Input
                   id="latitude"
                   type="number"
                   step="0.000001"
                   value={data.latitude || ""}
-                  placeholder="Latitude"
+                  placeholder={t.latitudePlaceholder}
                   onChange={handleNumberChange}
                 />
               </div>
               <div>
-                <Label htmlFor="longitude">Longitude</Label>
+                <Label htmlFor="longitude">{t.longitude}</Label>
                 <Input
                   id="longitude"
                   type="number"
                   step="0.000001"
                   value={data.longitude || ""}
-                  placeholder="Longitude"
+                  placeholder={t.longitudePlaceholder}
                   onChange={handleNumberChange}
                 />
               </div>
@@ -395,12 +504,12 @@ export function LocationForm({ data, onChange }) {
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    Getting location...
+                    {t.gettingLocation}
                   </>
                 ) : (
                   <>
                     <Target className="mr-2 h-4 w-4" />
-                    Get My Location
+                    {t.getMyLocation}
                   </>
                 )}
               </Button>
@@ -410,14 +519,13 @@ export function LocationForm({ data, onChange }) {
                   onClick={() => {
                     window.open("about:preferences#privacy", "_blank");
                     toast({
-                      title: "Location permission required",
-                      description:
-                        "Please enable location access in your browser settings",
+                      title: t.locationPermissionRequired,
+                      description: t.enableLocationAccess,
                     });
                   }}
                   variant="destructive"
                   size="icon"
-                  title="Location permission denied. Click to open settings."
+                  title={t.locationPermissionRequired}
                 >
                   <LocateFixed className="h-4 w-4" />
                 </Button>
@@ -453,17 +561,15 @@ export function LocationForm({ data, onChange }) {
                     updateAddressFromCoordinates(data.latitude, data.longitude)
                   }
                 >
-                  Update Address Fields from Map Location
+                  {t.updateAddress}
                 </Button>
               </div>
             ) : (
               <div className="h-[300px] bg-gray-100 rounded-md flex flex-col items-center justify-center gap-2">
                 <MapPin className="h-8 w-8 text-muted-foreground" />
-                <p className="text-sm text-muted-foreground">
-                  Map preview would be displayed here
-                </p>
+                <p className="text-sm text-muted-foreground">{t.mapPreview}</p>
                 <p className="text-xs text-muted-foreground">
-                  Use "Get My Location" button or enter coordinates manually
+                  {t.mapInstructions}
                 </p>
               </div>
             )}
@@ -473,7 +579,7 @@ export function LocationForm({ data, onChange }) {
         {data.latitude && data.longitude && (
           <CardFooter className="flex justify-between border-t pt-4 mt-2">
             <div className="text-sm">
-              <span className="font-medium">Current Location:</span>{" "}
+              <span className="font-medium">{t.currentLocation}</span>{" "}
               {data.latitude.toFixed(6)}, {data.longitude.toFixed(6)}
             </div>
             {!isMapMode && (
@@ -491,7 +597,7 @@ export function LocationForm({ data, onChange }) {
                 }}
               >
                 <Map className="h-4 w-4 mr-2" />
-                Show on Map
+                {t.showOnMap}
               </Button>
             )}
           </CardFooter>
@@ -500,13 +606,13 @@ export function LocationForm({ data, onChange }) {
 
       {/* Location confirmation dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
+        <AlertDialogContent className={isRTL ? "rtl" : ""}>
           <AlertDialogHeader>
-            <AlertDialogTitle>Confirm Location</AlertDialogTitle>
+            <AlertDialogTitle>{t.confirmLocation}</AlertDialogTitle>
             <AlertDialogDescription>
               {locationSource === "GPS"
-                ? "Your location has been detected. The accuracy may vary based on your device and environment."
-                : "We've found an approximate location based on your IP address."}
+                ? t.gpsLocationDetected
+                : t.ipLocationDetected}
             </AlertDialogDescription>
           </AlertDialogHeader>
 
@@ -524,11 +630,11 @@ export function LocationForm({ data, onChange }) {
             />
           )}
 
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className={isRTL ? "flex-row-reverse" : ""}>
+            <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
             <AlertDialogAction onClick={confirmLocation}>
               <Check className="mr-2 h-4 w-4" />
-              Use This Location
+              {t.useThisLocation}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

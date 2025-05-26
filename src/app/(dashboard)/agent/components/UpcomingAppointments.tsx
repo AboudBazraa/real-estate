@@ -20,19 +20,44 @@ export interface Appointment {
 interface UpcomingAppointmentsProps {
   appointments: Appointment[];
   isLoading: boolean;
+  translations?: {
+    upcomingAppointments: string;
+    viewAll: string;
+    with: string;
+    viewDetails: string;
+    noUpcomingAppointments: string;
+    scheduledAppointmentsWillAppear: string;
+  };
+  isRTL?: boolean;
 }
 
 export function UpcomingAppointments({
   appointments,
   isLoading,
+  translations,
+  isRTL = false,
 }: UpcomingAppointmentsProps) {
+  const t = translations || {
+    upcomingAppointments: "Upcoming Appointments",
+    viewAll: "View all",
+    with: "With",
+    viewDetails: "View Details",
+    noUpcomingAppointments: "No upcoming appointments",
+    scheduledAppointmentsWillAppear:
+      "Your scheduled appointments will appear here",
+  };
+
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-xl font-semibold">Upcoming Appointments</h3>
+    <div className={`space-y-4 ${isRTL ? "rtl" : ""}`}>
+      <div
+        className={`flex items-center justify-between ${
+          isRTL ? "flex-row-reverse" : ""
+        }`}
+      >
+        <h3 className="text-xl font-semibold">{t.upcomingAppointments}</h3>
         <Button variant="ghost" size="sm" asChild>
           <Link href="/agent/meetings" className="text-sm">
-            View all
+            {t.viewAll}
           </Link>
         </Button>
       </div>
@@ -44,24 +69,52 @@ export function UpcomingAppointments({
           {appointments.map((appointment) => (
             <Card
               key={appointment.id}
-              className="hover:shadow-md transition-shadow p-1"
+              className={`hover:shadow-md transition-shadow p-1 ${
+                isRTL ? "rtl" : ""
+              }`}
             >
               <CardContent className="p-4">
-                <div className="flex items-start gap-4">
+                <div
+                  className={`flex items-start gap-4 ${
+                    isRTL ? "flex-row-reverse" : ""
+                  }`}
+                >
                   <div className="rounded-full bg-primary/10 p-2 mt-1">
                     <Calendar className="h-4 w-4 text-primary" />
                   </div>
-                  <div className="flex-1 space-y-1">
+                  <div
+                    className={`flex-1 space-y-1 ${isRTL ? "text-right" : ""}`}
+                  >
                     <p className="font-medium line-clamp-1">
                       {appointment.property_title}
                     </p>
-                    <div className="flex flex-wrap justify-between text-sm gap-2">
-                      <span className="flex items-center">
-                        <Calendar className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                    <div
+                      className={`flex flex-wrap justify-between text-sm gap-2 ${
+                        isRTL ? "flex-row-reverse" : ""
+                      }`}
+                    >
+                      <span
+                        className={`flex items-center ${
+                          isRTL ? "flex-row-reverse" : ""
+                        }`}
+                      >
+                        <Calendar
+                          className={`h-3.5 w-3.5 ${
+                            isRTL ? "ml-1" : "mr-1"
+                          } text-muted-foreground`}
+                        />
                         {formatDate(appointment.date)}
                       </span>
-                      <span className="flex items-center">
-                        <Clock className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                      <span
+                        className={`flex items-center ${
+                          isRTL ? "flex-row-reverse" : ""
+                        }`}
+                      >
+                        <Clock
+                          className={`h-3.5 w-3.5 ${
+                            isRTL ? "ml-1" : "mr-1"
+                          } text-muted-foreground`}
+                        />
                         {appointment.time}
                       </span>
                       <span className="px-2 py-0.5 rounded-full text-xs font-medium capitalize bg-primary/10 text-primary">
@@ -69,14 +122,18 @@ export function UpcomingAppointments({
                       </span>
                     </div>
                     <p className="text-sm text-muted-foreground">
-                      With {appointment.client_name}
+                      {t.with} {appointment.client_name}
                     </p>
                   </div>
                 </div>
-                <div className="flex justify-end mt-3">
+                <div
+                  className={`flex ${
+                    isRTL ? "justify-start" : "justify-end"
+                  } mt-3`}
+                >
                   <Button variant="outline" size="sm" asChild>
                     <Link href={`/agent/meetings/${appointment.id}`}>
-                      View Details
+                      {t.viewDetails}
                     </Link>
                   </Button>
                 </div>
@@ -85,17 +142,15 @@ export function UpcomingAppointments({
           ))}
         </div>
       ) : (
-        <Card className="p-6 text-center border-dashed">
+        <Card className={`p-6 text-center border-dashed ${isRTL ? "rtl" : ""}`}>
           <div className="flex flex-col items-center justify-center py-6">
             <div className="p-3 bg-amber-100 rounded-full mb-3">
               <Calendar className="h-6 w-6 text-amber-600" />
             </div>
             <h3 className="text-lg font-medium mb-2">
-              No upcoming appointments
+              {t.noUpcomingAppointments}
             </h3>
-            <p className="text-gray-500">
-              Your scheduled appointments will appear here
-            </p>
+            <p className="text-gray-500">{t.scheduledAppointmentsWillAppear}</p>
           </div>
         </Card>
       )}

@@ -1,0 +1,39 @@
+{
+  "header": {
+    "home": "الرئيسية",
+    "about": "من نحن",
+    "services": "الخدمات",
+    "contact": "اتصل بنا",
+    "login": "تسجيل الدخول",
+    "signup": "إنشاء حساب",
+    "properties": "العقارات",
+    "dashboard": "لوحة التحكم"
+  },
+  "footer": {
+    "brand": "عقار",
+    "brandDescription": "يمثل تصميم عقار قمة التصميم، حيث يجمع بين التميز في الجودة الإيطالية، وابتكار الأداء، واختيار المواد بعناية.",
+    "contact": "اتصل بنا",
+    "generalInquiries": "للاستفسارات العامة:",
+    "ordersInquiries": "بخصوص الطلبات:",
+    "about": "عن الشركة",
+    "factory": "المصنع",
+    "designer": "المصمم",
+    "partner": "الشركاء",
+    "project": "المشاريع",
+    "other": "أخرى",
+    "prices": "الأسعار وطرق الدفع",
+    "returnPolicy": "سياسة الإرجاع",
+    "terms": "شروط الخدمة",
+    "privacy": "سياسة الخصوصية",
+    "collaborate": "لنتعاون معًا",
+    "copyright": "© {{year}} عقار، جميع الحقوق محفوظة.",
+    "language": "اللغة",
+    "switchToArabic": "العربية",
+    "switchToEnglish": "English"
+  },
+  "language": {
+    "en": "الإنجليزية",
+    "ar": "العربية"
+  },
+  "direction": "rtl"
+}

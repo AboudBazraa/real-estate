@@ -20,6 +20,16 @@ export interface DashboardStatsProps {
   newInquiries: number;
   availablePercentage: number;
   isLoading: boolean;
+  translations?: {
+    totalProperties: string;
+    verifiedProperties: string;
+    scheduledViewings: string;
+    newInquiries: string;
+    viewAllProperties: string;
+    viewSchedule: string;
+    viewInquiries: string;
+  };
+  isRTL?: boolean;
 }
 
 export function DashboardStats({
@@ -29,54 +39,74 @@ export function DashboardStats({
   newInquiries,
   availablePercentage,
   isLoading,
+  translations,
+  isRTL = false,
 }: DashboardStatsProps) {
+  const t = translations || {
+    totalProperties: "Total Properties",
+    verifiedProperties: "Verified Properties",
+    scheduledViewings: "Scheduled Viewings",
+    newInquiries: "New Inquiries",
+    viewAllProperties: "View all properties",
+    viewSchedule: "View schedule",
+    viewInquiries: "View inquiries",
+  };
+
   if (isLoading) {
     return <DashboardStatsSkeleton />;
   }
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ">
+    <div
+      className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 ${
+        isRTL ? "rtl" : ""
+      }`}
+    >
       {/* Total Properties */}
       <StatCard
-        title="Total Properties"
+        title={t.totalProperties}
         value={totalProperties}
         icon={<Building2 className="h-6 w-6 text-blue-600" />}
         bgColor="from-blue-100/90 to-blue-200/90 border-blue-200"
         iconColor="bg-blue-500/10"
         link="/agent/agentProperties"
-        linkText="View all properties"
-        />
+        linkText={t.viewAllProperties}
+        isRTL={isRTL}
+      />
 
       {/* Available Properties */}
       <StatCard
-        title="Verified Properties"
+        title={t.verifiedProperties}
         value={availableProperties}
         icon={<Check className="h-6 w-6 text-green-600" />}
         bgColor="from-green-100/90 to-green-200/90 border-green-200"
         iconColor="bg-green-500/10"
         trend={availablePercentage}
+        isRTL={isRTL}
       />
 
       {/* Scheduled Viewings */}
       <StatCard
-        title="Scheduled Viewings"
+        title={t.scheduledViewings}
         value={scheduledViewings}
         icon={<Calendar className="h-6 w-6 text-amber-600" />}
         bgColor="from-amber-100/90 to-amber-200/90 border-amber-200"
         iconColor="bg-amber-500/10"
         link="/agent/meetings"
-        linkText="View schedule"
+        linkText={t.viewSchedule}
+        isRTL={isRTL}
       />
 
       {/* New Inquiries */}
       <StatCard
-        title="New Inquiries"
+        title={t.newInquiries}
         value={newInquiries}
         icon={<MessageSquareText className="h-6 w-6 text-purple-600" />}
         bgColor="from-purple-100/90 to-purple-200/90 border-purple-200"
         iconColor="bg-purple-500/10"
         link="/agent/request"
-        linkText="View inquiries"
+        linkText={t.viewInquiries}
+        isRTL={isRTL}
       />
     </div>
   );
@@ -91,6 +121,7 @@ interface StatCardProps {
   link?: string;
   linkText?: string;
   trend?: number;
+  isRTL?: boolean;
 }
 
 const StatCard = ({
@@ -102,38 +133,63 @@ const StatCard = ({
   link,
   linkText,
   trend,
+  isRTL = false,
 }: StatCardProps) => {
   return (
     <Card
       className={`bg-gradient-to-br ${bgColor} hover:shadow-md transition-shadow p-1`}
     >
       <CardContent className="p-4 md:p-6 ">
-        <div className="flex justify-between items-start">
-          <div>
+        <div
+          className={`flex justify-between items-start ${
+            isRTL ? "flex-row-reverse" : ""
+          }`}
+        >
+          <div className={isRTL ? "text-right" : ""}>
             <p className="text-sm font-medium text-blue-600">{title}</p>
             <h3 className="text-3xl font-bold mt-1">{value}</h3>
           </div>
           <div className={`p-3 ${iconColor} rounded-full`}>{icon}</div>
         </div>
-        <div className="mt-4 flex items-center text-sm">
+        <div
+          className={`mt-4 flex items-center text-sm ${
+            isRTL ? "justify-end" : ""
+          }`}
+        >
           {link ? (
             <Link
               href={link}
-              className="text-blue-600 font-medium hover:underline flex items-center"
+              className={`text-blue-600 font-medium hover:underline flex items-center ${
+                isRTL ? "flex-row-reverse" : ""
+              }`}
             >
               {linkText}
-              <ArrowRight className="ml-1 h-4 w-4" />
+              <ArrowRight
+                className={
+                  isRTL ? "mr-1 h-4 w-4 transform rotate-180" : "ml-1 h-4 w-4"
+                }
+              />
             </Link>
           ) : trend !== undefined ? (
             <div
-              className={trend >= 0 ? "text-green-600" : "text-red-600"}
+              className={`${trend >= 0 ? "text-green-600" : "text-red-600"} ${
+                isRTL ? "flex flex-row-reverse" : ""
+              }`}
               title="Compared to last month"
             >
-              <span className="font-medium flex items-center">
+              <span
+                className={`font-medium flex items-center ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
+              >
                 {trend >= 0 ? (
-                  <TrendingUp className="mr-1 h-4 w-4" />
+                  <TrendingUp
+                    className={isRTL ? "ml-1 h-4 w-4" : "mr-1 h-4 w-4"}
+                  />
                 ) : (
-                  <TrendingDown className="mr-1 h-4 w-4" />
+                  <TrendingDown
+                    className={isRTL ? "ml-1 h-4 w-4" : "mr-1 h-4 w-4"}
+                  />
                 )}
                 {Math.abs(trend)}%
               </span>

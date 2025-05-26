@@ -1,6 +1,12 @@
-import { Outfit, Sigmar, Playwrite_IT_Moderna } from "next/font/google";
+import {
+  Outfit,
+  Sigmar,
+  Playwrite_IT_Moderna,
+  Tajawal,
+} from "next/font/google";
 import "./globals.css";
 import "@/styles/keyframes.css";
+import "@/styles/rtl.css";
 import { Toaster } from "@/shared/components/ui/toaster";
 import { ThemeProvider } from "@/shared/components/ThemeProvider";
 import { Suspense } from "react";
@@ -8,6 +14,7 @@ import { ErrorBoundary } from "@/shared/components/ErrorBoundary";
 import Providers from "./providers";
 import { ToastProvider } from "@/shared/components/ui/toast";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { cookies } from "next/headers";
 
 // Main font for the entire application
 const outfit = Outfit({
@@ -15,6 +22,15 @@ const outfit = Outfit({
   display: "swap",
   preload: true,
   variable: "--font-outfit",
+});
+
+// Arabic font
+const tajawal = Tajawal({
+  subsets: ["arabic"],
+  weight: ["400", "500", "700"],
+  variable: "--font-arabic",
+  display: "swap",
+  preload: true,
 });
 
 // Special fonts just for homepage sections
@@ -61,12 +77,15 @@ export const metadata = {
   },
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  // Default to English initially, let client-side handle actual language
+  const locale = "en";
+  const dir = "ltr";
+
   return (
     <html
-      lang="en"
       suppressHydrationWarning
-      className={`${outfit.variable} ${sigmar.variable} ${playwrite.variable}`}
+      className={`${outfit.variable} ${sigmar.variable} ${playwrite.variable} ${tajawal.variable}`}
     >
       {/* <head>
         <link

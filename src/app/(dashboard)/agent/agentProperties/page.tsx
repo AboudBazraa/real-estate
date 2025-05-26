@@ -6,6 +6,7 @@ import { useToast } from "@/shared/hooks/use-toast";
 import { useUser } from "@/shared/providers/UserProvider";
 import { useProperties } from "@/shared/hooks/useProperties";
 import { useTheme } from "next-themes";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   Property,
@@ -105,6 +106,175 @@ export default function AgentProperties() {
     deleteProperty,
   } = useProperties();
   const { theme, setTheme } = useTheme();
+  const { currentLanguage, isRTL } = useTranslation();
+
+  // Translations
+  const translations = {
+    en: {
+      myProperties: "My Properties",
+      addNewProperty: "Add New Property",
+      searchPlaceholder: "Search properties...",
+      filters: "Filters",
+      clearFilters: "Clear Filters",
+      sort: "Sort",
+      sortNewest: "Newest First",
+      sortOldest: "Oldest First",
+      sortPriceHigh: "Price: High to Low",
+      sortPriceLow: "Price: Low to High",
+      propertyType: "Property Type",
+      allTypes: "All Types",
+      apartment: "Apartment",
+      house: "House",
+      villa: "Villa",
+      commercial: "Commercial",
+      land: "Land",
+      status: "Status",
+      allStatuses: "All Statuses",
+      active: "Active",
+      pending: "Pending",
+      sold: "Sold",
+      rented: "Rented",
+      price: "Price",
+      location: "Location",
+      bedrooms: "Bedrooms",
+      bathrooms: "Bathrooms",
+      area: "Area",
+      actions: "Actions",
+      view: "View",
+      edit: "Edit",
+      delete: "Delete",
+      noProperties: "No properties found",
+      noPropertiesMessage:
+        "Try adding a new property or adjusting your filters.",
+      propertyDeleted: "Property Deleted",
+      propertyDeletedMessage: "The property has been successfully deleted",
+      confirmDelete: "Confirm Delete",
+      confirmDeleteMessage:
+        "Are you sure you want to delete this property? This action cannot be undone.",
+      cancel: "Cancel",
+      of: "of",
+      previous: "Previous",
+      next: "Next",
+      sqft: "sq ft",
+      details: "Details",
+      close: "Close",
+      propertyDetails: "Property Details",
+      editProperty: "Edit Property",
+      applyFilters: "Apply Filters",
+      loading: "Loading your properties...",
+      errorLoading: "Error Loading Properties",
+      verified: "Verified",
+      notVerified: "Not Verified",
+      noImage: "No image",
+      verification: "Verification",
+      dateAdded: "Date Added",
+      perMonth: "/month",
+      showing: "Showing",
+      properties: "properties",
+      signInRequired: "Sign In Required",
+      signInMessage:
+        "You need to be logged in to view and manage your properties.",
+      goToLogin: "Go to Login",
+      loadingProfile: "Loading your profile...",
+      toggleTheme: "Toggle theme",
+      refinePropertyListings: "Refine your property listings",
+      listingType: "Listing Type",
+      allListingTypes: "All Listing Types",
+      forSale: "For Sale",
+      forRent: "For Rent",
+      saleRent: "Sale/Rent",
+      available: "Available",
+      offMarket: "Off Market",
+      openMenu: "Open menu",
+      townhouse: "Townhouse",
+      condo: "Condo",
+      industrial: "Industrial",
+      titleAsc: "Title: A-Z",
+      titleDesc: "Title: Z-A",
+    },
+    ar: {
+      myProperties: "عقاراتي",
+      addNewProperty: "إضافة عقار جديد",
+      searchPlaceholder: "البحث في العقارات...",
+      filters: "التصفية",
+      clearFilters: "مسح التصفية",
+      sort: "الترتيب",
+      sortNewest: "الأحدث أولاً",
+      sortOldest: "الأقدم أولاً",
+      sortPriceHigh: "السعر: من الأعلى إلى الأقل",
+      sortPriceLow: "السعر: من الأقل إلى الأعلى",
+      propertyType: "نوع العقار",
+      allTypes: "جميع الأنواع",
+      apartment: "شقة",
+      house: "منزل",
+      villa: "فيلا",
+      commercial: "تجاري",
+      land: "أرض",
+      status: "الحالة",
+      allStatuses: "جميع الحالات",
+      active: "نشط",
+      pending: "قيد الانتظار",
+      sold: "تم البيع",
+      rented: "تم التأجير",
+      price: "السعر",
+      location: "الموقع",
+      bedrooms: "غرف النوم",
+      bathrooms: "الحمامات",
+      area: "المساحة",
+      actions: "الإجراءات",
+      view: "عرض",
+      edit: "تعديل",
+      delete: "حذف",
+      noProperties: "لم يتم العثور على عقارات",
+      noPropertiesMessage: "حاول إضافة عقار جديد أو تعديل التصفية.",
+      propertyDeleted: "تم حذف العقار",
+      propertyDeletedMessage: "تم حذف العقار بنجاح",
+      confirmDelete: "تأكيد الحذف",
+      confirmDeleteMessage:
+        "هل أنت متأكد من رغبتك في حذف هذا العقار؟ لا يمكن التراجع عن هذا الإجراء.",
+      cancel: "إلغاء",
+      of: "من",
+      previous: "السابق",
+      next: "التالي",
+      sqft: "قدم مربع",
+      details: "التفاصيل",
+      close: "إغلاق",
+      propertyDetails: "تفاصيل العقار",
+      editProperty: "تعديل العقار",
+      applyFilters: "تطبيق التصفية",
+      loading: "جاري تحميل عقاراتك...",
+      errorLoading: "خطأ في تحميل العقارات",
+      verified: "موثق",
+      notVerified: "غير موثق",
+      noImage: "لا توجد صورة",
+      verification: "التوثيق",
+      dateAdded: "تاريخ الإضافة",
+      perMonth: "/شهر",
+      showing: "عرض",
+      properties: "عقارات",
+      signInRequired: "تسجيل الدخول مطلوب",
+      signInMessage: "تحتاج إلى تسجيل الدخول لعرض وإدارة عقاراتك.",
+      goToLogin: "الذهاب إلى تسجيل الدخول",
+      loadingProfile: "جاري تحميل ملفك الشخصي...",
+      toggleTheme: "تبديل المظهر",
+      refinePropertyListings: "تنقيح قائمة العقارات الخاصة بك",
+      listingType: "نوع القائمة",
+      allListingTypes: "جميع أنواع القوائم",
+      forSale: "للبيع",
+      forRent: "للإيجار",
+      saleRent: "بيع/إيجار",
+      available: "متاح",
+      offMarket: "خارج السوق",
+      openMenu: "فتح القائمة",
+      townhouse: "تاون هاوس",
+      condo: "شقة تمليك",
+      industrial: "صناعي",
+      titleAsc: "العنوان: أ-ي",
+      titleDesc: "العنوان: ي-أ",
+    },
+  };
+
+  const t = translations[currentLanguage === "ar" ? "ar" : "en"];
 
   const [pageIndex, setPageIndex] = useState(0);
   const pageSize = 10;
@@ -189,8 +359,8 @@ export default function AgentProperties() {
 
     if (success) {
       toast({
-        title: "Property Deleted",
-        description: "The property has been successfully deleted",
+        title: t.propertyDeleted,
+        description: t.propertyDeletedMessage,
       });
     }
 
@@ -254,7 +424,7 @@ export default function AgentProperties() {
             animate={{ opacity: [0.6, 1, 0.6] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           >
-            Loading your profile...
+            {t.loadingProfile}
           </motion.p>
         </div>
       </motion.div>
@@ -291,15 +461,13 @@ export default function AgentProperties() {
               </svg>
             </div>
             <h1 className="text-2xl font-bold mb-2">Sign In Required</h1>
-            <p className="text-muted-foreground">
-              You need to be logged in to view and manage your properties.
-            </p>
+            <p className="text-muted-foreground">{t.signInMessage}</p>
           </div>
           <Button
             onClick={() => router.push("/login")}
             className="w-full shadow-sm"
           >
-            Go to Login
+            {t.goToLogin}
           </Button>
         </div>
       </motion.div>
@@ -308,14 +476,16 @@ export default function AgentProperties() {
 
   return (
     <motion.div
-      className="container mx-auto p-2 md:p-4 space-y-6"
+      className={`container mx-auto p-2 md:p-4 space-y-6 ${isRTL ? "rtl" : ""}`}
       initial="hidden"
       animate="visible"
       variants={fadeIn}
     >
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
         <div className="flex items-center gap-4">
-          <h1 className="text-3xl font-bold tracking-tight">My Properties</h1>
+          <h1 className="text-3xl font-bold tracking-tight">
+            {t.myProperties}
+          </h1>
           <TooltipProvider>
             <Tooltip>
               <TooltipTrigger asChild>
@@ -328,7 +498,7 @@ export default function AgentProperties() {
                   <SunMoon className="h-5 w-5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Toggle theme</TooltipContent>
+              <TooltipContent>{t.toggleTheme}</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
@@ -346,10 +516,12 @@ export default function AgentProperties() {
           <motion.button
             whileHover={{ scale: 1.03 }}
             whileTap={{ scale: 0.97 }}
-            className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90"
+            className={`inline-flex items-center justify-center gap-2 rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 ${
+              isRTL ? "flex-row-reverse" : ""
+            }`}
             onClick={() => router.push("/agent/addNewProp")}
           >
-            <Plus className="h-4 w-4" /> Add New Property
+            <Plus className="h-4 w-4" /> {t.addNewProperty}
           </motion.button>
         </div>
       </div>
@@ -357,17 +529,23 @@ export default function AgentProperties() {
       <div className="grid grid-cols-1 md:grid-cols-[2fr_1fr] gap-4 mb-6">
         <form onSubmit={handleSearch} className="flex gap-2">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
+            <Search
+              className={`absolute ${
+                isRTL ? "right-3" : "left-3"
+              } top-2.5 h-4 w-4 text-muted-foreground`}
+            />
             <Input
               type="text"
-              placeholder="Search properties..."
+              placeholder={t.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-10 bg-background border-muted"
+              className={`${
+                isRTL ? "pr-9" : "pl-9"
+              } h-10 bg-background border-muted`}
             />
           </div>
           <Button type="submit" size="default" className="shadow-sm">
-            Search
+            {t.searchPlaceholder.split("...")[0]}
           </Button>
         </form>
 
@@ -376,15 +554,15 @@ export default function AgentProperties() {
           onValueChange={handleSortChange}
         >
           <SelectTrigger className="h-10 bg-background border-muted">
-            <SelectValue placeholder="Sort by" />
+            <SelectValue placeholder={t.sort} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="created_at-false">Newest First</SelectItem>
-            <SelectItem value="created_at-true">Oldest First</SelectItem>
-            <SelectItem value="price-true">Price: Low to High</SelectItem>
-            <SelectItem value="price-false">Price: High to Low</SelectItem>
-            <SelectItem value="title-true">Title: A-Z</SelectItem>
-            <SelectItem value="title-false">Title: Z-A</SelectItem>
+            <SelectItem value="created_at-false">{t.sortNewest}</SelectItem>
+            <SelectItem value="created_at-true">{t.sortOldest}</SelectItem>
+            <SelectItem value="price-true">{t.sortPriceLow}</SelectItem>
+            <SelectItem value="price-false">{t.sortPriceHigh}</SelectItem>
+            <SelectItem value="title-true">{t.titleAsc}</SelectItem>
+            <SelectItem value="title-false">{t.titleDesc}</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -400,17 +578,17 @@ export default function AgentProperties() {
           }
         >
           <SelectTrigger className="w-[180px] h-9 bg-background border-muted">
-            <SelectValue placeholder="Property Type" />
+            <SelectValue placeholder={t.propertyType} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all_types">All Property Types</SelectItem>
-            <SelectItem value="house">House</SelectItem>
-            <SelectItem value="apartment">Apartment</SelectItem>
-            <SelectItem value="condo">Condo</SelectItem>
-            <SelectItem value="townhouse">Townhouse</SelectItem>
-            <SelectItem value="land">Land</SelectItem>
-            <SelectItem value="commercial">Commercial</SelectItem>
-            <SelectItem value="industrial">Industrial</SelectItem>
+            <SelectItem value="all_types">{t.allTypes}</SelectItem>
+            <SelectItem value="house">{t.house}</SelectItem>
+            <SelectItem value="apartment">{t.apartment}</SelectItem>
+            <SelectItem value="condo">{t.condo}</SelectItem>
+            <SelectItem value="townhouse">{t.townhouse}</SelectItem>
+            <SelectItem value="land">{t.land}</SelectItem>
+            <SelectItem value="commercial">{t.commercial}</SelectItem>
+            <SelectItem value="industrial">{t.industrial}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -421,14 +599,14 @@ export default function AgentProperties() {
           }
         >
           <SelectTrigger className="w-[180px] h-9 bg-background border-muted">
-            <SelectValue placeholder="Status" />
+            <SelectValue placeholder={t.status} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all_status">All Status</SelectItem>
-            <SelectItem value="available">Available</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="sold">Sold</SelectItem>
-            <SelectItem value="off_market">Off Market</SelectItem>
+            <SelectItem value="all_status">{t.allStatuses}</SelectItem>
+            <SelectItem value="available">{t.available}</SelectItem>
+            <SelectItem value="pending">{t.pending}</SelectItem>
+            <SelectItem value="sold">{t.sold}</SelectItem>
+            <SelectItem value="off_market">{t.offMarket}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -442,13 +620,15 @@ export default function AgentProperties() {
           }
         >
           <SelectTrigger className="w-[180px] h-9 bg-background border-muted">
-            <SelectValue placeholder="Listing Type" />
+            <SelectValue placeholder={t.listingType} />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="all_listing_types">All Listing Types</SelectItem>
-            <SelectItem value="sale">For Sale</SelectItem>
-            <SelectItem value="rent">For Rent</SelectItem>
-            <SelectItem value="both">Sale/Rent</SelectItem>
+            <SelectItem value="all_listing_types">
+              {t.allListingTypes}
+            </SelectItem>
+            <SelectItem value="sale">{t.forSale}</SelectItem>
+            <SelectItem value="rent">{t.forRent}</SelectItem>
+            <SelectItem value="both">{t.saleRent}</SelectItem>
           </SelectContent>
         </Select>
 
@@ -462,7 +642,7 @@ export default function AgentProperties() {
             size="sm"
             className="h-9"
           >
-            Clear Filters
+            {t.clearFilters}
           </Button>
         )}
       </div>
@@ -488,7 +668,7 @@ export default function AgentProperties() {
                   ease: "easeInOut",
                 }}
               >
-                Loading your properties...
+                {t.loading}
               </motion.p>
             </div>
           </motion.div>
@@ -520,7 +700,7 @@ export default function AgentProperties() {
               </svg>
             </div>
             <p className="text-lg font-medium text-destructive mb-2">
-              Error Loading Properties
+              {t.errorLoading}
             </p>
             <p className="text-muted-foreground max-w-md mx-auto">{error}</p>
           </motion.div>
@@ -536,18 +716,19 @@ export default function AgentProperties() {
             <div className="mx-auto w-fit p-4 rounded-full bg-muted mb-4">
               <Building className="h-8 w-8 text-muted-foreground" />
             </div>
-            <p className="text-xl font-medium mb-2">No properties found</p>
+            <p className="text-xl font-medium mb-2">{t.noProperties}</p>
             <p className="text-muted-foreground mb-8 max-w-md mx-auto">
-              You haven&apos;t added any properties to your portfolio yet. Get
-              started by adding your first property.
+              {t.noPropertiesMessage}
             </p>
             <motion.button
               whileHover={{ scale: 1.03 }}
               whileTap={{ scale: 0.97 }}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90"
+              className={`inline-flex items-center justify-center gap-2 rounded-md bg-primary px-6 py-2 text-sm font-medium text-primary-foreground shadow-sm transition-all hover:bg-primary/90 ${
+                isRTL ? "flex-row-reverse" : ""
+              }`}
               onClick={() => router.push("/agent/addNewProp")}
             >
-              <Plus className="h-4 w-4" /> Add Your First Property
+              <Plus className="h-4 w-4" /> {t.addNewProperty}
             </motion.button>
           </motion.div>
         ) : (
@@ -564,25 +745,25 @@ export default function AgentProperties() {
                 <TableHeader className="bg-muted/50">
                   <TableRow>
                     <TableHead className="text-left font-medium text-muted-foreground">
-                      Property
+                      {t.propertyType}
                     </TableHead>
                     <TableHead className="text-left font-medium text-muted-foreground">
-                      Price
+                      {t.price}
                     </TableHead>
                     <TableHead className="text-left font-medium text-muted-foreground">
-                      Details
+                      {t.details}
                     </TableHead>
                     <TableHead className="text-left font-medium text-muted-foreground">
-                      Status
+                      {t.status}
                     </TableHead>
                     <TableHead className="text-left font-medium text-muted-foreground">
-                      Date Added
+                      {t.dateAdded}
                     </TableHead>
                     <TableHead className="text-left font-medium text-muted-foreground">
-                      Verification
+                      {t.verification}
                     </TableHead>
                     <TableHead className="text-right font-medium text-muted-foreground w-[100px]">
-                      Actions
+                      {t.actions}
                     </TableHead>
                   </TableRow>
                 </TableHeader>
@@ -606,7 +787,7 @@ export default function AgentProperties() {
                               />
                             ) : (
                               <div className="h-full w-full bg-muted flex items-center justify-center text-muted-foreground text-xs">
-                                No image
+                                {t.noImage}
                               </div>
                             )}
                           </div>
@@ -625,7 +806,7 @@ export default function AgentProperties() {
                           {formatCurrency(property.price)}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          {property.listing_type === "rent" ? "/month" : ""}
+                          {property.listing_type === "rent" ? t.perMonth : ""}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -642,7 +823,7 @@ export default function AgentProperties() {
                           </span>
                           <span className="flex items-center gap-1">
                             <Building className="h-3.5 w-3.5" /> {property.area}{" "}
-                            sqft
+                            {t.sqft}
                           </span>
                         </div>
                       </TableCell>
@@ -666,7 +847,7 @@ export default function AgentProperties() {
                           }
                           className="capitalize px-1 text-xs font-medium"
                         >
-                          {property.featured ? "Verified" : "Not Verified"}
+                          {property.featured ? t.verified : t.notVerified}
                         </Badge>
                       </TableCell>
                       <TableCell className="text-right">
@@ -678,7 +859,7 @@ export default function AgentProperties() {
                               className="h-8 w-8 text-muted-foreground hover:text-foreground"
                             >
                               <MoreHorizontal className="h-4 w-4" />
-                              <span className="sr-only">Open menu</span>
+                              <span className="sr-only">{t.openMenu}</span>
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent
@@ -687,22 +868,37 @@ export default function AgentProperties() {
                           >
                             <DropdownMenuItem
                               onClick={() => handleViewProperty(property)}
-                              className="cursor-pointer flex items-center"
+                              className={`cursor-pointer flex items-center ${
+                                isRTL ? "flex-row-reverse justify-between" : ""
+                              }`}
                             >
-                              <Eye className="mr-2 h-4 w-4" /> View
+                              <Eye
+                                className={`${isRTL ? "ml-2" : "mr-2"} h-4 w-4`}
+                              />{" "}
+                              {t.view}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={() => handleEditProperty(property)}
-                              className="cursor-pointer flex items-center"
+                              className={`cursor-pointer flex items-center ${
+                                isRTL ? "flex-row-reverse justify-between" : ""
+                              }`}
                             >
-                              <Edit className="mr-2 h-4 w-4" /> Edit
+                              <Edit
+                                className={`${isRTL ? "ml-2" : "mr-2"} h-4 w-4`}
+                              />{" "}
+                              {t.edit}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
-                              className="text-destructive focus:text-destructive cursor-pointer flex items-center"
+                              className={`text-destructive focus:text-destructive cursor-pointer flex items-center ${
+                                isRTL ? "flex-row-reverse justify-between" : ""
+                              }`}
                               onClick={() => handleDeleteClick(property.id)}
                             >
-                              <Trash2 className="mr-2 h-4 w-4" /> Delete
+                              <Trash2
+                                className={`${isRTL ? "ml-2" : "mr-2"} h-4 w-4`}
+                              />{" "}
+                              {t.delete}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -759,13 +955,14 @@ export default function AgentProperties() {
               transition={{ delay: 0.2 }}
             >
               <div className="text-sm text-muted-foreground">
-                Showing{" "}
+                {t.showing}{" "}
                 <span className="font-medium">{pageIndex * pageSize + 1}</span>{" "}
                 to{" "}
                 <span className="font-medium">
                   {Math.min((pageIndex + 1) * pageSize, totalCount)}
                 </span>{" "}
-                of <span className="font-medium">{totalCount}</span> properties
+                {t.of} <span className="font-medium">{totalCount}</span>{" "}
+                {t.properties}
               </div>
               <div className="flex gap-2">
                 <Button
@@ -775,7 +972,7 @@ export default function AgentProperties() {
                   disabled={pageIndex === 0}
                   className="h-9 px-4"
                 >
-                  Previous
+                  {t.previous}
                 </Button>
                 <Button
                   variant="outline"
@@ -784,7 +981,7 @@ export default function AgentProperties() {
                   disabled={(pageIndex + 1) * pageSize >= totalCount}
                   className="h-9 px-4"
                 >
-                  Next
+                  {t.next}
                 </Button>
               </div>
             </motion.div>
@@ -794,14 +991,14 @@ export default function AgentProperties() {
 
       {/* Mobile Filters Drawer */}
       <Drawer open={showMobileFilters} onOpenChange={setShowMobileFilters}>
-        <DrawerContent className="px-4">
+        <DrawerContent className={`px-4 ${isRTL ? "rtl" : ""}`}>
           <DrawerHeader>
-            <DrawerTitle>Filters</DrawerTitle>
-            <DrawerDescription>Refine your property listings</DrawerDescription>
+            <DrawerTitle>{t.filters}</DrawerTitle>
+            <DrawerDescription>{t.refinePropertyListings}</DrawerDescription>
           </DrawerHeader>
           <div className="p-4 space-y-4">
             <div className="space-y-2">
-              <label className="text-sm font-medium">Property Type</label>
+              <label className="text-sm font-medium">{t.propertyType}</label>
               <Select
                 value={filters.property_type || "all_types"}
                 onValueChange={(value) =>
@@ -812,23 +1009,23 @@ export default function AgentProperties() {
                 }
               >
                 <SelectTrigger className="w-full bg-background border-muted">
-                  <SelectValue placeholder="Property Type" />
+                  <SelectValue placeholder={t.propertyType} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all_types">All Property Types</SelectItem>
-                  <SelectItem value="house">House</SelectItem>
-                  <SelectItem value="apartment">Apartment</SelectItem>
-                  <SelectItem value="condo">Condo</SelectItem>
-                  <SelectItem value="townhouse">Townhouse</SelectItem>
-                  <SelectItem value="land">Land</SelectItem>
-                  <SelectItem value="commercial">Commercial</SelectItem>
-                  <SelectItem value="industrial">Industrial</SelectItem>
+                  <SelectItem value="all_types">{t.allTypes}</SelectItem>
+                  <SelectItem value="house">{t.house}</SelectItem>
+                  <SelectItem value="apartment">{t.apartment}</SelectItem>
+                  <SelectItem value="condo">{t.condo}</SelectItem>
+                  <SelectItem value="townhouse">{t.townhouse}</SelectItem>
+                  <SelectItem value="land">{t.land}</SelectItem>
+                  <SelectItem value="commercial">{t.commercial}</SelectItem>
+                  <SelectItem value="industrial">{t.industrial}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Status</label>
+              <label className="text-sm font-medium">{t.status}</label>
               <Select
                 value={filters.status || "all_status"}
                 onValueChange={(value) =>
@@ -839,20 +1036,20 @@ export default function AgentProperties() {
                 }
               >
                 <SelectTrigger className="w-full bg-background border-muted">
-                  <SelectValue placeholder="Status" />
+                  <SelectValue placeholder={t.status} />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="all_status">All Status</SelectItem>
-                  <SelectItem value="available">Available</SelectItem>
-                  <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="sold">Sold</SelectItem>
-                  <SelectItem value="off_market">Off Market</SelectItem>
+                  <SelectItem value="all_status">{t.allStatuses}</SelectItem>
+                  <SelectItem value="available">{t.available}</SelectItem>
+                  <SelectItem value="pending">{t.pending}</SelectItem>
+                  <SelectItem value="sold">{t.sold}</SelectItem>
+                  <SelectItem value="off_market">{t.offMarket}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
 
             <div className="space-y-2">
-              <label className="text-sm font-medium">Listing Type</label>
+              <label className="text-sm font-medium">{t.listingType}</label>
               <Select
                 value={filters.listing_type || "all_listing_types"}
                 onValueChange={(value) =>
@@ -863,29 +1060,33 @@ export default function AgentProperties() {
                 }
               >
                 <SelectTrigger className="w-full bg-background border-muted">
-                  <SelectValue placeholder="Listing Type" />
+                  <SelectValue placeholder={t.listingType} />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all_listing_types">
-                    All Listing Types
+                    {t.allListingTypes}
                   </SelectItem>
-                  <SelectItem value="sale">For Sale</SelectItem>
-                  <SelectItem value="rent">For Rent</SelectItem>
-                  <SelectItem value="both">Sale/Rent</SelectItem>
+                  <SelectItem value="sale">{t.forSale}</SelectItem>
+                  <SelectItem value="rent">{t.forRent}</SelectItem>
+                  <SelectItem value="both">{t.saleRent}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
-          <DrawerFooter className="flex flex-row justify-between">
+          <DrawerFooter
+            className={`flex flex-row ${
+              isRTL ? "flex-row-reverse" : "justify-between"
+            }`}
+          >
             <Button
               variant="outline"
               onClick={clearFilters}
               disabled={Object.keys(filters).length === 0 && !searchTerm}
             >
-              Clear Filters
+              {t.clearFilters}
             </Button>
             <DrawerClose asChild>
-              <Button>Apply Filters</Button>
+              <Button>{t.applyFilters}</Button>
             </DrawerClose>
           </DrawerFooter>
         </DrawerContent>
@@ -896,8 +1097,8 @@ export default function AgentProperties() {
         isOpen={showDeleteModal}
         onClose={() => setShowDeleteModal(false)}
         onConfirm={confirmDelete}
-        title="Delete Property"
-        description="Are you sure you want to delete this property? This action cannot be undone."
+        title={t.confirmDelete}
+        description={t.confirmDeleteMessage}
       />
 
       {/* Property Details Modal */}

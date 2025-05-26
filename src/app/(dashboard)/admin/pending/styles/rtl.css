@@ -1,0 +1,145 @@
+/* RTL styles for pending approvals page */
+
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Card headers and content */
+.rtl .card-header,
+.rtl .card-title,
+.rtl .card-description {
+  text-align: right;
+}
+
+/* Flexbox adjustments */
+.rtl .rtl-flex-row-reverse {
+  flex-direction: row-reverse !important;
+}
+
+.rtl .rtl-ml-auto {
+  margin-right: auto !important;
+  margin-left: 0 !important;
+}
+
+.rtl .rtl-mr-auto {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+/* Icon spacing */
+.rtl .rtl-icon-flip {
+  transform: scaleX(-1);
+}
+
+.rtl .rtl-icon-mr {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+.rtl .rtl-icon-ml {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+/* Property card specific styles */
+.rtl .property-card {
+  text-align: right;
+}
+
+.rtl .property-card-header {
+  flex-direction: row-reverse;
+}
+
+.rtl .property-card-actions {
+  flex-direction: row-reverse;
+}
+
+/* Property details section */
+.rtl .property-details {
+  text-align: right;
+}
+
+.rtl .property-detail-item {
+  flex-direction: row-reverse;
+}
+
+/* Badge positioning */
+.rtl .badge-container {
+  flex-direction: row-reverse;
+}
+
+/* Tabs */
+.rtl .tabs-list {
+  flex-direction: row-reverse;
+}
+
+/* Right-to-left specific spacing overrides */
+.rtl .rtl-pr {
+  padding-right: 0;
+  padding-left: 1rem;
+}
+
+.rtl .rtl-pl {
+  padding-left: 0;
+  padding-right: 1rem;
+}
+
+.rtl .rtl-mr {
+  margin-right: 0;
+  margin-left: 1rem;
+}
+
+.rtl .rtl-ml {
+  margin-left: 0;
+  margin-right: 1rem;
+}
+
+/* Dialog and alert dialog adjustments */
+.rtl .dialog-content,
+.rtl .alert-dialog-content {
+  text-align: right;
+}
+
+.rtl .dialog-footer,
+.rtl .alert-dialog-footer {
+  flex-direction: row-reverse;
+}
+
+/* Property list */
+.rtl .property-list {
+  direction: rtl;
+}
+
+/* Approval buttons */
+.rtl .approval-buttons {
+  flex-direction: row-reverse;
+}
+
+/* Property image gallery */
+.rtl .image-gallery-controls {
+  direction: rtl;
+}
+
+/* Property metadata */
+.rtl .property-metadata {
+  flex-direction: row-reverse;
+}
+
+.rtl .property-metadata-item {
+  text-align: right;
+}
+
+/* Property description */
+.rtl .property-description {
+  text-align: right;
+}
+
+/* Property features */
+.rtl .property-features {
+  flex-direction: row-reverse;
+}
+
+.rtl .feature-item {
+  flex-direction: row-reverse;
+}

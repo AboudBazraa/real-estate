@@ -1,10 +1,12 @@
 "use client";
 import React, { useRef } from "react";
 import { motion } from "framer-motion";
+import { useLanguage } from "@/app/providers/LanguageProvider";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
   const ctaRef = useRef(null);
+  const { locale, changeLanguage, isRTL } = useLanguage();
 
   return (
     <motion.section
@@ -21,12 +23,12 @@ export default function Footer() {
           {/* Brand Column */}
           <div className="md:col-span-2 md:border-r border-zinc-900 footer-column pb-6 md:pb-0">
             <h2 className="text-4xl sm:text-5xl font-light mb-4 sm:mb-6">
-              Estate
+              {locale === "ar" ? "عقار" : "Estate"}
             </h2>
             <p className="text-zinc-400 text-xs sm:text-sm mb-6 sm:mb-8 max-w-xs">
-              Estate design represents the pinnacle of design, combining
-              excellence in Italian quality, performance innovation, and careful
-              selection of materials.
+              {locale === "ar"
+                ? "يمثل تصميم عقار قمة التصميم، حيث يجمع بين التميز في الجودة الإيطالية، وابتكار الأداء، واختيار المواد بعناية."
+                : "Estate design represents the pinnacle of design, combining excellence in Italian quality, performance innovation, and careful selection of materials."}
             </p>
             <div className="flex gap-4 sm:gap-6">
               <motion.a
@@ -88,12 +90,14 @@ export default function Footer() {
           {/* Contact Column */}
           <div className="md:col-span-1 footer-column mt-4 md:mt-0">
             <h3 className="text-white text-base sm:text-lg font-medium mb-4 sm:mb-6">
-              Contact
+              {locale === "ar" ? "اتصل بنا" : "Contact"}
             </h3>
             <div className="flex flex-col gap-3 sm:gap-4">
               <motion.div whileHover={{ x: 5 }}>
                 <p className="text-zinc-400 text-xs sm:text-sm">
-                  For general inquiries:
+                  {locale === "ar"
+                    ? "للاستفسارات العامة:"
+                    : "For general inquiries:"}
                 </p>
                 <a
                   href="mailto:contact@estate.com"
@@ -104,7 +108,7 @@ export default function Footer() {
               </motion.div>
               <motion.div whileHover={{ x: 5 }}>
                 <p className="text-zinc-400 text-xs sm:text-sm">
-                  Regarding orders:
+                  {locale === "ar" ? "بخصوص الطلبات:" : "Regarding orders:"}
                 </p>
                 <a
                   href="mailto:orders@estate.com"
@@ -119,7 +123,7 @@ export default function Footer() {
           {/* About Column */}
           <div className="md:col-span-1 footer-column mt-4 md:mt-0">
             <h3 className="text-white text-base sm:text-lg font-medium mb-4 sm:mb-6">
-              About
+              {locale === "ar" ? "عن الشركة" : "About"}
             </h3>
             <ul className="flex flex-col gap-2 sm:gap-3">
               <motion.li whileHover={{ x: 5 }}>
@@ -127,7 +131,7 @@ export default function Footer() {
                   href="#"
                   className="text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm"
                 >
-                  Factory
+                  {locale === "ar" ? "المصنع" : "Factory"}
                 </a>
               </motion.li>
               <motion.li whileHover={{ x: 5 }}>
@@ -135,7 +139,7 @@ export default function Footer() {
                   href="#"
                   className="text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm"
                 >
-                  Designer
+                  {locale === "ar" ? "المصمم" : "Designer"}
                 </a>
               </motion.li>
               <motion.li whileHover={{ x: 5 }}>
@@ -143,7 +147,7 @@ export default function Footer() {
                   href="#"
                   className="text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm"
                 >
-                  Partner
+                  {locale === "ar" ? "الشركاء" : "Partner"}
                 </a>
               </motion.li>
               <motion.li whileHover={{ x: 5 }}>
@@ -151,7 +155,7 @@ export default function Footer() {
                   href="#"
                   className="text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm"
                 >
-                  Project
+                  {locale === "ar" ? "المشاريع" : "Project"}
                 </a>
               </motion.li>
             </ul>
@@ -160,7 +164,7 @@ export default function Footer() {
           {/* Other Column */}
           <div className="md:col-span-1 footer-column mt-4 md:mt-0">
             <h3 className="text-white text-base sm:text-lg font-medium mb-4 sm:mb-6">
-              Other
+              {locale === "ar" ? "أخرى" : "Other"}
             </h3>
             <ul className="flex flex-col gap-2 sm:gap-3">
               <motion.li whileHover={{ x: 5 }}>
@@ -168,7 +172,9 @@ export default function Footer() {
                   href="#"
                   className="text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm"
                 >
-                  Prices and Payments
+                  {locale === "ar"
+                    ? "الأسعار وطرق الدفع"
+                    : "Prices and Payments"}
                 </a>
               </motion.li>
               <motion.li whileHover={{ x: 5 }}>
@@ -176,7 +182,7 @@ export default function Footer() {
                   href="#"
                   className="text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm"
                 >
-                  Return Policy
+                  {locale === "ar" ? "سياسة الإرجاع" : "Return Policy"}
                 </a>
               </motion.li>
               <motion.li whileHover={{ x: 5 }}>
@@ -184,7 +190,7 @@ export default function Footer() {
                   href="#"
                   className="text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm"
                 >
-                  Terms of Service
+                  {locale === "ar" ? "شروط الخدمة" : "Terms of Service"}
                 </a>
               </motion.li>
               <motion.li whileHover={{ x: 5 }}>
@@ -192,10 +198,41 @@ export default function Footer() {
                   href="#"
                   className="text-zinc-400 hover:text-white transition-colors text-xs sm:text-sm"
                 >
-                  Privacy Policy
+                  {locale === "ar" ? "سياسة الخصوصية" : "Privacy Policy"}
                 </a>
               </motion.li>
             </ul>
+          </div>
+        </div>
+
+        {/* Language Switcher */}
+        <div className="flex justify-center mb-6">
+          <div className="flex items-center space-x-4 rtl:space-x-reverse bg-zinc-900/40 p-2 rounded-lg">
+            <span className="text-zinc-400 text-sm">
+              {locale === "ar" ? "اللغة:" : "Language:"}
+            </span>
+            <button
+              onClick={() => changeLanguage("en")}
+              className={`px-3 py-1 rounded text-sm ${
+                locale === "en"
+                  ? "bg-white text-black font-medium"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+              suppressHydrationWarning
+            >
+              English
+            </button>
+            <button
+              onClick={() => changeLanguage("ar")}
+              className={`px-3 py-1 rounded text-sm ${
+                locale === "ar"
+                  ? "bg-white text-black font-medium"
+                  : "text-zinc-400 hover:text-white"
+              }`}
+              suppressHydrationWarning
+            >
+              العربية
+            </button>
           </div>
         </div>
 
@@ -208,10 +245,12 @@ export default function Footer() {
           className="overflow-hidden"
         >
           <h2 className="lets-collaborate text-4xl sm:text-5xl md:text-6xl lg:text-7xl xl:text-9xl font-light tracking-widest">
-            Let's Collaborate
+            {locale === "ar" ? "لنتعاون معًا" : "Let's Collaborate"}
           </h2>
           <div className="text-xs sm:text-sm text-zinc-500 mt-2 sm:mt-4 pb-4 text-center">
-            © {currentYear} Estate, Inc. All rights reserved.
+            {locale === "ar"
+              ? `© ${currentYear} عقار، جميع الحقوق محفوظة.`
+              : `© ${currentYear} Estate, Inc. All rights reserved.`}
           </div>
         </motion.div>
       </div>

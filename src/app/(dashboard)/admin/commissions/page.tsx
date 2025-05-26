@@ -81,6 +81,9 @@ import {
 import { Calendar as CalendarComponent } from "@/shared/components/ui/calendar";
 import { format } from "date-fns";
 import { cn } from "@/shared/lib/utils";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+import commissionsTranslations from "./translations";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 
 // Define types for data from Supabase
 interface Agent {
@@ -174,6 +177,9 @@ const statusColors = {
 export default function CommissionsPage() {
   const { supabase } = useSupabase();
   const { toast } = useToast();
+  const { currentLanguage, isRTL } = useTranslation();
+  const t =
+    commissionsTranslations[currentLanguage] || commissionsTranslations.en;
   const [searchQuery, setSearchQuery] = React.useState("");
   const [statusFilter, setStatusFilter] = React.useState("all");
   const [dateFilter, setDateFilter] = React.useState<Date | undefined>(
@@ -566,624 +572,653 @@ export default function CommissionsPage() {
   }, [newCommission.sale_price, newCommission.rate]);
 
   return (
-    <motion.div
-      className="space-y-6"
-      variants={container}
-      initial="hidden"
-      animate="show"
-    >
+    <div className={isRTL ? "rtl" : ""}>
       <motion.div
-        variants={item}
-        className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+        className="space-y-6"
+        variants={container}
+        initial="hidden"
+        animate="show"
       >
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">
-            Agent Commissions
-          </h1>
-          <p className="text-muted-foreground">
-            Track and manage agent commission payments
-          </p>
-        </div>
-        <div className="flex flex-wrap gap-2">
-          <Button
-            variant="outline"
-            onClick={handleRefresh}
-            disabled={isRefreshing || isLoading}
-            className="gap-2"
-          >
-            <RefreshCw
-              className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
-            />
-            Refresh
-          </Button>
-          <Button
-            onClick={() => setIsCommissionDialogOpen(true)}
-            className="gap-2"
-          >
-            <PlusCircle className="h-4 w-4" />
-            New Commission
-          </Button>
-          <Button variant="outline" className="gap-2">
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
-        </div>
-      </motion.div>
-
-      {/* Summary Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <motion.div variants={item}>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Total Commissions
-              </CardTitle>
-              <DollarSign className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-8 w-20" />
-              ) : (
-                <div className="text-2xl font-bold">
-                  ${stats.totalCommissions}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div variants={item}>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Average Commission
-              </CardTitle>
-              <BarChart3 className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-8 w-20" />
-              ) : (
-                <div className="text-2xl font-bold">
-                  ${stats.averageCommission}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div variants={item}>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Pending Commissions
-              </CardTitle>
-              <Clock className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-8 w-20" />
-              ) : (
-                <div className="text-2xl font-bold">
-                  ${stats.pendingCommissions}
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-
-        <motion.div variants={item}>
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-              <CardTitle className="text-sm font-medium">
-                Average Rate
-              </CardTitle>
-              <TrendingUp className="h-4 w-4 text-muted-foreground" />
-            </CardHeader>
-            <CardContent>
-              {isLoading ? (
-                <Skeleton className="h-8 w-20" />
-              ) : (
-                <div className="text-2xl font-bold">{stats.averageRate}%</div>
-              )}
-            </CardContent>
-          </Card>
-        </motion.div>
-      </div>
-
-      {/* Filter Controls */}
-      <motion.div variants={item} className="flex flex-col sm:flex-row gap-4">
-        <div className="flex-1 flex flex-col sm:flex-row gap-2">
-          <div className="relative flex-1">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="search"
-              placeholder="Search by agent or property..."
-              className="pl-8 w-full"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
+        <motion.div
+          variants={item}
+          className="flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+        >
+          <div>
+            <h1 className="text-3xl font-bold tracking-tight">
+              {t.commissions}
+            </h1>
+            <p className="text-muted-foreground">{t.commissionsOverview}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-[140px]">
-                <div className="flex items-center gap-2">
-                  <Filter className="h-4 w-4" />
-                  <span>Status</span>
-                </div>
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Statuses</SelectItem>
-                <SelectItem value="paid">Paid</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="cancelled">Cancelled</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Popover>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={cn(
-                    "w-[140px] justify-start text-left font-normal",
-                    !dateFilter && "text-muted-foreground"
-                  )}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {dateFilter ? (
-                    format(dateFilter, "PPP")
-                  ) : (
-                    <span>Pick date</span>
-                  )}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0">
-                <CalendarComponent
-                  mode="single"
-                  selected={dateFilter}
-                  onSelect={(date: Date | undefined) => setDateFilter(date)}
-                  initialFocus
-                />
-                {dateFilter && (
-                  <div className="p-3 border-t border-border">
-                    <Button
-                      variant="ghost"
-                      className="w-full justify-center"
-                      onClick={() => setDateFilter(undefined)}
-                    >
-                      Clear
-                    </Button>
-                  </div>
-                )}
-              </PopoverContent>
-            </Popover>
-          </div>
-        </div>
-      </motion.div>
-
-      {/* Commissions Table */}
-      <motion.div variants={item} className="rounded-md border">
-        {isLoading ? (
-          <div className="space-y-3 p-4">
-            {[1, 2, 3, 4, 5].map((i) => (
-              <Skeleton key={i} className="h-12 w-full" />
-            ))}
-          </div>
-        ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead
-                  className="cursor-pointer"
-                  onClick={() => handleSort("agent")}
-                >
-                  <div className="flex items-center">
-                    Agent {getSortIcon("agent")}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer"
-                  onClick={() => handleSort("property")}
-                >
-                  <div className="flex items-center">
-                    Property {getSortIcon("property")}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer w-[130px]"
-                  onClick={() => handleSort("salePrice")}
-                >
-                  <div className="flex items-center">
-                    Sale Price {getSortIcon("salePrice")}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer w-[130px]"
-                  onClick={() => handleSort("commission")}
-                >
-                  <div className="flex items-center">
-                    Commission {getSortIcon("commission")}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer w-[80px]"
-                  onClick={() => handleSort("rate")}
-                >
-                  <div className="flex items-center">
-                    Rate {getSortIcon("rate")}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer w-[100px]"
-                  onClick={() => handleSort("status")}
-                >
-                  <div className="flex items-center">
-                    Status {getSortIcon("status")}
-                  </div>
-                </TableHead>
-                <TableHead
-                  className="cursor-pointer w-[110px]"
-                  onClick={() => handleSort("date")}
-                >
-                  <div className="flex items-center">
-                    Date {getSortIcon("date")}
-                  </div>
-                </TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {filteredCommissions.length === 0 ? (
-                <TableRow>
-                  <TableCell colSpan={8} className="h-24 text-center">
-                    No commissions found.
-                  </TableCell>
-                </TableRow>
-              ) : (
-                filteredCommissions.map((commission) => (
-                  <TableRow key={commission.id}>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <User className="mr-2 h-4 w-4 text-muted-foreground" />
-                        {commission.agent}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Home className="mr-2 h-4 w-4 text-muted-foreground" />
-                        {commission.property}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      $
-                      {typeof commission.salePrice === "number"
-                        ? commission.salePrice.toLocaleString()
-                        : parseFloat(
-                            String(commission.salePrice)
-                          ).toLocaleString()}
-                    </TableCell>
-                    <TableCell>
-                      $
-                      {typeof commission.commission === "number"
-                        ? commission.commission.toLocaleString()
-                        : parseFloat(
-                            String(commission.commission)
-                          ).toLocaleString()}
-                    </TableCell>
-                    <TableCell>{commission.rate}%</TableCell>
-                    <TableCell>
-                      <Badge
-                        variant="outline"
-                        className={`${statusColors[commission.status]?.bg} ${
-                          statusColors[commission.status]?.text
-                        } flex items-center`}
-                      >
-                        {statusColors[commission.status]?.icon}
-                        {commission.status.charAt(0).toUpperCase() +
-                          commission.status.slice(1)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center">
-                        <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
-                        {commission.date}
-                      </div>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <Button variant="ghost" size="icon">
-                            <MoreHorizontal className="h-4 w-4" />
-                          </Button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end">
-                          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                          <DropdownMenuSeparator />
-                          {commission.status === "pending" && (
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleUpdateCommissionStatus(
-                                  commission.id,
-                                  "paid"
-                                )
-                              }
-                            >
-                              <CheckCircle2 className="mr-2 h-4 w-4 text-green-500" />
-                              Mark as Paid
-                            </DropdownMenuItem>
-                          )}
-                          {commission.status === "pending" && (
-                            <DropdownMenuItem
-                              onClick={() =>
-                                handleUpdateCommissionStatus(
-                                  commission.id,
-                                  "cancelled"
-                                )
-                              }
-                            >
-                              <XCircle className="mr-2 h-4 w-4 text-red-500" />
-                              Cancel Commission
-                            </DropdownMenuItem>
-                          )}
-                          <DropdownMenuItem>
-                            <Eye className="mr-2 h-4 w-4" />
-                            View Details
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </TableCell>
-                  </TableRow>
-                ))
-              )}
-            </TableBody>
-          </Table>
-        )}
-      </motion.div>
-
-      {/* New Commission Dialog */}
-      <Dialog
-        open={isCommissionDialogOpen}
-        onOpenChange={setIsCommissionDialogOpen}
-      >
-        <DialogContent className="sm:max-w-[500px]">
-          <DialogHeader>
-            <DialogTitle>Add New Commission</DialogTitle>
-            <DialogDescription>
-              Create a new agent commission record
-            </DialogDescription>
-          </DialogHeader>
-          <div className="grid gap-4 py-4">
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="agent" className="text-right text-sm font-medium">
-                Agent
-              </label>
-              <div className="col-span-3">
-                <Select
-                  value={newCommission.agent_id}
-                  onValueChange={(value) =>
-                    setNewCommission({ ...newCommission, agent_id: value })
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select an agent" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {agents.map((agent) => (
-                      <SelectItem key={agent.id} value={agent.id}>
-                        {agent.email}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label
-                htmlFor="property"
-                className="text-right text-sm font-medium"
-              >
-                Property
-              </label>
-              <div className="col-span-3">
-                <Select
-                  value={newCommission.property_id}
-                  onValueChange={(value) =>
-                    setNewCommission({ ...newCommission, property_id: value })
-                  }
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a property" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {properties.map((property) => (
-                      <SelectItem key={property.id} value={property.id}>
-                        {property.address}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label
-                htmlFor="propertyAddress"
-                className="text-right text-sm font-medium"
-              >
-                Or Enter Address
-              </label>
-              <Input
-                id="propertyAddress"
-                placeholder="123 Main St"
-                className="col-span-3"
-                value={newCommission.property_address}
-                onChange={(e) =>
-                  setNewCommission({
-                    ...newCommission,
-                    property_address: e.target.value,
-                  })
-                }
-                disabled={!!newCommission.property_id}
-              />
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label
-                htmlFor="salePrice"
-                className="text-right text-sm font-medium"
-              >
-                Sale Price
-              </label>
-              <div className="col-span-3">
-                <div className="relative">
-                  <span className="absolute left-3 top-2.5">$</span>
-                  <Input
-                    id="salePrice"
-                    type="number"
-                    placeholder="0.00"
-                    className="pl-7"
-                    value={newCommission.sale_price}
-                    onChange={(e) =>
-                      setNewCommission({
-                        ...newCommission,
-                        sale_price: e.target.value,
-                      })
-                    }
-                    step="0.01"
-                    min="0"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="rate" className="text-right text-sm font-medium">
-                Commission Rate
-              </label>
-              <div className="col-span-3">
-                <div className="relative">
-                  <Input
-                    id="rate"
-                    type="number"
-                    placeholder="3.0"
-                    className="pr-8"
-                    value={newCommission.rate}
-                    onChange={(e) =>
-                      setNewCommission({
-                        ...newCommission,
-                        rate: e.target.value,
-                      })
-                    }
-                    step="0.1"
-                    min="0"
-                    max="100"
-                  />
-                  <span className="absolute right-3 top-2.5">%</span>
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label
-                htmlFor="commission"
-                className="text-right text-sm font-medium"
-              >
-                Calculated Amount
-              </label>
-              <div className="col-span-3">
-                <div className="relative">
-                  <span className="absolute left-3 top-2.5">$</span>
-                  <Input
-                    id="commission"
-                    readOnly
-                    className="pl-7 bg-muted"
-                    value={newCommission.commission}
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label
-                htmlFor="status"
-                className="text-right text-sm font-medium"
-              >
-                Status
-              </label>
-              <div className="col-span-3">
-                <Select
-                  value={newCommission.status}
-                  onValueChange={(value) =>
-                    setNewCommission({ ...newCommission, status: value })
-                  }
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="pending">Pending</SelectItem>
-                    <SelectItem value="paid">Paid</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-4 items-center gap-4">
-              <label htmlFor="date" className="text-right text-sm font-medium">
-                Date
-              </label>
-              <div className="col-span-3">
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !newCommission.date && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {newCommission.date ? (
-                        newCommission.date
-                      ) : (
-                        <span>Pick a date</span>
-                      )}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
-                    <CalendarComponent
-                      mode="single"
-                      selected={
-                        newCommission.date
-                          ? new Date(newCommission.date)
-                          : undefined
-                      }
-                      onSelect={(date) =>
-                        setNewCommission({
-                          ...newCommission,
-                          date: date ? format(date, "yyyy-MM-dd") : "",
-                        })
-                      }
-                      initialFocus
-                    />
-                  </PopoverContent>
-                </Popover>
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
+            <LanguageSwitcher />
             <Button
               variant="outline"
-              onClick={() => setIsCommissionDialogOpen(false)}
+              onClick={handleRefresh}
+              disabled={isRefreshing || isLoading}
+              className="gap-2"
             >
-              Cancel
+              <RefreshCw
+                className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`}
+              />
+              {t.refresh}
             </Button>
-            <Button onClick={handleCreateCommission}>Create Commission</Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-    </motion.div>
+            <Button
+              onClick={() => setIsCommissionDialogOpen(true)}
+              className="gap-2"
+            >
+              <PlusCircle className="h-4 w-4" />
+              {t.addCommission}
+            </Button>
+            <Button variant="outline" className="gap-2">
+              <Download className="h-4 w-4" />
+              {t.download}
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Summary Stats */}
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+          <motion.div variants={item}>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t.totalCommissions}
+                </CardTitle>
+                <DollarSign className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-20" />
+                ) : (
+                  <div className="text-2xl font-bold">
+                    ${stats.totalCommissions.toLocaleString()}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={item}>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t.averageCommission}
+                </CardTitle>
+                <BarChart3 className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-20" />
+                ) : (
+                  <div className="text-2xl font-bold">
+                    ${stats.averageCommission.toLocaleString()}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={item}>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t.pendingCommissions}
+                </CardTitle>
+                <Clock className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-20" />
+                ) : (
+                  <div className="text-2xl font-bold">
+                    ${stats.pendingCommissions.toLocaleString()}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+
+          <motion.div variants={item}>
+            <Card>
+              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+                <CardTitle className="text-sm font-medium">
+                  {t.averageRate}
+                </CardTitle>
+                <TrendingUp className="h-4 w-4 text-muted-foreground" />
+              </CardHeader>
+              <CardContent>
+                {isLoading ? (
+                  <Skeleton className="h-8 w-20" />
+                ) : (
+                  <div className="text-2xl font-bold">{stats.averageRate}%</div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        </div>
+
+        {/* Filter Controls */}
+        <motion.div variants={item} className="flex flex-col sm:flex-row gap-4">
+          <div className="flex-1 flex flex-col sm:flex-row gap-2">
+            <div className="relative flex-1">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <Input
+                type="search"
+                placeholder={t.searchCommissions}
+                className="pl-8 w-full"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="flex flex-wrap gap-2">
+              <Select value={statusFilter} onValueChange={setStatusFilter}>
+                <SelectTrigger className="w-[140px]">
+                  <div className="flex items-center gap-2">
+                    <Filter className="h-4 w-4" />
+                    <span>{t.status}</span>
+                  </div>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{t.all}</SelectItem>
+                  <SelectItem value="paid">{t.paid}</SelectItem>
+                  <SelectItem value="pending">{t.pending}</SelectItem>
+                  <SelectItem value="cancelled">{t.cancelled}</SelectItem>
+                </SelectContent>
+              </Select>
+
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-[140px] justify-start text-left font-normal",
+                      !dateFilter && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateFilter ? format(dateFilter, "PPP") : t.filterByDate}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0">
+                  <CalendarComponent
+                    mode="single"
+                    selected={dateFilter}
+                    onSelect={setDateFilter}
+                    initialFocus
+                  />
+                  {dateFilter && (
+                    <div className="p-3 border-t border-border">
+                      <Button
+                        variant="ghost"
+                        className="w-full justify-center"
+                        onClick={() => setDateFilter(undefined)}
+                      >
+                        {t.clearDate}
+                      </Button>
+                    </div>
+                  )}
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+        </motion.div>
+
+        {/* Commissions Table */}
+        <motion.div variants={item} className="rounded-md border">
+          {isLoading ? (
+            <div className="space-y-3 p-4">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
+          ) : (
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead
+                    className="cursor-pointer"
+                    onClick={() => handleSort("agent")}
+                  >
+                    <div className="flex items-center">
+                      {t.agent} {getSortIcon("agent")}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer"
+                    onClick={() => handleSort("property")}
+                  >
+                    <div className="flex items-center">
+                      {t.property} {getSortIcon("property")}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer w-[130px]"
+                    onClick={() => handleSort("salePrice")}
+                  >
+                    <div className="flex items-center">
+                      {t.salePrice} {getSortIcon("salePrice")}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer w-[130px]"
+                    onClick={() => handleSort("commission")}
+                  >
+                    <div className="flex items-center">
+                      {t.commission} {getSortIcon("commission")}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer w-[80px]"
+                    onClick={() => handleSort("rate")}
+                  >
+                    <div className="flex items-center">
+                      {t.rate} {getSortIcon("rate")}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer w-[100px]"
+                    onClick={() => handleSort("status")}
+                  >
+                    <div className="flex items-center">
+                      {t.status} {getSortIcon("status")}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="cursor-pointer w-[110px]"
+                    onClick={() => handleSort("date")}
+                  >
+                    <div className="flex items-center">
+                      {t.date} {getSortIcon("date")}
+                    </div>
+                  </TableHead>
+                  <TableHead className="text-right">{t.actions}</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {filteredCommissions.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={8} className="h-24 text-center">
+                      {t.noResults}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredCommissions.map((commission) => (
+                    <TableRow key={commission.id}>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <User className="mr-2 h-4 w-4 text-muted-foreground" />
+                          {commission.agent}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <Home className="mr-2 h-4 w-4 text-muted-foreground" />
+                          {commission.property}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        $
+                        {typeof commission.salePrice === "number"
+                          ? commission.salePrice.toLocaleString()
+                          : parseFloat(
+                              String(commission.salePrice)
+                            ).toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        $
+                        {typeof commission.commission === "number"
+                          ? commission.commission.toLocaleString()
+                          : parseFloat(
+                              String(commission.commission)
+                            ).toLocaleString()}
+                      </TableCell>
+                      <TableCell>{commission.rate}%</TableCell>
+                      <TableCell>
+                        <Badge
+                          variant="outline"
+                          className={`${statusColors[commission.status]?.bg} ${
+                            statusColors[commission.status]?.text
+                          } flex items-center`}
+                        >
+                          {statusColors[commission.status]?.icon}
+                          {commission.status.charAt(0).toUpperCase() +
+                            commission.status.slice(1)}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center">
+                          <Calendar className="mr-2 h-4 w-4 text-muted-foreground" />
+                          {commission.date}
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="ghost" size="icon">
+                              <MoreHorizontal className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className={isRTL ? "rtl" : ""}
+                          >
+                            <DropdownMenuLabel>{t.actions}</DropdownMenuLabel>
+                            <DropdownMenuSeparator />
+                            {commission.status === "pending" && (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleUpdateCommissionStatus(
+                                    commission.id,
+                                    "paid"
+                                  )
+                                }
+                                className={
+                                  isRTL ? "flex-row-reverse text-right" : ""
+                                }
+                              >
+                                <CheckCircle2
+                                  className={`${
+                                    isRTL ? "ml-2" : "mr-2"
+                                  } h-4 w-4 text-green-500`}
+                                />
+                                {t.paid}
+                              </DropdownMenuItem>
+                            )}
+                            {commission.status === "pending" && (
+                              <DropdownMenuItem
+                                onClick={() =>
+                                  handleUpdateCommissionStatus(
+                                    commission.id,
+                                    "cancelled"
+                                  )
+                                }
+                                className={
+                                  isRTL ? "flex-row-reverse text-right" : ""
+                                }
+                              >
+                                <XCircle
+                                  className={`${
+                                    isRTL ? "ml-2" : "mr-2"
+                                  } h-4 w-4 text-red-500`}
+                                />
+                                {t.cancel}
+                              </DropdownMenuItem>
+                            )}
+                            <DropdownMenuItem
+                              className={
+                                isRTL ? "flex-row-reverse text-right" : ""
+                              }
+                            >
+                              <Eye
+                                className={`${isRTL ? "ml-2" : "mr-2"} h-4 w-4`}
+                              />
+                              {t.viewDetails}
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
+              </TableBody>
+            </Table>
+          )}
+        </motion.div>
+
+        {/* New Commission Dialog */}
+        <Dialog
+          open={isCommissionDialogOpen}
+          onOpenChange={setIsCommissionDialogOpen}
+        >
+          <DialogContent className="sm:max-w-[500px]">
+            <DialogHeader>
+              <DialogTitle>{t.addNewCommission}</DialogTitle>
+              <DialogDescription>{t.addNewCommission}</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label
+                  htmlFor="agent"
+                  className="text-right text-sm font-medium"
+                >
+                  {t.agent}
+                </label>
+                <div className="col-span-3">
+                  <Select
+                    value={newCommission.agent_id}
+                    onValueChange={(value) =>
+                      setNewCommission({ ...newCommission, agent_id: value })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t.selectAgent} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {agents.map((agent) => (
+                        <SelectItem key={agent.id} value={agent.id}>
+                          {agent.email}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label
+                  htmlFor="property"
+                  className="text-right text-sm font-medium"
+                >
+                  {t.property}
+                </label>
+                <div className="col-span-3">
+                  <Select
+                    value={newCommission.property_id}
+                    onValueChange={(value) =>
+                      setNewCommission({ ...newCommission, property_id: value })
+                    }
+                  >
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder={t.selectProperty} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {properties.map((property) => (
+                        <SelectItem key={property.id} value={property.id}>
+                          {property.address}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label
+                  htmlFor="propertyAddress"
+                  className="text-right text-sm font-medium"
+                >
+                  {t.manualProperty}
+                </label>
+                <Input
+                  id="propertyAddress"
+                  placeholder={t.manualProperty}
+                  className="col-span-3"
+                  value={newCommission.property_address}
+                  onChange={(e) =>
+                    setNewCommission({
+                      ...newCommission,
+                      property_address: e.target.value,
+                    })
+                  }
+                  disabled={!!newCommission.property_id}
+                />
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label
+                  htmlFor="salePrice"
+                  className="text-right text-sm font-medium"
+                >
+                  {t.salePrice}
+                </label>
+                <div className="col-span-3">
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5">$</span>
+                    <Input
+                      id="salePrice"
+                      type="number"
+                      placeholder={t.enterSalePrice}
+                      className="pl-7"
+                      value={newCommission.sale_price}
+                      onChange={(e) =>
+                        setNewCommission({
+                          ...newCommission,
+                          sale_price: e.target.value,
+                        })
+                      }
+                      step="0.01"
+                      min="0"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label
+                  htmlFor="rate"
+                  className="text-right text-sm font-medium"
+                >
+                  {t.rate}
+                </label>
+                <div className="col-span-3">
+                  <div className="relative">
+                    <Input
+                      id="rate"
+                      type="number"
+                      placeholder={t.enterRate}
+                      className="pr-8"
+                      value={newCommission.rate}
+                      onChange={(e) =>
+                        setNewCommission({
+                          ...newCommission,
+                          rate: e.target.value,
+                        })
+                      }
+                      step="0.1"
+                      min="0"
+                      max="100"
+                    />
+                    <span className="absolute right-3 top-2.5">%</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label
+                  htmlFor="commission"
+                  className="text-right text-sm font-medium"
+                >
+                  {t.commission}
+                </label>
+                <div className="col-span-3">
+                  <div className="relative">
+                    <span className="absolute left-3 top-2.5">$</span>
+                    <Input
+                      id="commission"
+                      readOnly
+                      className="pl-7 bg-muted"
+                      value={newCommission.commission}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label
+                  htmlFor="status"
+                  className="text-right text-sm font-medium"
+                >
+                  {t.status}
+                </label>
+                <div className="col-span-3">
+                  <Select
+                    value={newCommission.status}
+                    onValueChange={(value) =>
+                      setNewCommission({ ...newCommission, status: value })
+                    }
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder={t.selectStatus} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="pending">{t.pending}</SelectItem>
+                      <SelectItem value="paid">{t.paid}</SelectItem>
+                      <SelectItem value="cancelled">{t.cancelled}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-4 items-center gap-4">
+                <label
+                  htmlFor="date"
+                  className="text-right text-sm font-medium"
+                >
+                  {t.date}
+                </label>
+                <div className="col-span-3">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !newCommission.date && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon
+                          className={`${isRTL ? "ml-2" : "mr-2"} h-4 w-4`}
+                        />
+                        {newCommission.date ? (
+                          newCommission.date
+                        ) : (
+                          <span>{t.selectDate}</span>
+                        )}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0">
+                      <CalendarComponent
+                        mode="single"
+                        selected={
+                          newCommission.date
+                            ? new Date(newCommission.date)
+                            : undefined
+                        }
+                        onSelect={(date) =>
+                          setNewCommission({
+                            ...newCommission,
+                            date: date ? format(date, "yyyy-MM-dd") : "",
+                          })
+                        }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+              </div>
+            </div>
+            <DialogFooter className={isRTL ? "rtl-flex-row-reverse" : ""}>
+              <Button
+                variant="outline"
+                onClick={() => setIsCommissionDialogOpen(false)}
+              >
+                {t.cancel}
+              </Button>
+              <Button onClick={handleCreateCommission}>{t.create}</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      </motion.div>
+    </div>
   );
 }
