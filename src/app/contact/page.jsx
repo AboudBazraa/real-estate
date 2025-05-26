@@ -50,10 +50,10 @@ export default function ContactPage() {
                             Phone
                           </p>
                           <a
-                            href="tel:+12578385379"
+                            href="tel:+967735768797"
                             className="text-zinc-900 dark:text-white hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
                           >
-                            +1 (257) 838-5379
+                            +967 (735)768-797
                           </a>
                         </div>
                       </div>
@@ -65,10 +65,10 @@ export default function ContactPage() {
                             Email
                           </p>
                           <a
-                            href="mailto:hello@mirageestate.com"
+                            href="mailto:abodmohd880@gmail.com"
                             className="text-zinc-900 dark:text-white hover:text-zinc-600 dark:hover:text-zinc-300 transition-colors"
                           >
-                            hello@mirageestate.com
+                            abodmohd880@gmail.com
                           </a>
                         </div>
                       </div>
@@ -80,7 +80,7 @@ export default function ContactPage() {
                             Office
                           </p>
                           <p className="text-zinc-900 dark:text-white">
-                            230 Norman Street New York, QC (USA) H8R 1A1
+                            230 Al Mhabh Street Al Mukalla, Hadramoot, Yemen
                           </p>
                           <a
                             href="https://maps.google.com?q=230+Norman+Street+New+York"
