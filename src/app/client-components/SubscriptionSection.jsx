@@ -463,7 +463,7 @@ export default function SubscriptionSection() {
       {/* Plan Selection Drawer */}
       <Drawer open={isDrawerOpen} onOpenChange={setIsDrawerOpen}>
         <DrawerContent className="bg-white dark:bg-zinc-900 w-full border-t border-zinc-200 dark:border-zinc-800">
-          <div className="mx-auto w-full max-w-4xl">
+          <div className="mx-auto w-full max-w-4xl overflow-auto">
             <DrawerHeader>
               <DrawerTitle className="text-2xl text-center text-black dark:text-white">
                 Choose Your Plan
@@ -472,7 +472,7 @@ export default function SubscriptionSection() {
                 Select the plan that works best for you
               </DrawerDescription>
             </DrawerHeader>
-            <div className="p-4 md:p-6 flex flex-col md:flex-row items-center justify-center gap-4 w-full">
+            <div className="p-4 md:p-6 flex flex-col md:flex-row items-center justify-center gap-4 w-full ">
               {/* Pro Plan */}
               {renderPlanCard(
                 "pro",
