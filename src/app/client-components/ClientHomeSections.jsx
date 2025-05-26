@@ -22,18 +22,17 @@ function HistoricalJourneyCarousel() {
   // Array of images with their descriptions
   const carouselItems = [
     {
-      image:
-        "https://images.unsplash.com/photo-1600585152220-90363fe7e115?q=80&w=2070&auto=format",
+      image: "/images/Mukkla.png",
       alt:
         locale === "ar"
           ? "مطبخ عصري مع نوافذ كبيرة"
           : "Modern Kitchen with Large Windows",
     },
-    {
-      image:
-        "https://images.unsplash.com/photo-1600566753851-c3f970f613dc?q=80&w=2070&auto=format",
-      alt: locale === "ar" ? "غرفة معيشة أنيقة" : "Elegant Living Space",
-    },
+    // {
+    //   image:
+    //     "https://images.unsplash.com/photo-1600566753851-c3f970f613dc?q=80&w=2070&auto=format",
+    //   alt: locale === "ar" ? "غرفة معيشة أنيقة" : "Elegant Living Space",
+    // },
     {
       image:
         "https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?q=80&w=2070&auto=format",
@@ -45,11 +44,11 @@ function HistoricalJourneyCarousel() {
       alt:
         locale === "ar" ? "تصميم حمام معاصر" : "Contemporary Bathroom Design",
     },
-    {
-      image:
-        "https://images.unsplash.com/photo-1600210492486-724fe5c67fb3?q=80&w=2070&auto=format",
-      alt: locale === "ar" ? "جناح غرفة نوم فاخر" : "Luxury Bedroom Suite",
-    },
+    // {
+    //   image:
+    //     "https://images.unsplash.com/photo-1600210492486-724fe5c67fb3?q=80&w=2070&auto=format",
+    //   alt: locale === "ar" ? "جناح غرفة نوم فاخر" : "Luxury Bedroom Suite",
+    // },
     {
       image:
         "https://images.unsplash.com/photo-1600047509807-ba8f99d2cdde?q=80&w=2070&auto=format",
@@ -424,7 +423,7 @@ export default function ClientHomeSections() {
               } overflow-hidden rounded-sm`}
             >
               <motion.img
-                src="https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2069&auto=format"
+                src="/images/Jola.png"
                 alt={locale === "ar" ? "غرفة نوم أنيقة" : "Elegant Bedroom"}
                 className="w-full aspect-[4/3] object-cover rounded-2xl"
                 initial={{ scale: 1 }}
@@ -442,7 +441,7 @@ export default function ClientHomeSections() {
               } overflow-hidden rounded-sm`}
             >
               <motion.img
-                src="https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2069&auto=format"
+                src="/images/Dar.png"
                 alt={
                   locale === "ar" ? "غرفة معيشة عصرية" : "Modern Living Room"
                 }

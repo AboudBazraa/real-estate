@@ -98,7 +98,7 @@ export default function AboutContent() {
             </div>
             <div>
               <motion.img
-                src="https://images.unsplash.com/photo-1613977257592-4871e5fcd7c4?q=80&w=2070&auto=format"
+                src="/images/ddd.jpeg"
                 alt={
                   typeof window !== "undefined" &&
                   (document?.documentElement?.lang === "ar" ||

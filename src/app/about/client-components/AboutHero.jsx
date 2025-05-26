@@ -38,7 +38,7 @@ export default function AboutHero() {
               style={{ clipPath: "polygon(0 0, 100% 0, 0 100%)" }}
             >
               <motion.img
-                src="https://images.unsplash.com/photo-1600607686527-6fb886090705?q=80&w=2069&auto=format"
+                src="images/Bayet.png"
                 alt="Modern Interior"
                 className="w-full h-full object-cover"
                 initial={{ scale: 1 }}
