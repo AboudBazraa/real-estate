@@ -1,7 +1,8 @@
 "use client";
 
-import { ChevronRight, type LucideIcon } from "lucide-react";
+import { ChevronRight, ChevronLeft, type LucideIcon } from "lucide-react";
 import { useState } from "react";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 
 import {
   Collapsible,
@@ -29,18 +30,30 @@ export function NavMain({
     url: string;
     icon: LucideIcon;
     isActive?: boolean;
+    rtl?: boolean;
+    menuItemClass?: string;
+    textAlign?: string;
+    iconPosition?: string;
+    submenuClass?: string;
     items?: {
       title: string;
       url: string;
+      rtl?: boolean;
+      menuItemClass?: string;
+      textAlign?: string;
+      iconPosition?: string;
+      submenuClass?: string;
     }[];
-  }[],
-
+  }[];
 }) {
   const [activeUrl, setActiveUrl] = useState("");
+  const { isRTL } = useTranslation();
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel className={isRTL ? "text-right w-full" : ""}>
+        Platform
+      </SidebarGroupLabel>
       <SidebarMenu>
         {items.map((item) => (
           <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
@@ -48,36 +61,70 @@ export function NavMain({
               <SidebarMenuButton
                 asChild
                 onClick={() => setActiveUrl(item.url)}
-                className={` ${activeUrl === item.url && "bg-zinc-200 dark:bg-zinc-800"}`}
+                className={`${
+                  activeUrl === item.url && "bg-zinc-200 dark:bg-zinc-800"
+                } ${isRTL ? "rtl-hover-indicator relative" : ""}`}
                 tooltip={item.title}
               >
-                <Link href={item.url}>
+                <Link
+                  href={item.url}
+                  className={item.rtl ? "flex-row-reverse justify-between" : ""}
+                >
                   <item.icon />
-                  <span>{item.title}</span>
+                  <span
+                    className={item.textAlign ? `text-${item.textAlign}` : ""}
+                  >
+                    {item.title}
+                  </span>
                 </Link>
               </SidebarMenuButton>
               {item.items?.length ? (
                 <>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuAction className="data-[state=open]:rotate-90">
-                      <ChevronRight />
+                    <SidebarMenuAction
+                      className={`data-[state=open]:rotate-90 ${
+                        isRTL ? "right-auto left-1" : ""
+                      }`}
+                    >
+                      {isRTL ? <ChevronLeft /> : <ChevronRight />}
                       <span className="sr-only">Toggle</span>
                     </SidebarMenuAction>
                   </CollapsibleTrigger>
                   <CollapsibleContent>
-                    <SidebarMenuSub>
+                    <SidebarMenuSub
+                      className={
+                        isRTL
+                          ? "border-r border-l-0 mr-3.5 ml-0 pr-2.5 pl-0"
+                          : ""
+                      }
+                    >
                       {item.items?.map((subItem) => (
                         <SidebarMenuSubItem key={subItem.title}>
                           <SidebarMenuSubButton
                             asChild
                             onClick={() => setActiveUrl(subItem.url)}
-                            className={` ${
+                            className={`${
                               activeUrl === subItem.url &&
                               "bg-zinc-200 dark:bg-zinc-800"
                             }`}
                           >
-                            <Link href={subItem.url}>
-                              <span>{subItem.title}</span>
+                            <Link
+                              href={subItem.url}
+                              className={
+                                subItem.rtl
+                                  ? "flex-row-reverse justify-between w-full"
+                                  : ""
+                              }
+                            >
+                              <span
+                                className={
+                                  subItem.textAlign
+                                    ? `text-${subItem.textAlign}`
+                                    : ""
+                                }
+                              >
+                                {subItem.title}
+                              </span>
                             </Link>
                           </SidebarMenuSubButton>
                         </SidebarMenuSubItem>

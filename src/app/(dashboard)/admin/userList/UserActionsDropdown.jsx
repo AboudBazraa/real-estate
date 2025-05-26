@@ -19,6 +19,10 @@ import {
   Trash2,
   Upload,
   UserPlus,
+  Edit,
+  EyeOff,
+  CheckCircle,
+  User,
 } from "lucide-react";
 import {
   Dialog,
@@ -39,9 +43,27 @@ import { useUpdateUserRole } from "@/app/auth/hooks/useUpdateUserRole";
 import Roles from "@/app/auth/types/roles";
 import { useToast } from "@/shared/hooks/use-toast";
 import { updateUserRole, deleteUser } from "./utils/supabaseAdmin";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/components/ui/alert-dialog";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+import userListTranslations from "./translations";
 
 // UserActionsDropdown ///////////////////////////////////
-export function UserActionsDropdown({ user, onRefresh }) {
+export function UserActionsDropdown({
+  user,
+  onEdit,
+  onDelete,
+  onStatusChange,
+  onView,
+}) {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
   const [isUpdating, setIsUpdating] = useState(false);
@@ -50,6 +72,12 @@ export function UserActionsDropdown({ user, onRefresh }) {
   const [selectedRole, setSelectedRole] = useState(
     user.user_metadata?.role || Roles.USER
   );
+  const { currentLanguage, isRTL } = useTranslation();
+
+  // Get translations based on current language
+  const t = userListTranslations[currentLanguage] || userListTranslations.en;
+
+  const isBlocked = user?.status === "blocked";
 
   const handleRoleChange = (value) => {
     setSelectedRole(value);
@@ -120,102 +148,104 @@ export function UserActionsDropdown({ user, onRefresh }) {
     }
   };
 
+  const handleStatusChange = () => {
+    setIsDeleteDialogOpen(false);
+    onStatusChange(user.id, isBlocked ? "active" : "blocked");
+  };
+
   return (
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="icon" className="h-8 w-8">
+          <Button variant="ghost" className="h-8 w-8 p-0">
             <MoreHorizontal className="h-4 w-4" />
-            <span className="sr-only">Actions</span>
+            <span className="sr-only">Open menu</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          <DropdownMenuLabel>Actions</DropdownMenuLabel>
-          <DropdownMenuItem onClick={() => setIsDialogOpen(true)}>
-            <Shield className="mr-2 h-4 w-4" />
-            Update User Role
+        <DropdownMenuContent
+          align={isRTL ? "start" : "end"}
+          className={isRTL ? "rtl text-right" : ""}
+        >
+          <DropdownMenuLabel>{t.actions}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem
+            onClick={onView}
+            className={isRTL ? "flex-row-reverse" : ""}
+          >
+            <User className={`${isRTL ? "ml-2" : "mr-2"} h-4 w-4`} />
+            {t.viewDetails}
+          </DropdownMenuItem>
+          <DropdownMenuItem
+            onClick={onEdit}
+            className={isRTL ? "flex-row-reverse" : ""}
+          >
+            <Edit className={`${isRTL ? "ml-2" : "mr-2"} h-4 w-4`} />
+            {t.editUser}
           </DropdownMenuItem>
           <DropdownMenuSeparator />
           <DropdownMenuItem
-            className="text-destructive"
             onClick={() => setIsDeleteDialogOpen(true)}
+            className={`text-red-600 ${isRTL ? "flex-row-reverse" : ""}`}
           >
-            <Trash2 className="mr-2 h-4 w-4" />
-            Delete User
+            <Trash2 className={`${isRTL ? "ml-2" : "mr-2"} h-4 w-4`} />
+            {t.deleteUser}
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>
 
-      <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-        <DialogOverlay />
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Update User Role</DialogTitle>
-          </DialogHeader>
-          <div className="py-4">
-            <p className="mb-2">User: {user.email}</p>
-            <p className="mb-4 text-sm text-muted-foreground">
-              Current role:{" "}
-              <span className="capitalize">
-                {user.user_metadata?.role || "Not set"}
-              </span>
-            </p>
-            <Select value={selectedRole} onValueChange={handleRoleChange}>
-              <SelectTrigger className="w-full">
-                <SelectValue placeholder="Select a role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value={Roles.USER}>User</SelectItem>
-                <SelectItem value={Roles.AGENT}>Agent</SelectItem>
-                <SelectItem value={Roles.ADMIN}>Admin</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <DialogFooter>
-            <Button
-              onClick={handleUpdateUserRole}
-              disabled={isUpdating || selectedRole === user.user_metadata?.role}
-            >
-              {isUpdating ? "Updating..." : "Update Role"}
-            </Button>
-            <Button variant="outline" onClick={() => setIsDialogOpen(false)}>
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
-        <DialogOverlay />
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Confirm Delete</DialogTitle>
-          </DialogHeader>
-          <p className="py-4">
-            Are you sure you want to delete the user{" "}
-            <strong>{user.email}</strong>?
-            <br />
-            <span className="text-sm text-muted-foreground">
-              This action cannot be undone.
-            </span>
-          </p>
-          <DialogFooter>
-            <Button
-              variant="destructive"
+      {/* Delete confirmation dialog */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent className={isRTL ? "rtl text-right" : ""}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>{t.deleteUser}</AlertDialogTitle>
+            <AlertDialogDescription>
+              {t.confirmDeleteUser}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className={isRTL ? "flex-row-reverse" : ""}>
+            <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+            <AlertDialogAction
               onClick={handleDeleteUser}
-              disabled={isDeleting}
+              className="bg-red-600 hover:bg-red-700"
             >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </Button>
-            <Button
-              variant="outline"
-              onClick={() => setIsDeleteDialogOpen(false)}
+              {t.delete}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Block/unblock confirmation dialog */}
+      <AlertDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+      >
+        <AlertDialogContent className={isRTL ? "rtl text-right" : ""}>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {isBlocked ? t.unblockUser : t.blockUser}
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {isBlocked ? t.confirmUnblockUser : t.confirmBlockUser}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter className={isRTL ? "flex-row-reverse" : ""}>
+            <AlertDialogCancel>{t.cancel}</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleStatusChange}
+              className={
+                isBlocked
+                  ? "bg-green-600 hover:bg-green-700"
+                  : "bg-amber-600 hover:bg-amber-700"
+              }
             >
-              Cancel
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+              {isBlocked ? t.unblockUser : t.blockUser}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </>
   );
 }

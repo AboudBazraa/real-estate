@@ -4,10 +4,10 @@ import { Button } from "@/shared/components/ui/button";
 // import { useApiMutatio } from "@/shared/hooks/useApi";
 
 export default function AddPropertyForm() {
-//   const agentAddProperty = useApiMutatio({
-//     url: "/Agent/Create",
-//     method: "POST",
-//   });
+  //   const agentAddProperty = useApiMutatio({
+  //     url: "/Agent/Create",
+  //     method: "POST",
+  //   });
 
   const [newProperty, setNewProperty] = useState({
     title: "",

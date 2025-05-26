@@ -33,6 +33,7 @@ import {
 import { useToast } from "@/shared/hooks/use-toast";
 import { Badge } from "@/shared/components/ui/badge";
 import { useTheme } from "next-themes";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 import {
   Dialog,
   DialogContent,
@@ -126,6 +127,7 @@ const ScheduledVisitsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("upcoming");
   const { theme, setTheme } = useTheme();
+  const { currentLanguage, isRTL } = useTranslation();
   const [newAppointment, setNewAppointment] = useState({
     propertyTitle: "",
     propertyAddress: "",
@@ -137,6 +139,94 @@ const ScheduledVisitsPage = () => {
     status: "Pending",
   });
   const { toast } = useToast();
+
+  // Translations
+  const translations = {
+    en: {
+      scheduledVisits: "Scheduled Visits",
+      newVisit: "New Visit",
+      searchPlaceholder: "Search by property or client name...",
+      upcoming: "Upcoming",
+      past: "Past",
+      all: "All",
+      noVisits: "No scheduled visits found",
+      noVisitsMessage:
+        "Try creating a new appointment or change your search terms.",
+      visitDetails: "Visit Details",
+      loading: "Loading appointments...",
+      // Add Appointment Form
+      addNewAppointment: "Add New Appointment",
+      scheduleNewVisit: "Schedule a new property visit or meeting",
+      propertyTitle: "Property Title",
+      propertyAddress: "Property Address",
+      clientName: "Client Name",
+      clientPhone: "Client Phone",
+      date: "Date",
+      time: "Time",
+      appointmentType: "Appointment Type",
+      showing: "Showing",
+      inspection: "Inspection",
+      meeting: "Meeting",
+      consultation: "Consultation",
+      status: "Status",
+      pending: "Pending",
+      confirmed: "Confirmed",
+      cancel: "Cancel",
+      schedule: "Schedule Visit",
+      visitScheduled: "Visit Scheduled",
+      newVisitMessage: "New property visit has been scheduled successfully.",
+      // View Appointment
+      contactClient: "Contact Client",
+      visitDetails: "Visit Details",
+      visitDate: "Visit Date",
+      visitTime: "Visit Time",
+      appointmentAdded: "Appointment Added",
+      appointmentAddedMessage:
+        "New appointment has been added to your calendar.",
+    },
+    ar: {
+      scheduledVisits: "الزيارات المجدولة",
+      newVisit: "زيارة جديدة",
+      searchPlaceholder: "البحث حسب العقار أو اسم العميل...",
+      upcoming: "القادمة",
+      past: "السابقة",
+      all: "الكل",
+      noVisits: "لا توجد زيارات مجدولة",
+      noVisitsMessage: "حاول إنشاء موعد جديد أو تغيير مصطلحات البحث الخاصة بك.",
+      visitDetails: "تفاصيل الزيارة",
+      loading: "جاري تحميل المواعيد...",
+      // Add Appointment Form
+      addNewAppointment: "إضافة موعد جديد",
+      scheduleNewVisit: "جدولة زيارة عقار جديدة أو اجتماع",
+      propertyTitle: "عنوان العقار",
+      propertyAddress: "عنوان العقار",
+      clientName: "اسم العميل",
+      clientPhone: "هاتف العميل",
+      date: "التاريخ",
+      time: "الوقت",
+      appointmentType: "نوع الموعد",
+      showing: "عرض",
+      inspection: "فحص",
+      meeting: "اجتماع",
+      consultation: "استشارة",
+      status: "الحالة",
+      pending: "قيد الانتظار",
+      confirmed: "مؤكد",
+      cancel: "إلغاء",
+      schedule: "جدولة الزيارة",
+      visitScheduled: "تم جدولة الزيارة",
+      newVisitMessage: "تمت جدولة زيارة العقار الجديدة بنجاح.",
+      // View Appointment
+      contactClient: "الاتصال بالعميل",
+      visitDetails: "تفاصيل الزيارة",
+      visitDate: "تاريخ الزيارة",
+      visitTime: "وقت الزيارة",
+      appointmentAdded: "تمت إضافة الموعد",
+      appointmentAddedMessage: "تمت إضافة موعد جديد إلى التقويم الخاص بك.",
+    },
+  };
+
+  const t = translations[currentLanguage === "ar" ? "ar" : "en"];
 
   // Simulate loading data
   useEffect(() => {
@@ -198,65 +288,47 @@ const ScheduledVisitsPage = () => {
     });
   };
 
-  const handleInputChange = (e) => {
-    const { name, value } = e.target;
-    setNewAppointment((prev) => ({ ...prev, [name]: value }));
-  };
-
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    // Form validation
-    if (
-      !newAppointment.propertyTitle ||
-      !newAppointment.clientName ||
-      !newAppointment.date ||
-      !newAppointment.time
-    ) {
-      toast({
-        title: "Missing Information",
-        description: "Please fill in all required fields.",
-        variant: "destructive",
-      });
-      return;
-    }
+    // Add a unique ID
+    const newId = `apt-${appointments.length + 1}`;
+    const appointmentToAdd = { id: newId, ...newAppointment };
 
-    // Add appointment with animation
-    const appointmentToAdd = {
-      ...newAppointment,
-      id: `apt-${appointments.length + 1}`,
-    };
-
+    // Add to appointments
     setAppointments((prev) => [...prev, appointmentToAdd]);
 
-    toast({
-      title: "Appointment Added",
-      description: "You have successfully added a new appointment.",
-    });
-
+    // Close modal and reset form
     handleModalClose();
+
+    // Show success toast
+    toast({
+      title: t.appointmentAdded,
+      description: t.appointmentAddedMessage,
+      variant: "success",
+    });
   };
 
   const getStatusBadgeColor = (status) => {
-    switch (status.toLowerCase()) {
-      case "confirmed":
-        return "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300";
-      case "pending":
-        return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300";
-      case "cancelled":
-        return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+    switch (status) {
+      case "Confirmed":
+        return "bg-green-500/10 text-green-600 hover:bg-green-500/20";
+      case "Pending":
+        return "bg-yellow-500/10 text-yellow-600 hover:bg-yellow-500/20";
+      case "Cancelled":
+        return "bg-red-500/10 text-red-500 hover:bg-red-500/20";
       default:
-        return "";
+        return "bg-gray-500/10 text-gray-500 hover:bg-gray-500/20";
     }
   };
 
   const getTypeIcon = (type) => {
-    switch (type.toLowerCase()) {
-      case "showing":
+    switch (type) {
+      case "Showing":
         return <Calendar className="h-4 w-4" />;
-      case "inspection":
+      case "Inspection":
         return <Search className="h-4 w-4" />;
-      case "meeting":
+      case "Meeting":
         return <User className="h-4 w-4" />;
       default:
         return <Calendar className="h-4 w-4" />;
@@ -264,389 +336,365 @@ const ScheduledVisitsPage = () => {
   };
 
   const formatDate = (dateString) => {
-    const options = {
-      weekday: "long",
-      year: "numeric",
-      month: "long",
+    return new Date(dateString).toLocaleDateString("en-US", {
+      weekday: "short",
+      month: "short",
       day: "numeric",
-    };
-    return new Date(dateString).toLocaleDateString(undefined, options);
+    });
   };
 
   return (
-    <motion.div
-      initial="hidden"
-      animate="visible"
-      variants={fadeIn}
-      className="container mx-auto p-2 md:p-4 space-y-8"
-    >
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight">
-            Appointments & Meetings
-          </h1>
-          <p className="text-muted-foreground">
-            Manage your scheduled property viewings and client meetings
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <Button onClick={handleAddAppointment} className="group">
-            <Plus className="mr-2 h-4 w-4 transition-transform group-hover:rotate-90" />
-            Schedule New
-          </Button>
-        </div>
-      </div>
-
-      <Tabs
-        defaultValue="upcoming"
-        value={activeTab}
-        onValueChange={setActiveTab}
+    <div className={`w-full mx-auto ${isRTL ? "rtl" : ""}`}>
+      <motion.div
+        initial="hidden"
+        animate="visible"
+        variants={fadeIn}
+        className="mb-8"
       >
-        <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-          <TabsList>
-            <TabsTrigger value="upcoming" className="relative">
-              Upcoming
-              {/* {!isLoading && (
-                <Badge className="ml-1 px-1 h-5 absolute -top-2 -right-2 bg-primary text-white text-xs">
-                  {
-                    appointments.filter(
-                      (apt) => new Date(apt.date) >= new Date()
-                    ).length
-                  }
-                </Badge>
-              )} */}
-            </TabsTrigger>
-            <TabsTrigger value="past">Past</TabsTrigger>
-            <TabsTrigger value="all">All</TabsTrigger>
-          </TabsList>
-          <div className="relative sm:w-72">
-            <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+          <div>
+            <h1 className="text-2xl font-bold">{t.scheduledVisits}</h1>
+          </div>
+
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="icon"
+              onClick={toggleTheme}
+              className="hidden sm:flex"
+            >
+              <SunMoon className="h-[1.2rem] w-[1.2rem]" />
+            </Button>
+
+            <Button
+              onClick={handleAddAppointment}
+              className={`${
+                isRTL ? "flex-row-reverse" : ""
+              } bg-primary hover:bg-primary/90`}
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              {t.newVisit}
+            </Button>
+          </div>
+        </div>
+
+        {/* Search & Tabs */}
+        <div className="mt-6 flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between">
+          <div className="w-full sm:w-auto relative">
+            <Search
+              className={`absolute ${
+                isRTL ? "left-3" : "left-3"
+              } top-2.5 h-4 w-4 text-muted-foreground`}
+            />
             <Input
-              type="search"
-              placeholder="Search appointments..."
-              className="pl-8"
+              placeholder={t.searchPlaceholder}
+              className={`${
+                isRTL ? "pr-10" : "pl-10"
+              } w-full sm:w-[300px] h-10`}
               value={searchTerm}
               onChange={handleSearchChange}
             />
           </div>
-        </div>
 
-        <AnimatePresence mode="wait">
-          {isLoading ? (
-            <motion.div
-              key="loading"
-              variants={fadeInUp}
-              initial="hidden"
-              animate="visible"
-              exit="exit"
-              className="space-y-4 mt-6"
-            >
-              {[1, 2, 3].map((i) => (
-                <Card key={`skeleton-${i}`} className="overflow-hidden">
-                  <CardHeader className="pb-2">
-                    <div className="flex justify-between">
-                      <Skeleton className="h-6 w-3/4" />
-                      <Skeleton className="h-6 w-20" />
+          <Tabs
+            defaultValue="upcoming"
+            value={activeTab}
+            onValueChange={setActiveTab}
+            className="w-full sm:w-auto"
+          >
+            <TabsList className="grid grid-cols-3 w-full sm:w-[300px]">
+              <TabsTrigger value="upcoming">{t.upcoming}</TabsTrigger>
+              <TabsTrigger value="past">{t.past}</TabsTrigger>
+              <TabsTrigger value="all">{t.all}</TabsTrigger>
+            </TabsList>
+          </Tabs>
+        </div>
+      </motion.div>
+
+      {/* Appointments List */}
+      <AnimatePresence mode="wait">
+        {isLoading ? (
+          <motion.div
+            key="loading"
+            variants={fadeInUp}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          >
+            {Array(6)
+              .fill("")
+              .map((_, index) => (
+                <Card
+                  key={`loading-${index}`}
+                  className="overflow-hidden border"
+                >
+                  <CardHeader className="p-4">
+                    <div className="flex justify-between items-start">
+                      <div className="space-y-1.5 flex-1">
+                        <Skeleton className="h-5 w-3/4" />
+                        <Skeleton className="h-4 w-1/2" />
+                      </div>
+                      <Skeleton className="h-6 w-16 rounded-full" />
                     </div>
                   </CardHeader>
-                  <CardContent className="space-y-4">
-                    <div className="flex flex-col md:flex-row md:justify-between gap-4">
-                      <div className="space-y-2">
-                        <Skeleton className="h-4 w-64" />
-                        <Skeleton className="h-4 w-48" />
-                        <div className="flex gap-4">
-                          <Skeleton className="h-4 w-32" />
-                          <Skeleton className="h-4 w-32" />
-                        </div>
-                      </div>
-                      <Skeleton className="h-10 w-28" />
+                  <CardContent className="p-4 pt-0 space-y-3">
+                    <Skeleton className="h-4 w-4/5" />
+                    <Skeleton className="h-4 w-2/3" />
+                    <div className="flex items-center justify-between mt-2">
+                      <Skeleton className="h-8 w-20" />
+                      <Skeleton className="h-8 w-8 rounded-full" />
                     </div>
                   </CardContent>
                 </Card>
               ))}
-            </motion.div>
-          ) : (
-            <TabsContent value={activeTab} className="pt-4">
-              <AnimatePresence>
-                {filteredAppointments.length === 0 ? (
-                  <motion.div
-                    key="empty"
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    variants={fadeInUp}
-                    className="flex flex-col items-center justify-center py-12 text-center"
-                  >
-                    <div className="bg-muted rounded-full p-4 mb-4">
-                      <CalendarDays className="h-8 w-8 text-muted-foreground" />
-                    </div>
-                    <h3 className="text-lg font-medium mb-2">
-                      No appointments found
-                    </h3>
-                    <p className="text-muted-foreground max-w-md">
-                      {searchTerm
-                        ? "No appointments match your search criteria. Try adjusting your search."
-                        : activeTab === "upcoming"
-                        ? "You don't have any upcoming appointments scheduled."
-                        : activeTab === "past"
-                        ? "You don't have any past appointments."
-                        : "You don't have any appointments yet."}
-                    </p>
-                    <Button
-                      onClick={handleAddAppointment}
-                      variant="outline"
-                      className="mt-6"
-                    >
-                      <Plus className="mr-2 h-4 w-4" />
-                      Schedule an Appointment
-                    </Button>
-                  </motion.div>
-                ) : (
-                  <motion.div
-                    key="appointments-list"
-                    className="space-y-4"
-                    layout
-                    initial="hidden"
-                    animate="visible"
-                    exit="exit"
-                    variants={fadeIn}
-                  >
-                    {filteredAppointments.map((appointment, index) => (
-                      <AppointmentItem
-                        key={appointment.id}
-                        appointment={appointment}
-                        onClick={handleAppointmentClick}
-                        index={index}
-                        getStatusBadgeColor={getStatusBadgeColor}
-                        getTypeIcon={getTypeIcon}
-                      />
-                    ))}
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </TabsContent>
-          )}
-        </AnimatePresence>
-      </Tabs>
-
-      {/* Appointment Details Dialog */}
-      <Dialog
-        open={selectedAppointment !== null}
-        onOpenChange={() => setSelectedAppointment(null)}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Appointment Details</DialogTitle>
-            <DialogDescription>
-              View details of this scheduled appointment
-            </DialogDescription>
-          </DialogHeader>
-
-          {selectedAppointment && (
-            <div className="space-y-4">
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-medium">
-                    {selectedAppointment.propertyTitle}
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedAppointment.propertyAddress}
-                  </p>
-                </div>
-                <Badge
-                  className={getStatusBadgeColor(selectedAppointment.status)}
-                >
-                  {selectedAppointment.status}
-                </Badge>
-              </div>
-
-              <Separator />
-
-              <div className="space-y-3">
-                <div className="flex gap-2">
-                  <User className="h-4 w-4 mt-1 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">
-                      {selectedAppointment.clientName}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedAppointment.clientPhone}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <CalendarDays className="h-4 w-4 mt-1 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">
-                      {formatDate(selectedAppointment.date)}
-                    </p>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedAppointment.time}
-                    </p>
-                  </div>
-                </div>
-
-                <div className="flex gap-2">
-                  <MapPin className="h-4 w-4 mt-1 text-muted-foreground" />
-                  <div>
-                    <p className="font-medium">Property Location</p>
-                    <p className="text-sm text-muted-foreground">
-                      {selectedAppointment.propertyAddress}
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-between items-center pt-2">
-                <Badge variant="outline" className="flex gap-1 items-center">
-                  {getTypeIcon(selectedAppointment.type)}
-                  {selectedAppointment.type}
-                </Badge>
-
-                <div className="flex gap-2">
-                  <Button variant="destructive" size="sm">
-                    Cancel
-                  </Button>
-                  <Button variant="outline" size="sm">
-                    Edit
-                  </Button>
-                </div>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
+          </motion.div>
+        ) : filteredAppointments.length === 0 ? (
+          <motion.div
+            key="empty"
+            variants={fadeInUp}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="flex flex-col items-center justify-center py-12 text-center"
+          >
+            <CalendarDays className="h-12 w-12 mb-4 text-gray-400" />
+            <h3 className="text-lg font-medium mb-1">{t.noVisits}</h3>
+            <p className="text-muted-foreground max-w-sm">
+              {t.noVisitsMessage}
+            </p>
+          </motion.div>
+        ) : (
+          <motion.div
+            key="appointments"
+            variants={fadeInUp}
+            initial="hidden"
+            animate="visible"
+            exit="exit"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4"
+          >
+            {filteredAppointments.map((appointment, index) => (
+              <AppointmentItem
+                key={appointment.id}
+                appointment={appointment}
+                onClick={handleAppointmentClick}
+                index={index}
+                getStatusBadgeColor={getStatusBadgeColor}
+                getTypeIcon={getTypeIcon}
+                t={t}
+                isRTL={isRTL}
+              />
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Add Appointment Dialog */}
       <Dialog open={isModalOpen} onOpenChange={handleModalClose}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Schedule New Appointment</DialogTitle>
-            <DialogDescription>
-              Fill in the details to create a new appointment
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="propertyTitle">
-                Property Title <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="propertyTitle"
-                name="propertyTitle"
-                placeholder="Enter property title"
-                value={newAppointment.propertyTitle}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="propertyAddress">
-                Property Address <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="propertyAddress"
-                name="propertyAddress"
-                placeholder="Enter property address"
-                value={newAppointment.propertyAddress}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="clientName">
-                Client Name <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="clientName"
-                name="clientName"
-                placeholder="Enter client name"
-                value={newAppointment.clientName}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="clientPhone">
-                Client Phone <span className="text-red-500">*</span>
-              </Label>
-              <Input
-                id="clientPhone"
-                name="clientPhone"
-                placeholder="Enter client phone"
-                value={newAppointment.clientPhone}
-                onChange={handleInputChange}
-                required
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="date">
-                  Date <span className="text-red-500">*</span>
-                </Label>
+        <DialogContent className={`sm:max-w-[425px] ${isRTL ? "rtl" : ""}`}>
+          <form onSubmit={handleSubmit}>
+            <DialogHeader>
+              <DialogTitle>{t.addNewAppointment}</DialogTitle>
+              <DialogDescription>{t.scheduleNewVisit}</DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="propertyTitle">{t.propertyTitle}</Label>
                 <Input
-                  id="date"
-                  name="date"
-                  type="date"
-                  value={newAppointment.date}
-                  onChange={handleInputChange}
-                  min={new Date().toISOString().split("T")[0]}
+                  id="propertyTitle"
+                  value={newAppointment.propertyTitle}
+                  onChange={(e) =>
+                    setNewAppointment({
+                      ...newAppointment,
+                      propertyTitle: e.target.value,
+                    })
+                  }
                   required
                 />
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="time">
-                  Time <span className="text-red-500">*</span>
-                </Label>
+              <div className="grid gap-2">
+                <Label htmlFor="propertyAddress">{t.propertyAddress}</Label>
                 <Input
-                  id="time"
-                  name="time"
-                  type="time"
-                  value={newAppointment.time}
-                  onChange={handleInputChange}
+                  id="propertyAddress"
+                  value={newAppointment.propertyAddress}
+                  onChange={(e) =>
+                    setNewAppointment({
+                      ...newAppointment,
+                      propertyAddress: e.target.value,
+                    })
+                  }
                   required
                 />
               </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="clientName">{t.clientName}</Label>
+                  <Input
+                    id="clientName"
+                    value={newAppointment.clientName}
+                    onChange={(e) =>
+                      setNewAppointment({
+                        ...newAppointment,
+                        clientName: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="clientPhone">{t.clientPhone}</Label>
+                  <Input
+                    id="clientPhone"
+                    value={newAppointment.clientPhone}
+                    onChange={(e) =>
+                      setNewAppointment({
+                        ...newAppointment,
+                        clientPhone: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="date">{t.date}</Label>
+                  <Input
+                    id="date"
+                    type="date"
+                    value={newAppointment.date}
+                    onChange={(e) =>
+                      setNewAppointment({
+                        ...newAppointment,
+                        date: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="time">{t.time}</Label>
+                  <Input
+                    id="time"
+                    type="time"
+                    value={newAppointment.time}
+                    onChange={(e) =>
+                      setNewAppointment({
+                        ...newAppointment,
+                        time: e.target.value,
+                      })
+                    }
+                    required
+                  />
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div className="grid gap-2">
+                  <Label htmlFor="type">{t.appointmentType}</Label>
+                  <Select
+                    value={newAppointment.type}
+                    onValueChange={(value) =>
+                      setNewAppointment({ ...newAppointment, type: value })
+                    }
+                  >
+                    <SelectTrigger id="type">
+                      <SelectValue placeholder={t.appointmentType} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Showing">{t.showing}</SelectItem>
+                      <SelectItem value="Inspection">{t.inspection}</SelectItem>
+                      <SelectItem value="Meeting">{t.meeting}</SelectItem>
+                      <SelectItem value="Consultation">
+                        {t.consultation}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div className="grid gap-2">
+                  <Label htmlFor="status">{t.status}</Label>
+                  <Select
+                    value={newAppointment.status}
+                    onValueChange={(value) =>
+                      setNewAppointment({ ...newAppointment, status: value })
+                    }
+                  >
+                    <SelectTrigger id="status">
+                      <SelectValue placeholder={t.status} />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="Pending">{t.pending}</SelectItem>
+                      <SelectItem value="Confirmed">{t.confirmed}</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="type">Appointment Type</Label>
-              <Select
-                name="type"
-                value={newAppointment.type}
-                onValueChange={(value) =>
-                  setNewAppointment((prev) => ({ ...prev, type: value }))
-                }
+            <DialogFooter className={isRTL ? "flex-row-reverse" : ""}>
+              <Button
+                type="button"
+                variant="outline"
+                onClick={handleModalClose}
               >
-                <SelectTrigger id="type">
-                  <SelectValue placeholder="Select type" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Showing">Property Showing</SelectItem>
-                  <SelectItem value="Inspection">
-                    Property Inspection
-                  </SelectItem>
-                  <SelectItem value="Meeting">Client Meeting</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <DialogFooter className="pt-4">
-              <Button type="submit">Schedule Appointment</Button>
+                {t.cancel}
+              </Button>
+              <Button type="submit">{t.schedule}</Button>
             </DialogFooter>
           </form>
         </DialogContent>
       </Dialog>
-    </motion.div>
+
+      {/* View Appointment Details Dialog */}
+      <Dialog
+        open={!!selectedAppointment}
+        onOpenChange={() => setSelectedAppointment(null)}
+      >
+        {selectedAppointment && (
+          <DialogContent className={`sm:max-w-[425px] ${isRTL ? "rtl" : ""}`}>
+            <DialogHeader>
+              <DialogTitle>{t.visitDetails}</DialogTitle>
+              <DialogDescription>
+                {selectedAppointment.propertyTitle}
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-2">
+              <div className="flex items-center gap-2">
+                <MapPin className="h-4 w-4 text-muted-foreground flex-shrink-0" />
+                <span className="text-sm">
+                  {selectedAppointment.propertyAddress}
+                </span>
+              </div>
+              <Separator />
+              <div className="grid gap-2">
+                <h4 className="font-medium text-sm">{t.clientName}</h4>
+                <p>{selectedAppointment.clientName}</p>
+              </div>
+              <div className="grid gap-2">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium text-sm">{t.visitDate}</h4>
+                  <Badge variant="outline">{selectedAppointment.status}</Badge>
+                </div>
+                <p>
+                  {formatDate(selectedAppointment.date)},{" "}
+                  {selectedAppointment.time}
+                </p>
+              </div>
+
+              <Button
+                variant="secondary"
+                className={`mt-2 ${isRTL ? "flex-row-reverse" : ""}`}
+              >
+                <User className={`h-4 w-4 ${isRTL ? "ml-2" : "mr-2"}`} />
+                {t.contactClient}
+              </Button>
+            </div>
+          </DialogContent>
+        )}
+      </Dialog>
+    </div>
   );
 };
+
+export default ScheduledVisitsPage;
 
 function AppointmentItem({
   appointment,
@@ -654,66 +702,83 @@ function AppointmentItem({
   index,
   getStatusBadgeColor,
   getTypeIcon,
+  t,
+  isRTL,
 }) {
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: index * 0.05 }}
-      whileHover={{ y: -2, transition: { duration: 0.2 } }}
+      animate={{
+        opacity: 1,
+        y: 0,
+        transition: { duration: 0.3, delay: index * 0.05 },
+      }}
     >
       <Card
+        className="overflow-hidden cursor-pointer border transition-all hover:shadow-md"
         onClick={() => onClick(appointment)}
-        className="overflow-hidden cursor-pointer transition-all hover:shadow-md"
       >
-        <CardHeader className="pb-2">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
-            <CardTitle className="text-base">
-              {appointment.propertyTitle}
-            </CardTitle>
+        <CardHeader className="p-4">
+          <div className="flex justify-between items-start">
+            <div className="space-y-1">
+              <CardTitle className="text-base">
+                {appointment.propertyTitle}
+              </CardTitle>
+              <CardDescription className="line-clamp-1">
+                {appointment.propertyAddress}
+              </CardDescription>
+            </div>
             <Badge
-              className={`w-fit ${getStatusBadgeColor(appointment.status)}`}
+              variant="secondary"
+              className={`${getStatusBadgeColor(
+                appointment.status
+              )} transition-colors`}
             >
               {appointment.status}
             </Badge>
           </div>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex flex-col md:flex-row md:items-start md:justify-between gap-4">
-            <div className="space-y-2">
-              <div className="flex items-center gap-1 text-sm">
-                <MapPin className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>{appointment.propertyAddress}</span>
-              </div>
-              <div className="flex items-center gap-1 text-sm">
-                <User className="h-3.5 w-3.5 text-muted-foreground" />
-                <span>
-                  {appointment.clientName} • {appointment.clientPhone}
-                </span>
-              </div>
-              <div className="flex items-center gap-4 text-sm">
-                <div className="flex items-center gap-1">
-                  <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>{appointment.date}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                  <Clock className="h-3.5 w-3.5 text-muted-foreground" />
-                  <span>{appointment.time}</span>
-                </div>
-              </div>
+        <CardContent className="p-4 pt-0 space-y-3">
+          <div
+            className={`flex items-center ${
+              isRTL ? "space-x-reverse" : "space-x-2"
+            }`}
+          >
+            <User className="h-4 w-4 text-muted-foreground" />
+            <span className="text-sm">{appointment.clientName}</span>
+          </div>
+
+          <div className="flex items-center justify-between pt-2">
+            <div className="flex items-center gap-1 text-sm">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span>{formatDate(appointment.date)}</span>
             </div>
-            <Badge
-              variant="outline"
-              className="flex items-center gap-1 self-start"
-            >
-              {getTypeIcon(appointment.type)}
-              <span>{appointment.type}</span>
-            </Badge>
+            <div className="flex items-center gap-1 text-sm">
+              <Clock className="h-4 w-4 text-muted-foreground" />
+              <span>{appointment.time}</span>
+            </div>
           </div>
         </CardContent>
+        <CardFooter className="p-4 pt-0">
+          <div
+            className={`flex items-center ${
+              isRTL ? "space-x-reverse" : "space-x-2"
+            }`}
+          >
+            <Badge
+              variant="outline"
+              className={`${
+                isRTL ? "flex-row-reverse" : ""
+              } px-2 py-1 h-7 rounded-full`}
+            >
+              {getTypeIcon(appointment.type)}
+              <span className={`text-xs ${isRTL ? "mr-1" : "ml-1"}`}>
+                {appointment.type}
+              </span>
+            </Badge>
+          </div>
+        </CardFooter>
       </Card>
     </motion.div>
   );
 }
-
-export default ScheduledVisitsPage;

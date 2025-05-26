@@ -1,0 +1,125 @@
+/* RTL styles for payments page */
+
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Card headers and content */
+.rtl .card-header,
+.rtl .card-title,
+.rtl .card-description {
+  text-align: right;
+}
+
+/* Flexbox adjustments */
+.rtl .rtl-flex-row-reverse {
+  flex-direction: row-reverse !important;
+}
+
+.rtl .rtl-ml-auto {
+  margin-right: auto !important;
+  margin-left: 0 !important;
+}
+
+.rtl .rtl-mr-auto {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+/* Icon spacing */
+.rtl .rtl-icon-flip {
+  transform: scaleX(-1);
+}
+
+.rtl .rtl-icon-mr {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+.rtl .rtl-icon-ml {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+/* Table styles */
+.rtl .table-container th,
+.rtl .table-container td,
+.rtl th,
+.rtl td {
+  text-align: right;
+}
+
+.rtl .table-header {
+  flex-direction: row-reverse;
+}
+
+.rtl .table-actions {
+  flex-direction: row-reverse;
+}
+
+/* Payment card specific styles */
+.rtl .payment-stat-card {
+  text-align: right;
+}
+
+.rtl .status-badge {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+.rtl .payment-card-content {
+  direction: rtl;
+}
+
+/* Status indicator styles */
+.rtl .status-indicator {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Form and input styles */
+.rtl .form-group label {
+  text-align: right;
+}
+
+.rtl .form-row {
+  flex-direction: row-reverse;
+}
+
+.rtl .dialog-content {
+  text-align: right;
+}
+
+.rtl .dialog-footer {
+  flex-direction: row-reverse;
+}
+
+/* Search and filter components */
+.rtl .search-filter-container {
+  flex-direction: row-reverse;
+}
+
+.rtl .filter-group {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+/* Payment details */
+.rtl .payment-details-grid {
+  direction: rtl;
+}
+
+.rtl .payment-details-label {
+  text-align: right;
+}
+
+.rtl .payment-details-value {
+  text-align: right;
+}
+
+/* Calendar dropdown */
+.rtl .date-picker-dropdown {
+  right: auto;
+  left: 0;
+}

@@ -17,6 +17,7 @@ import { useProperties } from "@/shared/hooks/useProperties";
 import { useRouter } from "next/navigation";
 import { Property } from "@/shared/types/property";
 import { useToast } from "@/shared/hooks/use-toast";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 import {
   Loader2,
   Home,
@@ -54,6 +55,59 @@ export default function AddProperty() {
   const [error, setError] = useState<string | null>(null);
   const [formProgress, setFormProgress] = useState(25);
   const [success, setSuccess] = useState(false);
+  const { currentLanguage, isRTL } = useTranslation();
+
+  // Translations
+  const translations = {
+    en: {
+      progress: "Progress",
+      error: "Error",
+      success: "Success",
+      successMessage: "Property created successfully! Redirecting...",
+      basicInfo: "Basic Info",
+      details: "Details",
+      location: "Location",
+      media: "Media",
+      nextDetails: "Next: Details",
+      backBasic: "Back: Basic Info",
+      nextLocation: "Next: Location",
+      backDetails: "Back: Details",
+      nextMedia: "Next: Media",
+      backLocation: "Back: Location",
+      saveProperty: "Save Property",
+      saving: "Saving...",
+      saved: "Saved!",
+      validationError: "Validation Error",
+      titleRequired: "Property title is required",
+      priceRequired: "Property price must be greater than 0",
+      descriptionRequired: "Property description is required",
+    },
+    ar: {
+      progress: "التقدم",
+      error: "خطأ",
+      success: "نجاح",
+      successMessage: "تم إنشاء العقار بنجاح! جاري إعادة التوجيه...",
+      basicInfo: "معلومات أساسية",
+      details: "التفاصيل",
+      location: "الموقع",
+      media: "الوسائط",
+      nextDetails: "التالي: التفاصيل",
+      backBasic: "الرجوع: المعلومات الأساسية",
+      nextLocation: "التالي: الموقع",
+      backDetails: "الرجوع: التفاصيل",
+      nextMedia: "التالي: الوسائط",
+      backLocation: "الرجوع: الموقع",
+      saveProperty: "حفظ العقار",
+      saving: "جاري الحفظ...",
+      saved: "تم الحفظ!",
+      validationError: "خطأ في التحقق",
+      titleRequired: "عنوان العقار مطلوب",
+      priceRequired: "سعر العقار يجب أن يكون أكبر من 0",
+      descriptionRequired: "وصف العقار مطلوب",
+    },
+  };
+
+  const t = translations[currentLanguage === "ar" ? "ar" : "en"];
 
   const [propertyData, setPropertyData] = useState<
     Omit<
@@ -127,19 +181,19 @@ export default function AddProperty() {
   const validateForm = () => {
     // Required fields validation
     if (!propertyData.title) {
-      setError("Property title is required");
+      setError(t.titleRequired);
       setActiveTab("basic-info");
       return false;
     }
 
     if (propertyData.price <= 0) {
-      setError("Property price must be greater than 0");
+      setError(t.priceRequired);
       setActiveTab("basic-info");
       return false;
     }
 
     if (!propertyData.description) {
-      setError("Property description is required");
+      setError(t.descriptionRequired);
       setActiveTab("basic-info");
       return false;
     }
@@ -157,7 +211,7 @@ export default function AddProperty() {
     // Validate form
     if (!validateForm()) {
       toast({
-        title: "Validation Error",
+        title: t.validationError,
         description: error,
         variant: "destructive",
       });
@@ -177,8 +231,8 @@ export default function AddProperty() {
       if (newProperty) {
         setSuccess(true);
         toast({
-          title: "Success!",
-          description: "Property has been created successfully",
+          title: t.success,
+          description: t.successMessage,
         });
 
         // Briefly show success state before redirecting
@@ -193,7 +247,7 @@ export default function AddProperty() {
       console.error("Error creating property:", err);
       setError(err.message || "Failed to create property");
       toast({
-        title: "Error",
+        title: t.error,
         description: err.message || "Failed to create property",
         variant: "destructive",
       });
@@ -215,10 +269,10 @@ export default function AddProperty() {
   };
 
   return (
-    <div className="w-full mx-auto relative">
+    <div className={`w-full mx-auto relative ${isRTL ? "rtl" : ""}`}>
       <div className="mb-8">
         <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium">Progress</span>
+          <span className="text-sm font-medium">{t.progress}</span>
           <span className="text-sm font-medium">{formProgress}%</span>
         </div>
         <Progress value={formProgress} className="h-2" />
@@ -235,7 +289,7 @@ export default function AddProperty() {
           >
             <Alert variant="destructive">
               <AlertTriangle className="h-4 w-4" />
-              <AlertTitle>Error</AlertTitle>
+              <AlertTitle>{t.error}</AlertTitle>
               <AlertDescription>{error}</AlertDescription>
             </Alert>
           </motion.div>
@@ -254,10 +308,8 @@ export default function AddProperty() {
               className="bg-green-50 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800"
             >
               <CheckCircle className="h-4 w-4" />
-              <AlertTitle>Success</AlertTitle>
-              <AlertDescription>
-                Property created successfully! Redirecting...
-              </AlertDescription>
+              <AlertTitle>{t.success}</AlertTitle>
+              <AlertDescription>{t.successMessage}</AlertDescription>
             </Alert>
           </motion.div>
         )}
@@ -272,7 +324,7 @@ export default function AddProperty() {
               className="flex items-center gap-2"
             >
               <Info className="h-4 w-4" />
-              <span className="hidden sm:inline">Basic Info</span>
+              <span className="hidden sm:inline">{t.basicInfo}</span>
             </TabsTrigger>
             <TabsTrigger
               value="details"
@@ -280,7 +332,7 @@ export default function AddProperty() {
               className="flex items-center gap-2"
             >
               <Home className="h-4 w-4" />
-              <span className="hidden sm:inline">Details</span>
+              <span className="hidden sm:inline">{t.details}</span>
             </TabsTrigger>
             <TabsTrigger
               value="location"
@@ -288,7 +340,7 @@ export default function AddProperty() {
               className="flex items-center gap-2"
             >
               <MapPin className="h-4 w-4" />
-              <span className="hidden sm:inline">Location</span>
+              <span className="hidden sm:inline">{t.location}</span>
             </TabsTrigger>
             <TabsTrigger
               value="media"
@@ -296,7 +348,7 @@ export default function AddProperty() {
               className="flex items-center gap-2"
             >
               <Images className="h-4 w-4" />
-              <span className="hidden sm:inline">Media</span>
+              <span className="hidden sm:inline">{t.media}</span>
             </TabsTrigger>
           </TabsList>
 
@@ -323,7 +375,7 @@ export default function AddProperty() {
                     onClick={moveToNextTab}
                     disabled={isSubmitting}
                   >
-                    Next: Details
+                    {t.nextDetails}
                   </motion.button>
                 </div>
               </motion.div>
@@ -348,7 +400,7 @@ export default function AddProperty() {
                     disabled={isSubmitting}
                     className="flex items-center gap-2"
                   >
-                    Back: Basic Info
+                    {t.backBasic}
                   </Button>
                   <motion.button
                     whileHover={{ scale: 1.03 }}
@@ -358,7 +410,7 @@ export default function AddProperty() {
                     onClick={moveToNextTab}
                     disabled={isSubmitting}
                   >
-                    Next: Location
+                    {t.nextLocation}
                   </motion.button>
                 </div>
               </motion.div>
@@ -383,7 +435,7 @@ export default function AddProperty() {
                     disabled={isSubmitting}
                     className="flex items-center gap-2"
                   >
-                    Back: Details
+                    {t.backDetails}
                   </Button>
                   <motion.button
                     whileHover={{ scale: 1.03 }}
@@ -393,7 +445,7 @@ export default function AddProperty() {
                     onClick={moveToNextTab}
                     disabled={isSubmitting}
                   >
-                    Next: Media
+                    {t.nextMedia}
                   </motion.button>
                 </div>
               </motion.div>
@@ -418,7 +470,7 @@ export default function AddProperty() {
                     disabled={isSubmitting}
                     className="flex items-center gap-2"
                   >
-                    Back: Location
+                    {t.backLocation}
                   </Button>
                   <motion.button
                     whileHover={{ scale: 1.03 }}
@@ -433,14 +485,14 @@ export default function AddProperty() {
                   >
                     {isSubmitting ? (
                       <span className="flex items-center gap-2">
-                        <Loader2 className="h-4 w-4 animate-spin" /> Saving...
+                        <Loader2 className="h-4 w-4 animate-spin" /> {t.saving}
                       </span>
                     ) : success ? (
                       <span className="flex items-center gap-2">
-                        <CheckCircle className="h-4 w-4" /> Saved!
+                        <CheckCircle className="h-4 w-4" /> {t.saved}
                       </span>
                     ) : (
-                      "Save Property"
+                      t.saveProperty
                     )}
                   </motion.button>
                 </div>

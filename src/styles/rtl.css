@@ -1,0 +1,62 @@
+/* RTL specific styles */
+html[dir="rtl"] {
+  text-align: right;
+}
+
+/* Flip icons and directions for RTL */
+html[dir="rtl"] svg:not(.no-flip) {
+  transform: scaleX(-1);
+}
+
+/* Adjust margins and paddings for RTL */
+html[dir="rtl"] .rtl-flip {
+  transform: scaleX(-1);
+}
+
+html[dir="rtl"] .rtl-swap-margin {
+  margin-right: var(--margin-left, 0);
+  margin-left: var(--margin-right, 0);
+}
+
+html[dir="rtl"] .rtl-swap-padding {
+  padding-right: var(--padding-left, 0);
+  padding-left: var(--padding-right, 0);
+}
+
+/* Adjust flexbox for RTL */
+html[dir="rtl"] .rtl-reverse-flex {
+  flex-direction: row-reverse;
+}
+
+/* Adjust text alignment for RTL */
+html[dir="rtl"] .rtl-text-right {
+  text-align: left;
+}
+
+html[dir="rtl"] .rtl-text-left {
+  text-align: right;
+}
+
+/* Adjust border radiuses for RTL */
+html[dir="rtl"] .rtl-swap-radius {
+  border-top-right-radius: var(--border-top-left-radius, 0);
+  border-top-left-radius: var(--border-top-right-radius, 0);
+  border-bottom-right-radius: var(--border-bottom-left-radius, 0);
+  border-bottom-left-radius: var(--border-bottom-right-radius, 0);
+}
+
+/* Font adjustments for Arabic */
+html[lang="ar"] {
+  font-family: var(--font-arabic, "Tajawal"), var(--font-sans, sans-serif);
+}
+
+/* Fix for tailwind's direction utilities */
+[dir="rtl"] .rtl\:right-0 {
+  right: 0 !important;
+  left: auto !important;
+}
+
+[dir="rtl"] .rtl\:left-0 {
+  left: 0 !important;
+  right: auto !important;
+}

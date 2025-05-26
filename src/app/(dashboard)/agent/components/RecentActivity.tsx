@@ -23,9 +23,26 @@ export interface ActivityItem {
 interface RecentActivityProps {
   activities: ActivityItem[];
   isLoading: boolean;
+  translations?: {
+    recentActivity: string;
+    noRecentActivity: string;
+    recentActivityWillAppear: string;
+  };
+  isRTL?: boolean;
 }
 
-export function RecentActivity({ activities, isLoading }: RecentActivityProps) {
+export function RecentActivity({
+  activities,
+  isLoading,
+  translations,
+  isRTL = false,
+}: RecentActivityProps) {
+  const t = translations || {
+    recentActivity: "Recent Activity",
+    noRecentActivity: "No recent activity",
+    recentActivityWillAppear: "Recent property activity will appear here",
+  };
+
   const getActivityIcon = (type: string) => {
     switch (type) {
       case "new_inquiry":
@@ -38,9 +55,11 @@ export function RecentActivity({ activities, isLoading }: RecentActivityProps) {
   };
 
   return (
-    <Card className="h-full">
+    <Card className={`h-full ${isRTL ? "rtl" : ""}`}>
       <CardHeader>
-        <CardTitle>Recent Activity</CardTitle>
+        <CardTitle className={isRTL ? "text-right" : ""}>
+          {t.recentActivity}
+        </CardTitle>
       </CardHeader>
       <CardContent>
         {isLoading ? (
@@ -48,12 +67,23 @@ export function RecentActivity({ activities, isLoading }: RecentActivityProps) {
         ) : activities.length > 0 ? (
           <div className="space-y-6">
             {activities.map((activity) => (
-              <div key={activity.id} className="flex items-start gap-4">
+              <div
+                key={activity.id}
+                className={`flex items-start gap-4 ${
+                  isRTL ? "flex-row-reverse" : ""
+                }`}
+              >
                 <div className="rounded-full bg-primary/10 p-2">
                   {getActivityIcon(activity.type)}
                 </div>
-                <div className="flex-1 space-y-1">
-                  <div className="flex justify-between">
+                <div
+                  className={`flex-1 space-y-1 ${isRTL ? "text-right" : ""}`}
+                >
+                  <div
+                    className={`flex justify-between ${
+                      isRTL ? "flex-row-reverse" : ""
+                    }`}
+                  >
                     <p className="font-medium">{activity.message}</p>
                     <span className="text-sm text-muted-foreground whitespace-nowrap">
                       {timeAgo(activity.timestamp)}
@@ -78,11 +108,15 @@ export function RecentActivity({ activities, isLoading }: RecentActivityProps) {
             ))}
           </div>
         ) : (
-          <div className="flex flex-col items-center justify-center py-8 text-center">
+          <div
+            className={`flex flex-col items-center justify-center py-8 text-center ${
+              isRTL ? "rtl" : ""
+            }`}
+          >
             <MessageSquareText className="h-12 w-12 text-muted-foreground mb-4" />
-            <h3 className="text-lg font-medium">No recent activity</h3>
+            <h3 className="text-lg font-medium">{t.noRecentActivity}</h3>
             <p className="text-sm text-muted-foreground mt-2">
-              Recent property activity will appear here
+              {t.recentActivityWillAppear}
             </p>
           </div>
         )}

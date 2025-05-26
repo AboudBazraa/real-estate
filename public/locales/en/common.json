@@ -1,0 +1,39 @@
+{
+  "header": {
+    "home": "Home",
+    "about": "About",
+    "services": "Services",
+    "contact": "Contact",
+    "login": "Login",
+    "signup": "Sign Up",
+    "properties": "Properties",
+    "dashboard": "Dashboard"
+  },
+  "footer": {
+    "brand": "Estate",
+    "brandDescription": "Estate design represents the pinnacle of design, combining excellence in Italian quality, performance innovation, and careful selection of materials.",
+    "contact": "Contact",
+    "generalInquiries": "For general inquiries:",
+    "ordersInquiries": "Regarding orders:",
+    "about": "About",
+    "factory": "Factory",
+    "designer": "Designer",
+    "partner": "Partner",
+    "project": "Project",
+    "other": "Other",
+    "prices": "Prices and Payments",
+    "returnPolicy": "Return Policy",
+    "terms": "Terms of Service",
+    "privacy": "Privacy Policy",
+    "collaborate": "Let's Collaborate",
+    "copyright": "© {{year}} Estate, Inc. All rights reserved.",
+    "language": "Language",
+    "switchToArabic": "العربية",
+    "switchToEnglish": "English"
+  },
+  "language": {
+    "en": "English",
+    "ar": "Arabic"
+  },
+  "direction": "ltr"
+}

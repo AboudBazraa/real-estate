@@ -99,6 +99,9 @@ import {
   FolderOpen,
   UserCog,
 } from "lucide-react";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+import userListTranslations from "./translations";
+import LanguageSwitcher from "./components/LanguageSwitcher";
 
 // Animation variants
 const container = {
@@ -148,6 +151,8 @@ export default function UsersPage() {
     email: "",
     role: "",
   });
+  const { currentLanguage, isRTL } = useTranslation();
+  const t = userListTranslations[currentLanguage] || userListTranslations.en;
 
   // Fetch all users from Supabase
   const fetchUsers = React.useCallback(
@@ -350,19 +355,24 @@ export default function UsersPage() {
 
   // Filter Section
   const FilterSection = () => (
-    <div className="flex items-center gap-2">
+    <div
+      className={`flex items-center gap-2 ${
+        isRTL ? "rtl-flex-row-reverse" : ""
+      }`}
+    >
       <Label htmlFor="role-select" className="hidden md:flex text-sm">
-        Filter by:
+        {t.filterByRole}:
       </Label>
       <Select value={selectedRole} onValueChange={setSelectedRole}>
-        <SelectTrigger className="w-[180px]" id="role-select">
-          <SelectValue placeholder="Select role" />
+        <SelectTrigger className="w-[180px]">
+          <Filter className={`mr-2 h-4 w-4 ${isRTL ? "ml-2 mr-0" : ""}`} />
+          <SelectValue placeholder={t.filterByRole} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="all">All Roles</SelectItem>
-          <SelectItem value="admin">Admin</SelectItem>
-          <SelectItem value="agent">Agent</SelectItem>
-          <SelectItem value="user">User</SelectItem>
+          <SelectItem value="all">{t.allUsers}</SelectItem>
+          <SelectItem value="admin">{t.admin}</SelectItem>
+          <SelectItem value="agent">{t.agent}</SelectItem>
+          <SelectItem value="user">{t.user}</SelectItem>
         </SelectContent>
       </Select>
     </div>
@@ -370,14 +380,20 @@ export default function UsersPage() {
 
   // Search Section
   const SearchSection = () => (
-    <div className="relative flex-1 max-w-md">
-      <Search className="absolute left-3 top-2.5 h-4 w-4 text-muted-foreground" />
-      <Input
-        placeholder="Search users..."
-        className="pl-10"
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-      />
+    <div className={`flex w-full gap-2 ${isRTL ? "rtl-flex-row-reverse" : ""}`}>
+      <div className="relative flex-grow">
+        <Search
+          className={`absolute left-2 top-2.5 h-4 w-4 text-muted-foreground ${
+            isRTL ? "left-auto right-2" : ""
+          }`}
+        />
+        <Input
+          placeholder={t.searchUsers}
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+          className={`pl-8 ${isRTL ? "pl-4 pr-8" : ""}`}
+        />
+      </div>
     </div>
   );
 
@@ -645,43 +661,52 @@ export default function UsersPage() {
   };
 
   return (
-    <motion.div
-      className="space-y-6"
-      variants={container}
-      initial="hidden"
-      animate="show"
-    >
-      <motion.div
-        className="flex flex-col gap-4 md:flex-row md:items-center justify-between"
-        variants={item}
+    <div className={`p-4 space-y-4 ${isRTL ? "rtl" : ""}`}>
+      <div
+        className={`flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 ${
+          isRTL ? "rtl-flex-row-reverse" : ""
+        }`}
       >
         <div>
-          <h1 className="text-3xl font-bold">Users</h1>
-          <p className="text-muted-foreground">
-            Manage user accounts and permissions
-          </p>
+          <h1 className="text-2xl font-semibold">{t.userManagement}</h1>
+          <p className="text-muted-foreground">{t.manageUsers}</p>
         </div>
-        <div className="flex items-center space-x-2">
+        <div
+          className={`flex items-center gap-2 ${
+            isRTL ? "rtl-flex-row-reverse" : ""
+          }`}
+        >
+          <LanguageSwitcher />
           <Button
-            variant="outline"
-            className="gap-2"
             onClick={handleRefresh}
+            variant="outline"
+            size="sm"
             disabled={isRefreshing}
           >
             {isRefreshing ? (
-              <Loader2 className="h-4 w-4 animate-spin" />
+              <>
+                <Loader2
+                  className={`mr-2 h-4 w-4 animate-spin ${
+                    isRTL ? "ml-2 mr-0" : ""
+                  }`}
+                />
+                {t.loading}
+              </>
             ) : (
-              <RefreshCcw className="h-4 w-4" />
+              <>
+                <RefreshCcw
+                  className={`mr-2 h-4 w-4 ${isRTL ? "ml-2 mr-0" : ""}`}
+                />
+                {t.refresh}
+              </>
             )}
-            <span className="hidden md:inline">Refresh</span>
           </Button>
-          <ExportImportDropdown />
-          <Button className="gap-2">
-            <UserPlus className="h-4 w-4" />
-            <span className="hidden md:inline">Add User</span>
+          <Button onClick={() => setShowAddUserDialog(true)}>
+            <UserPlus className={`mr-2 h-4 w-4 ${isRTL ? "ml-2 mr-0" : ""}`} />
+            {t.addUser}
           </Button>
         </div>
-      </motion.div>
+      </div>
 
       {!isLoading && !isError && users.length > 0 && (
         <motion.div variants={item}>
@@ -702,10 +727,41 @@ export default function UsersPage() {
             onValueChange={setActiveTab}
             className=""
           >
-            <TabsList>
-              <TabsTrigger value="all">All Users</TabsTrigger>
-              <TabsTrigger value="active">Active</TabsTrigger>
-              <TabsTrigger value="inactive">Inactive</TabsTrigger>
+            <TabsList className={isRTL ? "rtl-flex-row-reverse" : ""}>
+              <TabsTrigger value="all">
+                <Users className={`mr-2 h-4 w-4 ${isRTL ? "ml-2 mr-0" : ""}`} />
+                {t.allUsers}
+                <Badge
+                  className={`ml-2 ${isRTL ? "mr-2 ml-0" : ""}`}
+                  variant="secondary"
+                >
+                  {users.length}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="active">
+                <Shield
+                  className={`mr-2 h-4 w-4 ${isRTL ? "ml-2 mr-0" : ""}`}
+                />
+                {t.activeUsers}
+                <Badge
+                  className={`ml-2 ${isRTL ? "mr-2 ml-0" : ""}`}
+                  variant="secondary"
+                >
+                  {countByRole("active")}
+                </Badge>
+              </TabsTrigger>
+              <TabsTrigger value="blocked">
+                <AlertCircle
+                  className={`mr-2 h-4 w-4 ${isRTL ? "ml-2 mr-0" : ""}`}
+                />
+                {t.blockedUsers}
+                <Badge
+                  className={`ml-2 ${isRTL ? "mr-2 ml-0" : ""}`}
+                  variant="secondary"
+                >
+                  {countByRole("blocked")}
+                </Badge>
+              </TabsTrigger>
             </TabsList>
           </Tabs>
 
@@ -762,6 +818,6 @@ export default function UsersPage() {
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }

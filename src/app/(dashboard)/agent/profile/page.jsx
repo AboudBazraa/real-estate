@@ -57,6 +57,7 @@ import {
   AlertTitle,
 } from "@/shared/components/ui/alert";
 import { useTheme } from "next-themes";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 import {
   Tooltip,
   TooltipContent,
@@ -85,6 +86,7 @@ export default function ProfilePage() {
   const currentRole = useRole();
   const router = useRouter();
   const { theme, setTheme } = useTheme();
+  const { currentLanguage, isRTL } = useTranslation();
   const [isPasswordModalOpen, setIsPasswordModalOpen] = useState(false);
   const [isUploadModalOpen, setIsUploadModalOpen] = useState(false);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
@@ -105,6 +107,137 @@ export default function ProfilePage() {
     marketing: false,
     updates: true,
   });
+
+  // Translations
+  const translations = {
+    en: {
+      loadingProfile: "Loading your profile...",
+      uploadProfilePicture: "Upload Profile Picture",
+      chooseProfileImage: "Choose an image to use as your profile picture",
+      profilePicture: "Profile Picture",
+      cancel: "Cancel",
+      upload: "Upload",
+      propertiesListed: "Properties Listed",
+      propertiesSold: "Properties Sold",
+      rating: "Rating",
+      profileCompletion: "Profile Completion",
+      account: "Account",
+      security: "Security",
+      notifications: "Notifications",
+      accountInformation: "Account Information",
+      manageAccountDetails: "View and manage your personal account details",
+      userId: "User ID",
+      emailAddress: "Email Address",
+      username: "Username",
+      lastSignIn: "Last Sign In",
+      profileCompletionText: "Your profile is",
+      profileCompletionText2:
+        "complete. Add more details to improve your visibility.",
+      signOut: "Sign Out",
+      saveChanges: "Save Changes",
+      securitySettings: "Security Settings",
+      manageSecurityPreferences: "Manage your account security and preferences",
+      password: "Password",
+      changePasswordText: "Change your password for improved security",
+      changePassword: "Change Password",
+      twoFactorAuth: "Two-Factor Authentication",
+      twoFactorAuthText: "Add an extra layer of security to your account",
+      setUp: "Set Up",
+      activeSessions: "Active Sessions",
+      activeSessionsText: "Manage devices where you're currently logged in",
+      manage: "Manage",
+      accountActivityLogs: "Account Activity Logs",
+      accountActivityLogsText:
+        "View a log of activities and events on your account",
+      viewLogs: "View Logs",
+      notificationPreferences: "Notification Preferences",
+      manageNotifications: "Manage how and when you receive notifications",
+      emailNotifications: "Email Notifications",
+      emailNotificationsText: "Receive notifications via email",
+      inAppNotifications: "In-App Notifications",
+      inAppNotificationsText: "Receive notifications within the application",
+      marketingEmails: "Marketing Emails",
+      marketingEmailsText: "Receive emails about new features and promotions",
+      systemUpdates: "System Updates",
+      systemUpdatesText:
+        "Receive notifications about system changes and updates",
+      savePreferences: "Save Preferences",
+      updatePasswordSecurity:
+        "Update your password to maintain account security",
+      error: "Error",
+      success: "Success",
+      passwordUpdated: "Your password has been successfully updated.",
+      currentPassword: "Current Password",
+      newPassword: "New Password",
+      confirmNewPassword: "Confirm New Password",
+      updatePassword: "Update Password",
+      changing: "Changing...",
+      never: "Never",
+    },
+    ar: {
+      loadingProfile: "جاري تحميل الملف الشخصي...",
+      uploadProfilePicture: "تحميل صورة الملف الشخصي",
+      chooseProfileImage: "اختر صورة لاستخدامها كصورة ملفك الشخصي",
+      profilePicture: "صورة الملف الشخصي",
+      cancel: "إلغاء",
+      upload: "تحميل",
+      propertiesListed: "العقارات المدرجة",
+      propertiesSold: "العقارات المباعة",
+      rating: "التقييم",
+      profileCompletion: "اكتمال الملف الشخصي",
+      account: "الحساب",
+      security: "الأمان",
+      notifications: "الإشعارات",
+      accountInformation: "معلومات الحساب",
+      manageAccountDetails: "عرض وإدارة تفاصيل حسابك الشخصي",
+      userId: "معرف المستخدم",
+      emailAddress: "البريد الإلكتروني",
+      username: "اسم المستخدم",
+      lastSignIn: "آخر تسجيل دخول",
+      profileCompletionText: "اكتمال ملفك الشخصي بنسبة",
+      profileCompletionText2: "أضف المزيد من التفاصيل لتحسين ظهورك.",
+      signOut: "تسجيل الخروج",
+      saveChanges: "حفظ التغييرات",
+      securitySettings: "إعدادات الأمان",
+      manageSecurityPreferences: "إدارة تفضيلات الأمان والحساب",
+      password: "كلمة المرور",
+      changePasswordText: "تغيير كلمة المرور لتحسين الأمان",
+      changePassword: "تغيير كلمة المرور",
+      twoFactorAuth: "المصادقة الثنائية",
+      twoFactorAuthText: "إضافة طبقة إضافية من الأمان لحسابك",
+      setUp: "إعداد",
+      activeSessions: "الجلسات النشطة",
+      activeSessionsText: "إدارة الأجهزة التي سجلت الدخول حاليًا",
+      manage: "إدارة",
+      accountActivityLogs: "سجلات نشاط الحساب",
+      accountActivityLogsText: "عرض سجل الأنشطة والأحداث في حسابك",
+      viewLogs: "عرض السجلات",
+      notificationPreferences: "تفضيلات الإشعارات",
+      manageNotifications: "إدارة كيفية ووقت تلقي الإشعارات",
+      emailNotifications: "إشعارات البريد الإلكتروني",
+      emailNotificationsText: "تلقي الإشعارات عبر البريد الإلكتروني",
+      inAppNotifications: "إشعارات داخل التطبيق",
+      inAppNotificationsText: "تلقي الإشعارات داخل التطبيق",
+      marketingEmails: "رسائل البريد التسويقية",
+      marketingEmailsText:
+        "تلقي رسائل البريد الإلكتروني حول الميزات الجديدة والعروض الترويجية",
+      systemUpdates: "تحديثات النظام",
+      systemUpdatesText: "تلقي إشعارات حول تغييرات وتحديثات النظام",
+      savePreferences: "حفظ التفضيلات",
+      updatePasswordSecurity: "تحديث كلمة المرور للحفاظ على أمان الحساب",
+      error: "خطأ",
+      success: "نجاح",
+      passwordUpdated: "تم تحديث كلمة المرور بنجاح.",
+      currentPassword: "كلمة المرور الحالية",
+      newPassword: "كلمة المرور الجديدة",
+      confirmNewPassword: "تأكيد كلمة المرور الجديدة",
+      updatePassword: "تحديث كلمة المرور",
+      changing: "جاري التغيير...",
+      never: "أبدًا",
+    },
+  };
+
+  const t = translations[currentLanguage === "ar" ? "ar" : "en"];
 
   // Simulate initial loading
   useEffect(() => {
@@ -225,7 +358,7 @@ export default function ProfilePage() {
             animate={{ opacity: [0.6, 1, 0.6] }}
             transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
           >
-            Loading your profile...
+            {t.loadingProfile}
           </motion.p>
         </div>
       </motion.div>
@@ -257,7 +390,7 @@ export default function ProfilePage() {
       animate="visible"
       transition={{ duration: 0.4 }}
       variants={fadeIn}
-      className="container mx-auto p-2 "
+      className={`container mx-auto p-2 ${isRTL ? "rtl" : ""}`}
     >
       <motion.div
         initial="hidden"
@@ -286,12 +419,10 @@ export default function ProfilePage() {
                   <Upload className="h-4 w-4" />
                 </Button>
               </DialogTrigger>
-              <DialogContent className="sm:max-w-md">
+              <DialogContent className={`sm:max-w-md ${isRTL ? "rtl" : ""}`}>
                 <DialogHeader>
-                  <DialogTitle>Upload Profile Picture</DialogTitle>
-                  <DialogDescription>
-                    Choose an image to use as your profile picture
-                  </DialogDescription>
+                  <DialogTitle>{t.uploadProfilePicture}</DialogTitle>
+                  <DialogDescription>{t.chooseProfileImage}</DialogDescription>
                 </DialogHeader>
                 <div className="space-y-4 py-4">
                   <div className="flex justify-center">
@@ -306,19 +437,19 @@ export default function ProfilePage() {
                     </Avatar>
                   </div>
                   <div className="grid w-full items-center gap-1.5">
-                    <Label htmlFor="picture">Profile Picture</Label>
+                    <Label htmlFor="picture">{t.profilePicture}</Label>
                     <Input id="picture" type="file" accept="image/*" />
                   </div>
                 </div>
-                <DialogFooter>
+                <DialogFooter className={isRTL ? "flex-row-reverse" : ""}>
                   <Button
                     type="button"
                     variant="outline"
                     onClick={() => setIsUploadModalOpen(false)}
                   >
-                    Cancel
+                    {t.cancel}
                   </Button>
-                  <Button type="button">Upload</Button>
+                  <Button type="button">{t.upload}</Button>
                 </DialogFooter>
               </DialogContent>
             </Dialog>
@@ -341,7 +472,7 @@ export default function ProfilePage() {
                   {userStats.propertiesListed}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Properties Listed
+                  {t.propertiesListed}
                 </span>
               </div>
               <div className="flex flex-col items-center">
@@ -349,21 +480,23 @@ export default function ProfilePage() {
                   {userStats.propertiesSold}
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Properties Sold
+                  {t.propertiesSold}
                 </span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-lg font-semibold">
                   {userStats.totalRating}
                 </span>
-                <span className="text-xs text-muted-foreground">Rating</span>
+                <span className="text-xs text-muted-foreground">
+                  {t.rating}
+                </span>
               </div>
               <div className="flex flex-col items-center">
                 <span className="text-lg font-semibold">
                   {userStats.profileCompletion}%
                 </span>
                 <span className="text-xs text-muted-foreground">
-                  Profile Completion
+                  {t.profileCompletion}
                 </span>
               </div>
             </div>
@@ -375,18 +508,18 @@ export default function ProfilePage() {
         <TabsList className="grid grid-cols-3 md:w-[400px]">
           <TabsTrigger value="account" className="flex items-center gap-2">
             <User className="h-4 w-4" />
-            <span className="hidden sm:inline">Account</span>
+            <span className="hidden sm:inline">{t.account}</span>
           </TabsTrigger>
           <TabsTrigger value="security" className="flex items-center gap-2">
             <Lock className="h-4 w-4" />
-            <span className="hidden sm:inline">Security</span>
+            <span className="hidden sm:inline">{t.security}</span>
           </TabsTrigger>
           <TabsTrigger
             value="notifications"
             className="flex items-center gap-2"
           >
             <BellRing className="h-4 w-4" />
-            <span className="hidden sm:inline">Notifications</span>
+            <span className="hidden sm:inline">{t.notifications}</span>
           </TabsTrigger>
         </TabsList>
 
@@ -401,16 +534,14 @@ export default function ProfilePage() {
             >
               <Card>
                 <CardHeader>
-                  <CardTitle>Account Information</CardTitle>
-                  <CardDescription>
-                    View and manage your personal account details
-                  </CardDescription>
+                  <CardTitle>{t.accountInformation}</CardTitle>
+                  <CardDescription>{t.manageAccountDetails}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-1">
                       <Label className="text-muted-foreground text-xs">
-                        User ID
+                        {t.userId}
                       </Label>
                       <div className="p-2 rounded-md bg-muted text-xs break-all">
                         {user.id}
@@ -419,7 +550,7 @@ export default function ProfilePage() {
 
                     <div className="space-y-1">
                       <Label className="text-muted-foreground text-xs">
-                        Email Address
+                        {t.emailAddress}
                       </Label>
                       <div className="flex justify-between items-center">
                         <div className="p-2 rounded-md bg-muted text-sm w-full overflow-hidden">
@@ -438,7 +569,7 @@ export default function ProfilePage() {
 
                     <div className="space-y-1">
                       <Label className="text-muted-foreground text-xs">
-                        Username
+                        {t.username}
                       </Label>
                       <div className="flex justify-between items-center">
                         <Input value={username} className="h-9" readOnly />
@@ -450,20 +581,20 @@ export default function ProfilePage() {
 
                     <div className="space-y-1">
                       <Label className="text-muted-foreground text-xs">
-                        Last Sign In
+                        {t.lastSignIn}
                       </Label>
                       <div className="flex items-center gap-2 p-2 rounded-md bg-muted text-sm">
                         <Calendar className="h-4 w-4 text-muted-foreground" />
                         {user.last_sign_in_at
                           ? new Date(user.last_sign_in_at).toLocaleString()
-                          : "Never"}
+                          : t.never}
                       </div>
                     </div>
                   </div>
 
                   <div className="space-y-1.5">
                     <Label className="text-muted-foreground text-xs">
-                      Profile Completion
+                      {t.profileCompletion}
                     </Label>
                     <div className="relative h-2 w-full overflow-hidden rounded-full bg-muted">
                       <div
@@ -472,21 +603,25 @@ export default function ProfilePage() {
                       />
                     </div>
                     <p className="text-xs text-muted-foreground">
-                      Your profile is {userStats.profileCompletion}% complete.
-                      Add more details to improve your visibility.
+                      {t.profileCompletionText} {userStats.profileCompletion}%{" "}
+                      {t.profileCompletionText2}
                     </p>
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-between border-t p-6">
+                <CardFooter
+                  className={`flex justify-between border-t p-6 ${
+                    isRTL ? "flex-row-reverse" : ""
+                  }`}
+                >
                   <Button
                     variant="outline"
                     className="flex items-center gap-2"
                     onClick={handleLogout}
                   >
                     <LogOut className="h-4 w-4" />
-                    Sign Out
+                    {t.signOut}
                   </Button>
-                  <Button>Save Changes</Button>
+                  <Button>{t.saveChanges}</Button>
                 </CardFooter>
               </Card>
             </motion.div>
@@ -504,60 +639,62 @@ export default function ProfilePage() {
             >
               <Card>
                 <CardHeader>
-                  <CardTitle>Security Settings</CardTitle>
+                  <CardTitle>{t.securitySettings}</CardTitle>
                   <CardDescription>
-                    Manage your account security and preferences
+                    {t.manageSecurityPreferences}
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <div className="space-y-0.5">
-                        <div className="font-medium">Password</div>
+                        <div className="font-medium">{t.password}</div>
                         <div className="text-sm text-muted-foreground">
-                          Change your password for improved security
+                          {t.changePasswordText}
                         </div>
                       </div>
                       <Button
                         onClick={() => setIsPasswordModalOpen(true)}
                         variant="outline"
-                        className="flex items-center gap-2"
+                        className={`flex items-center gap-2 ${
+                          isRTL ? "flex-row-reverse" : ""
+                        }`}
                       >
                         <Key className="h-4 w-4" />
-                        Change Password
+                        {t.changePassword}
                       </Button>
                     </div>
                     <Separator />
                     <div className="flex justify-between items-center">
                       <div className="space-y-0.5">
+                        <div className="font-medium">{t.twoFactorAuth}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {t.twoFactorAuthText}
+                        </div>
+                      </div>
+                      <Button variant="outline">{t.setUp}</Button>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <div className="space-y-0.5">
+                        <div className="font-medium">{t.activeSessions}</div>
+                        <div className="text-sm text-muted-foreground">
+                          {t.activeSessionsText}
+                        </div>
+                      </div>
+                      <Button variant="outline">{t.manage}</Button>
+                    </div>
+                    <Separator />
+                    <div className="flex justify-between items-center">
+                      <div className="space-y-0.5">
                         <div className="font-medium">
-                          Two-Factor Authentication
+                          {t.accountActivityLogs}
                         </div>
                         <div className="text-sm text-muted-foreground">
-                          Add an extra layer of security to your account
+                          {t.accountActivityLogsText}
                         </div>
                       </div>
-                      <Button variant="outline">Set Up</Button>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between items-center">
-                      <div className="space-y-0.5">
-                        <div className="font-medium">Active Sessions</div>
-                        <div className="text-sm text-muted-foreground">
-                          Manage devices where you're currently logged in
-                        </div>
-                      </div>
-                      <Button variant="outline">Manage</Button>
-                    </div>
-                    <Separator />
-                    <div className="flex justify-between items-center">
-                      <div className="space-y-0.5">
-                        <div className="font-medium">Account Activity Logs</div>
-                        <div className="text-sm text-muted-foreground">
-                          View a log of activities and events on your account
-                        </div>
-                      </div>
-                      <Button variant="outline">View Logs</Button>
+                      <Button variant="outline">{t.viewLogs}</Button>
                     </div>
                   </div>
                 </CardContent>
@@ -577,18 +714,18 @@ export default function ProfilePage() {
             >
               <Card>
                 <CardHeader>
-                  <CardTitle>Notification Preferences</CardTitle>
-                  <CardDescription>
-                    Manage how and when you receive notifications
-                  </CardDescription>
+                  <CardTitle>{t.notificationPreferences}</CardTitle>
+                  <CardDescription>{t.manageNotifications}</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-4">
                     <div className="flex justify-between items-center">
                       <div className="space-y-0.5">
-                        <div className="font-medium">Email Notifications</div>
+                        <div className="font-medium">
+                          {t.emailNotifications}
+                        </div>
                         <div className="text-sm text-muted-foreground">
-                          Receive notifications via email
+                          {t.emailNotificationsText}
                         </div>
                       </div>
                       <Switch
@@ -604,9 +741,11 @@ export default function ProfilePage() {
                     <Separator />
                     <div className="flex justify-between items-center">
                       <div className="space-y-0.5">
-                        <div className="font-medium">In-App Notifications</div>
+                        <div className="font-medium">
+                          {t.inAppNotifications}
+                        </div>
                         <div className="text-sm text-muted-foreground">
-                          Receive notifications within the application
+                          {t.inAppNotificationsText}
                         </div>
                       </div>
                       <Switch
@@ -622,9 +761,9 @@ export default function ProfilePage() {
                     <Separator />
                     <div className="flex justify-between items-center">
                       <div className="space-y-0.5">
-                        <div className="font-medium">Marketing Emails</div>
+                        <div className="font-medium">{t.marketingEmails}</div>
                         <div className="text-sm text-muted-foreground">
-                          Receive emails about new features and promotions
+                          {t.marketingEmailsText}
                         </div>
                       </div>
                       <Switch
@@ -640,9 +779,9 @@ export default function ProfilePage() {
                     <Separator />
                     <div className="flex justify-between items-center">
                       <div className="space-y-0.5">
-                        <div className="font-medium">System Updates</div>
+                        <div className="font-medium">{t.systemUpdates}</div>
                         <div className="text-sm text-muted-foreground">
-                          Receive notifications about system changes and updates
+                          {t.systemUpdatesText}
                         </div>
                       </div>
                       <Switch
@@ -657,8 +796,10 @@ export default function ProfilePage() {
                     </div>
                   </div>
                 </CardContent>
-                <CardFooter className="flex justify-end">
-                  <Button>Save Preferences</Button>
+                <CardFooter
+                  className={`flex justify-end ${isRTL ? "justify-start" : ""}`}
+                >
+                  <Button>{t.savePreferences}</Button>
                 </CardFooter>
               </Card>
             </motion.div>
@@ -673,12 +814,10 @@ export default function ProfilePage() {
           if (!open) handleModalClose();
         }}
       >
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className={`sm:max-w-md ${isRTL ? "rtl" : ""}`}>
           <DialogHeader>
-            <DialogTitle>Change Password</DialogTitle>
-            <DialogDescription>
-              Update your password to maintain account security
-            </DialogDescription>
+            <DialogTitle>{t.changePassword}</DialogTitle>
+            <DialogDescription>{t.updatePasswordSecurity}</DialogDescription>
           </DialogHeader>
           <form onSubmit={handlePasswordChange} className="space-y-4">
             <AnimatePresence>
@@ -690,7 +829,7 @@ export default function ProfilePage() {
                   exit={{ opacity: 0, height: 0 }}
                 >
                   <Alert variant="destructive">
-                    <AlertTitle>Error</AlertTitle>
+                    <AlertTitle>{t.error}</AlertTitle>
                     <AlertDescription>
                       {passwordChangeStatus.error}
                     </AlertDescription>
@@ -706,17 +845,15 @@ export default function ProfilePage() {
                   exit={{ opacity: 0, height: 0 }}
                 >
                   <Alert className="bg-green-50 text-green-800 border-green-200 dark:bg-green-900/20 dark:text-green-300 dark:border-green-800">
-                    <AlertTitle>Success</AlertTitle>
-                    <AlertDescription>
-                      Your password has been successfully updated.
-                    </AlertDescription>
+                    <AlertTitle>{t.success}</AlertTitle>
+                    <AlertDescription>{t.passwordUpdated}</AlertDescription>
                   </Alert>
                 </motion.div>
               )}
             </AnimatePresence>
 
             <div className="space-y-2">
-              <Label htmlFor="currentPassword">Current Password</Label>
+              <Label htmlFor="currentPassword">{t.currentPassword}</Label>
               <Input
                 id="currentPassword"
                 name="currentPassword"
@@ -728,7 +865,7 @@ export default function ProfilePage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
+              <Label htmlFor="newPassword">{t.newPassword}</Label>
               <Input
                 id="newPassword"
                 name="newPassword"
@@ -740,7 +877,7 @@ export default function ProfilePage() {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Label htmlFor="confirmPassword">{t.confirmNewPassword}</Label>
               <Input
                 id="confirmPassword"
                 name="confirmPassword"
@@ -751,7 +888,7 @@ export default function ProfilePage() {
                 autoComplete="new-password"
               />
             </div>
-            <DialogFooter>
+            <DialogFooter className={isRTL ? "flex-row-reverse" : ""}>
               <Button
                 type="submit"
                 disabled={
@@ -762,10 +899,10 @@ export default function ProfilePage() {
                 {passwordChangeStatus.loading ? (
                   <span className="flex items-center">
                     <LoaderCircle className="mr-2 h-4 w-4 animate-spin" />{" "}
-                    Changing...
+                    {t.changing}
                   </span>
                 ) : (
-                  "Update Password"
+                  t.updatePassword
                 )}
               </Button>
             </DialogFooter>

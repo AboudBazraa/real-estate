@@ -7,6 +7,8 @@ import { PropertyDetailsModal } from "../../agent/components/PropertyDetailsModa
 import { PropertyEditForm } from "../../agent/components/PropertyEditForm";
 import { DeleteConfirmationModal } from "../../agent/components/DeleteConfirmationModal";
 import { useToast } from "@/shared/hooks/use-toast";
+import { useTranslation } from "@/shared/hooks/useTranslation";
+import propertyListTranslations from "./translations";
 
 // Animation variants
 const containerVariants = {
@@ -42,6 +44,11 @@ export default function AllProperties({ data = [] }) {
   const [isDeleting, setIsDeleting] = useState(false);
   const { toast } = useToast();
 
+  // Add translation support
+  const { currentLanguage, isRTL } = useTranslation();
+  const t =
+    propertyListTranslations[currentLanguage] || propertyListTranslations.en;
+
   const handleViewProperty = (id) => {
     setSelectedPropertyId(id);
     setIsDetailsModalOpen(true);
@@ -68,8 +75,8 @@ export default function AllProperties({ data = [] }) {
       // await deleteProperty(selectedPropertyId);
 
       toast({
-        title: "Property deleted",
-        description: "The property has been successfully deleted.",
+        title: t.propertyDeleted,
+        description: t.propertyDeletedMessage,
         variant: "success",
       });
 
@@ -77,8 +84,8 @@ export default function AllProperties({ data = [] }) {
       setIsDeleteModalOpen(false);
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Failed to delete the property. Please try again.",
+        title: t.error,
+        description: t.deleteError,
         variant: "destructive",
       });
     } finally {
@@ -87,7 +94,7 @@ export default function AllProperties({ data = [] }) {
   };
 
   return (
-    <div>
+    <div className={isRTL ? "rtl property-list-container" : ""}>
       <AnimatePresence>
         {data.length === 0 ? (
           <motion.div
@@ -115,7 +122,7 @@ export default function AllProperties({ data = [] }) {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              No properties found
+              {t.noPropertiesFound}
             </motion.h3>
             <motion.p
               className="text-muted-foreground"
@@ -123,12 +130,14 @@ export default function AllProperties({ data = [] }) {
               animate={{ opacity: 1 }}
               transition={{ delay: 0.4 }}
             >
-              There are no properties available at the moment.
+              {t.noPropertiesDescription}
             </motion.p>
           </motion.div>
         ) : (
           <motion.div
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4"
+            className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-4 ${
+              isRTL ? "property-grid" : ""
+            }`}
             variants={containerVariants}
             initial="hidden"
             animate="visible"
@@ -153,16 +162,16 @@ export default function AllProperties({ data = [] }) {
                 <PropertyCard
                   property={{
                     id: property.id,
-                    title: property.title || "Untitled Property",
+                    title: property.title || t.propertyTitle,
                     price: property.price || 0,
                     status:
                       property.featured === true
-                        ? "ACTIVE"
+                        ? t.active
                         : property.featured === false
-                        ? "PENDING"
-                        : "DRAFT",
+                        ? t.pending
+                        : t.draft,
                     primaryImage: property.image || property.primaryImage,
-                    address: property.location || "Location not specified",
+                    address: property.location || t.location,
                     bedrooms: property.bedrooms || 0,
                     bathrooms: property.bathrooms || 0,
                     size: property.size || 0,
@@ -172,6 +181,7 @@ export default function AllProperties({ data = [] }) {
                   onView={() => handleViewProperty(property.id)}
                   onEdit={() => handleEditProperty(property.id)}
                   onDelete={() => handleDeleteProperty(property.id)}
+                  isRTL={isRTL}
                 />
               </motion.div>
             ))}
@@ -185,6 +195,7 @@ export default function AllProperties({ data = [] }) {
           propertyId={selectedPropertyId}
           isOpen={isDetailsModalOpen}
           onClose={() => setIsDetailsModalOpen(false)}
+          className={isRTL ? "modal-content" : ""}
         />
       )}
 
@@ -202,11 +213,12 @@ export default function AllProperties({ data = [] }) {
             onSaved={() => {
               setIsEditModalOpen(false);
               toast({
-                title: "Property updated",
-                description: "The property has been successfully updated.",
+                title: t.propertyUpdated,
+                description: t.propertyUpdatedMessage,
                 variant: "success",
               });
             }}
+            className={isRTL ? "modal-content" : ""}
           />
         </>
       )}
@@ -217,9 +229,10 @@ export default function AllProperties({ data = [] }) {
         onClose={() => setIsDeleteModalOpen(false)}
         onConfirm={confirmDelete}
         isLoading={isDeleting}
-        title="Delete Property"
-        description="Are you sure you want to delete this property? This action cannot be undone."
+        title={t.deleteProperty}
+        description={t.deleteConfirmation}
         itemName={data.find((p) => p.id === selectedPropertyId)?.title || ""}
+        className={isRTL ? "modal-content" : ""}
       />
     </div>
   );

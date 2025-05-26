@@ -1,0 +1,124 @@
+/* RTL styles for property list page */
+
+.rtl {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Card headers and content */
+.rtl .card-header,
+.rtl .card-title,
+.rtl .card-description {
+  text-align: right;
+}
+
+/* Flexbox adjustments */
+.rtl .rtl-flex-row-reverse {
+  flex-direction: row-reverse !important;
+}
+
+.rtl .rtl-ml-auto {
+  margin-right: auto !important;
+  margin-left: 0 !important;
+}
+
+.rtl .rtl-mr-auto {
+  margin-left: auto !important;
+  margin-right: 0 !important;
+}
+
+/* Icon spacing */
+.rtl .rtl-icon-flip {
+  transform: scaleX(-1);
+}
+
+.rtl .rtl-icon-mr {
+  margin-right: 0;
+  margin-left: 0.5rem;
+}
+
+.rtl .rtl-icon-ml {
+  margin-left: 0;
+  margin-right: 0.5rem;
+}
+
+/* Property card specific styles */
+.rtl .property-card {
+  text-align: right;
+}
+
+.rtl .property-card-header {
+  flex-direction: row-reverse;
+}
+
+.rtl .property-card-actions {
+  flex-direction: row-reverse;
+}
+
+.rtl .property-card-content {
+  direction: rtl;
+}
+
+/* Table styles */
+.rtl .table-container th,
+.rtl .table-container td {
+  text-align: right;
+}
+
+.rtl .table-container .cell-action {
+  flex-direction: row-reverse;
+}
+
+/* Tab and list styles */
+.rtl .tabs-list {
+  flex-direction: row-reverse;
+}
+
+.rtl .property-list-container {
+  direction: rtl;
+}
+
+/* Property grid and list */
+.rtl .property-grid {
+  direction: rtl;
+}
+
+.rtl .property-details {
+  text-align: right;
+}
+
+.rtl .property-action-buttons {
+  flex-direction: row-reverse;
+}
+
+/* Status badges */
+.rtl .status-badge {
+  margin-left: 0;
+  margin-right: auto;
+}
+
+/* Modal styles */
+.rtl .modal-header,
+.rtl .modal-footer {
+  text-align: right;
+  flex-direction: row-reverse;
+}
+
+.rtl .modal-content {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Form elements */
+.rtl .form-group label {
+  text-align: right;
+}
+
+.rtl .form-buttons {
+  flex-direction: row-reverse;
+}
+
+/* Dropdown menu positioning */
+.rtl .dropdown-menu-content {
+  text-align: right;
+}

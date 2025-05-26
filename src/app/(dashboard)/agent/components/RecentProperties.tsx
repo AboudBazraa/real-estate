@@ -26,17 +26,35 @@ interface RecentPropertiesProps {
   properties: PropertyItem[];
   isLoading: boolean;
   onDelete: (propertyId: string) => Promise<void>;
+  translations?: {
+    recentProperties: string;
+    viewAll: string;
+    noPropertiesYet: string;
+    addYourFirstProperty: string;
+    addProperty: string;
+  };
+  isRTL?: boolean;
 }
 
 export function RecentProperties({
   properties,
   isLoading,
   onDelete,
+  translations,
+  isRTL = false,
 }: RecentPropertiesProps) {
   const router = useRouter();
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [propertyToDelete, setPropertyToDelete] = useState<string | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const t = translations || {
+    recentProperties: "Recent Properties",
+    viewAll: "View all",
+    noPropertiesYet: "No properties yet",
+    addYourFirstProperty: "Add your first property to see it here",
+    addProperty: "Add Property",
+  };
 
   const handleDeleteProperty = (propertyId: string) => {
     setPropertyToDelete(propertyId);
@@ -57,12 +75,16 @@ export function RecentProperties({
   };
 
   return (
-    <div className="h-full">
-      <div className="flex items-center justify-between pb-4">
-        <h3 className="text-xl font-semibold">Recent Properties</h3>
+    <div className={`h-full ${isRTL ? "rtl" : ""}`}>
+      <div
+        className={`flex items-center justify-between pb-4 ${
+          isRTL ? "flex-row-reverse" : ""
+        }`}
+      >
+        <h3 className="text-xl font-semibold">{t.recentProperties}</h3>
         <Button variant="ghost" size="sm" asChild>
           <Link href="/agent/agentProperties" className="text-sm">
-            View all
+            {t.viewAll}
           </Link>
         </Button>
       </div>
@@ -79,22 +101,29 @@ export function RecentProperties({
               primaryImage={null}
               address=""
               isLoading={true}
+              isRTL={isRTL}
             />
           ))}
         </div>
       ) : properties.length === 0 ? (
-        <Card className="text-center border-dashed flex items-center justify-center h-80">
+        <Card
+          className={`text-center border-dashed flex items-center justify-center h-80 ${
+            isRTL ? "rtl" : ""
+          }`}
+        >
           <div className="flex flex-col items-center justify-center h-full">
             <div className="p-3 bg-blue-100 rounded-full mb-3">
               <Building2 className="h-6 w-6 text-blue-600" />
             </div>
-            <h3 className="text-lg font-medium mb-2">No properties yet</h3>
-            <p className="text-gray-500 mb-4">
-              Add your first property to see it here
-            </p>
+            <h3 className="text-lg font-medium mb-2">{t.noPropertiesYet}</h3>
+            <p className="text-gray-500 mb-4">{t.addYourFirstProperty}</p>
             <Button asChild>
-              <Link href="/agent/addNewProp">
-                <Plus className="mr-2 h-4 w-4" /> Add Property
+              <Link
+                href="/agent/addNewProp"
+                className={isRTL ? "flex-row-reverse" : ""}
+              >
+                <Plus className={isRTL ? "ml-2 h-4 w-4" : "mr-2 h-4 w-4"} />{" "}
+                {t.addProperty}
               </Link>
             </Button>
           </div>
@@ -114,6 +143,7 @@ export function RecentProperties({
               bathrooms={property.bathrooms}
               property_type={property.property_type}
               size={property.size}
+              isRTL={isRTL}
             />
           ))}
         </div>

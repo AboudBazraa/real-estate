@@ -12,6 +12,7 @@ import L from "leaflet";
 import { Search, Layers, MapPin, PlusSquare } from "lucide-react";
 import { Input } from "@/shared/components/ui/input";
 import { Button } from "@/shared/components/ui/button";
+import { useTranslation } from "@/shared/hooks/useTranslation";
 import {
   Popover,
   PopoverContent,
@@ -94,10 +95,47 @@ export default function MapComponent({
   enableMapClick = true,
   accuracy = null,
 }) {
+  const { currentLanguage, isRTL } = useTranslation();
   const [markerPosition, setMarkerPosition] = useState(position);
   const [mapType, setMapType] = useState("street"); // "street" or "satellite"
   const [searchText, setSearchText] = useState("");
   const [isSearching, setIsSearching] = useState(false);
+
+  // Translations
+  const translations = {
+    en: {
+      searchAddress: "Search for address...",
+      mapOptions: "Map Settings",
+      mapType: "Map Type",
+      street: "Street",
+      satellite: "Satellite",
+      tips: "Tips",
+      searchTip: "Search your exact address",
+      satelliteTip: "Switch to satellite for better precision",
+      dragTip: "Drag marker to your exact building",
+      clickMapDrag:
+        "Click anywhere on the map or drag the marker to place your property exactly",
+      addressNotFound: "Address not found. Please try a different search term.",
+      searchError: "Failed to search for address. Please try again.",
+    },
+    ar: {
+      searchAddress: "ابحث عن العنوان...",
+      mapOptions: "إعدادات الخريطة",
+      mapType: "نوع الخريطة",
+      street: "الشارع",
+      satellite: "القمر الصناعي",
+      tips: "نصائح",
+      searchTip: "ابحث عن عنوانك الدقيق",
+      satelliteTip: "التبديل إلى القمر الصناعي للحصول على دقة أفضل",
+      dragTip: "اسحب العلامة إلى مبناك بالضبط",
+      clickMapDrag:
+        "انقر في أي مكان على الخريطة أو اسحب العلامة لوضع عقارك بالضبط",
+      addressNotFound: "لم يتم العثور على العنوان. يرجى تجربة مصطلح بحث مختلف.",
+      searchError: "فشل البحث عن العنوان. الرجاء المحاولة مرة أخرى.",
+    },
+  };
+
+  const t = translations[currentLanguage === "ar" ? "ar" : "en"];
 
   // Update marker position when props change
   useEffect(() => {
@@ -134,29 +172,33 @@ export default function MapComponent({
         onPositionChange(position);
         setMarkerPosition(position);
       } else {
-        alert("Address not found. Please try a different search term.");
+        alert(t.addressNotFound);
       }
     } catch (error) {
       console.error("Error searching for address:", error);
-      alert("Failed to search for address. Please try again.");
+      alert(t.searchError);
     } finally {
       setIsSearching(false);
     }
   };
 
   return (
-    <div className="space-y-3">
+    <div className={`space-y-3 ${isRTL ? "rtl" : ""}`}>
       <div className="flex gap-2">
         <div className="relative flex-1">
           <Input
             type="text"
             value={searchText}
             onChange={(e) => setSearchText(e.target.value)}
-            placeholder="Search for address..."
-            className="pr-9"
+            placeholder={t.searchAddress}
+            className={`${isRTL ? "pr-3 pl-9" : "pr-9"}`}
             onKeyDown={(e) => e.key === "Enter" && handleSearch()}
           />
-          <div className="absolute right-2 top-0 h-full flex items-center">
+          <div
+            className={`absolute ${
+              isRTL ? "left-2" : "right-2"
+            } top-0 h-full flex items-center`}
+          >
             {isSearching ? (
               <div className="h-4 w-4 animate-spin rounded-full border-2 border-primary border-r-transparent" />
             ) : (
@@ -180,10 +222,10 @@ export default function MapComponent({
           </PopoverTrigger>
           <PopoverContent className="w-56 p-3">
             <div className="space-y-3">
-              <div className="font-medium">Map Settings</div>
+              <div className="font-medium">{t.mapOptions}</div>
               <div className="space-y-1.5">
                 <div className="text-sm font-medium text-muted-foreground">
-                  Map Type
+                  {t.mapType}
                 </div>
                 <div className="grid grid-cols-2 gap-2">
                   <Button
@@ -192,7 +234,7 @@ export default function MapComponent({
                     className="h-9"
                     onClick={() => setMapType("street")}
                   >
-                    Street
+                    {t.street}
                   </Button>
                   <Button
                     size="sm"
@@ -200,27 +242,27 @@ export default function MapComponent({
                     className="h-9"
                     onClick={() => setMapType("satellite")}
                   >
-                    Satellite
+                    {t.satellite}
                   </Button>
                 </div>
               </div>
               <div className="space-y-1.5 pt-1.5 border-t">
                 <div className="text-sm font-medium text-muted-foreground">
-                  Tips
+                  {t.tips}
                 </div>
                 <div className="text-xs text-muted-foreground">
                   <ul className="space-y-1">
                     <li className="flex items-start gap-1.5">
                       <Search className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                      <span>Search your exact address</span>
+                      <span>{t.searchTip}</span>
                     </li>
                     <li className="flex items-start gap-1.5">
                       <PlusSquare className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                      <span>Switch to satellite for better precision</span>
+                      <span>{t.satelliteTip}</span>
                     </li>
                     <li className="flex items-start gap-1.5">
                       <MapPin className="h-3 w-3 mt-0.5 flex-shrink-0" />
-                      <span>Drag marker to your exact building</span>
+                      <span>{t.dragTip}</span>
                     </li>
                   </ul>
                 </div>
@@ -285,9 +327,7 @@ export default function MapComponent({
       </div>
 
       <div className="text-xs text-center text-muted-foreground">
-        {isDraggable
-          ? "Click anywhere on the map or drag the marker to place your property exactly"
-          : ""}
+        {isDraggable ? t.clickMapDrag : ""}
       </div>
     </div>
   );

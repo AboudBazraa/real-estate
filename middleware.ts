@@ -8,6 +8,9 @@ export async function middleware(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
 
+  // Handle language preference from cookie
+  const locale = request.cookies.get("NEXT_LOCALE")?.value || "en";
+
   // Check if the current route is an auth page
   const isAuthPage =
     pathname.startsWith("/auth/login") ||
@@ -67,6 +70,9 @@ export async function middleware(request: NextRequest) {
 
     return NextResponse.redirect(redirectUrl);
   }
+
+  // Set language in response headers
+  response.headers.set("x-language", locale);
 
   return response;
 }
