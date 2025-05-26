@@ -6,6 +6,7 @@ import { SupabaseProvider } from "@/shared/providers/SupabaseProvider";
 import { UserProvider } from "@/shared/providers/UserProvider";
 import { ThemeProvider } from "@/shared/providers/ThemeProvider";
 import { LanguageProvider } from "./providers/LanguageProvider";
+import NetworkProvider from "@/shared/providers/NetworkProvider";
 
 export default function Providers({ children }) {
   const [queryClient] = useState(
@@ -25,7 +26,9 @@ export default function Providers({ children }) {
       <SupabaseProvider>
         <UserProvider>
           <ThemeProvider defaultTheme="system" storageKey="real-estate-theme">
-            <LanguageProvider>{children}</LanguageProvider>
+            <NetworkProvider>
+              <LanguageProvider>{children}</LanguageProvider>
+            </NetworkProvider>
           </ThemeProvider>
         </UserProvider>
       </SupabaseProvider>

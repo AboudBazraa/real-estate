@@ -2,7 +2,16 @@
 
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Plus, Check, X, CreditCard, BadgeCheck, Shield } from "lucide-react";
+import {
+  Plus,
+  Check,
+  X,
+  CreditCard,
+  BadgeCheck,
+  Shield,
+  RefreshCw,
+  WifiOff,
+} from "lucide-react";
 import {
   Drawer,
   DrawerContent,
@@ -35,6 +44,8 @@ export default function SubscriptionSection() {
   const [loading, setLoading] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userRole, setUserRole] = useState(null);
+  const [networkStatus, setNetworkStatus] = useState(navigator.onLine);
+  const [retryCount, setRetryCount] = useState(0);
   const [cardInfo, setCardInfo] = useState({
     number: "",
     name: "",
@@ -42,19 +53,73 @@ export default function SubscriptionSection() {
     cvc: "",
   });
 
+  // Listen for online/offline status
+  useEffect(() => {
+    const handleOnline = () => {
+      console.log("Network connection restored");
+      setNetworkStatus(true);
+      // Retry fetching subscription when connection is restored
+      if (user) fetchSubscription();
+    };
+
+    const handleOffline = () => {
+      console.log("Network connection lost");
+      setNetworkStatus(false);
+      toast({
+        title: "You're Offline",
+        description: "Please check your internet connection.",
+        variant: "destructive",
+      });
+    };
+
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, [user]);
+
+  // Manual retry function
+  const handleRetry = () => {
+    if (!networkStatus) {
+      toast({
+        title: "Still Offline",
+        description:
+          "Internet connection is required to fetch subscription data.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setRetryCount((prev) => prev + 1);
+    toast({
+      title: "Retrying...",
+      description: "Attempting to fetch your subscription information again.",
+    });
+    fetchSubscription();
+  };
+
   // Fetch user's subscription status and role
   useEffect(() => {
     if (user) {
       fetchSubscription();
       fetchUserRole();
     }
-  }, [user]);
+  }, [user, retryCount]);
 
   const fetchUserRole = async () => {
     // Default to USER role to avoid undefined
     setUserRole("USER");
 
     try {
+      // Check for network connectivity first
+      if (!navigator.onLine) {
+        console.error("Network offline - cannot fetch user role");
+        return;
+      }
+
       // Validate prerequisites
       if (!user?.id || !supabase) {
         console.log("Missing user ID or supabase client");
@@ -71,6 +136,20 @@ export default function SubscriptionSection() {
 
       if (error) {
         console.error("Error fetching user role:", error);
+
+        // Check if error is network-related
+        if (
+          !navigator.onLine ||
+          error.code === "NETWORK_ERROR" ||
+          error.message?.includes("network")
+        ) {
+          toast({
+            title: "Network Error",
+            description:
+              "Failed to load user profile due to connection issues.",
+            variant: "destructive",
+          });
+        }
         return;
       }
 
@@ -83,11 +162,65 @@ export default function SubscriptionSection() {
       }
     } catch (error) {
       console.error("Exception in fetchUserRole:", error);
+
+      // Determine if this is a network error
+      if (
+        !navigator.onLine ||
+        error.name === "TypeError" ||
+        error.message?.includes("network")
+      ) {
+        toast({
+          title: "Connection Error",
+          description: "Failed to load your profile due to network issues.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
+  // Add this function for retrying with exponential backoff
+  const retryWithBackoff = async (fn, maxRetries = 3) => {
+    let retries = 0;
+
+    const executeWithBackoff = async () => {
+      try {
+        if (!navigator.onLine) throw new Error("Network offline");
+        return await fn();
+      } catch (error) {
+        retries++;
+        if (retries > maxRetries) throw error;
+
+        // Calculate backoff delay: 2^retries * 1000ms (1s, 2s, 4s, ...)
+        const delay = Math.min(Math.pow(2, retries) * 1000, 10000); // Cap at 10 seconds
+        console.log(`Retry attempt ${retries} after ${delay}ms delay`);
+
+        // If we're still online, try again after delay
+        return new Promise((resolve, reject) => {
+          setTimeout(() => {
+            executeWithBackoff().then(resolve).catch(reject);
+          }, delay);
+        });
+      }
+    };
+
+    return executeWithBackoff();
+  };
+
+  // Modify the fetchSubscription function to use the retry mechanism
   const fetchSubscription = async () => {
     try {
+      // Check for internet connection first
+      if (!navigator.onLine) {
+        console.error("Network offline - cannot fetch subscription");
+        toast({
+          title: "Network Error",
+          description:
+            "You are offline. Please check your internet connection.",
+          variant: "destructive",
+        });
+        return;
+      }
+
       // Validate prerequisites
       if (!user?.id || !supabase) {
         console.log(
@@ -96,33 +229,79 @@ export default function SubscriptionSection() {
         return;
       }
 
-      // Try a simpler query approach (without .single())
-      const { data, error } = await supabase
-        .from("subscriptions")
-        .select("*")
-        .eq("user_id", user.id)
-        .eq("is_active", true);
+      // Use the retry mechanism for the database query
+      await retryWithBackoff(async () => {
+        // Try a simpler query approach (without .single())
+        const { data, error } = await supabase
+          .from("subscriptions")
+          .select("*")
+          .eq("user_id", user.id)
+          .eq("is_active", true);
 
-      if (error) {
-        console.error("Error fetching subscription:", error);
-        return;
-      }
+        if (error) {
+          // Check if error is related to network connectivity
+          if (
+            error.code === "NETWORK_ERROR" ||
+            error.message?.includes("network") ||
+            !navigator.onLine
+          ) {
+            toast({
+              title: "Connection Error",
+              description:
+                "Failed to fetch subscription data. Please check your internet connection.",
+              variant: "destructive",
+            });
+            throw error; // Throw to trigger retry
+          } else {
+            console.error("Error fetching subscription:", error);
+            toast({
+              title: "Subscription Error",
+              description: "Failed to load your subscription details.",
+              variant: "destructive",
+            });
+            throw error; // Throw but this is likely not a network error
+          }
+        }
 
-      // Check if we got any active subscriptions
-      if (Array.isArray(data) && data.length > 0) {
-        // Use the most recent subscription if multiple found
-        const latestSubscription = data.sort(
-          (a, b) => new Date(b.created_at) - new Date(a.created_at)
-        )[0];
+        // Process the data if successful
+        if (Array.isArray(data) && data.length > 0) {
+          // Use the most recent subscription if multiple found
+          const latestSubscription = data.sort(
+            (a, b) => new Date(b.created_at) - new Date(a.created_at)
+          )[0];
 
-        console.log("Active subscription found:", latestSubscription.plan);
-        setSubscription(latestSubscription);
-      } else {
-        console.log("No active subscription found");
-        setSubscription(null);
-      }
+          console.log("Active subscription found:", latestSubscription.plan);
+          setSubscription(latestSubscription);
+        } else {
+          console.log("No active subscription found");
+          setSubscription(null);
+        }
+      });
     } catch (error) {
       console.error("Exception in fetchSubscription:", error);
+
+      // Determine if this is a network-related error
+      const isNetworkError =
+        !navigator.onLine ||
+        error.name === "TypeError" ||
+        error.message?.includes("network") ||
+        error.message?.includes("failed to fetch");
+
+      if (isNetworkError) {
+        toast({
+          title: "Network Error",
+          description:
+            "Failed to check your subscription status. Please check your internet connection and try again.",
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Error",
+          description:
+            "Failed to load subscription data. Please try again later.",
+          variant: "destructive",
+        });
+      }
     }
   };
 
@@ -430,8 +609,43 @@ export default function SubscriptionSection() {
     );
   };
 
+  // Network error indicator
+  const renderNetworkError = () => {
+    if (!networkStatus) {
+      return (
+        <motion.div
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="bg-destructive/10 border border-destructive text-destructive rounded-md p-4 mb-4 flex items-center justify-between"
+        >
+          <div className="flex items-center gap-2">
+            <WifiOff className="h-5 w-5" />
+            <div>
+              <h4 className="font-medium">Network Connection Lost</h4>
+              <p className="text-sm text-destructive/80">
+                Subscription data couldn't be loaded due to network issues
+              </p>
+            </div>
+          </div>
+          <Button
+            variant="outline"
+            className="border-destructive hover:bg-destructive/10"
+            onClick={handleRetry}
+            size="sm"
+          >
+            <RefreshCw className="h-4 w-4 mr-2" />
+            Retry
+          </Button>
+        </motion.div>
+      );
+    }
+    return null;
+  };
+
   return (
     <section className="py-12 md:py-16 px-4 sm:px-6 md:px-12 lg:px-24 bg-gray-50 dark:bg-zinc-900 text-black dark:text-white transition-colors">
+      {renderNetworkError()}
+
       <div className="max-w-7xl mx-auto">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center">
           <div>
