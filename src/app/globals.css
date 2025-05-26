@@ -1,3 +1,5 @@
+@import url("https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Outfit:wght@400;700&display=swap");
 @import "tailwindcss";
 @import "../app/(dashboard)/agent/styles/rtl.css";
 @import "../app/(dashboard)/admin/userList/styles/rtl.css";
@@ -251,14 +253,18 @@
     --chart-5: 27 87% 67%;
   }
 
-  /* Global default font */
-  html,
-  body,
-  button,
-  input,
-  textarea,
-  select {
-    font-family: var(--font-outfit);
+  /* Global default font for English (LTR) */
+  html:lang(en),
+  body:lang(en),
+  [dir="ltr"] {
+    font-family: "Outfit", sans-serif;
+  }
+
+  /* Global default font for Arabic (RTL) */
+  html:lang(ar),
+  body:lang(ar),
+  [dir="rtl"] {
+    font-family: "Cairo", sans-serif;
   }
 
   /* Special fonts for home section */
@@ -298,4 +304,8 @@ body {
 
 html {
   scroll-behavior: smooth;
+}
+
+.font-cairo {
+  font-family: "Cairo", sans-serif !important;
 }
