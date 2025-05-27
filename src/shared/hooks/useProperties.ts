@@ -94,8 +94,8 @@ export const useProperties = () => {
       pageSize = 10,
       filters?: PropertyFilters,
       sort?: PropertySort,
-      fetchUserPropertiesOnly = false,
-      fetchFeaturedPropertiesOnly = false
+      fetchFeaturedPropertiesOnly = false,
+      fetchUserPropertiesOnly = false
     ) => {
       setLoading(true);
       setError(null);

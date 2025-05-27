@@ -144,7 +144,7 @@ export default function SearchPage() {
       ascending: sortBy === "price-low" || sortBy === "oldest",
     };
 
-    fetchProperties(0, 100, filters, sort);
+    fetchProperties(0, 100, filters, sort, true);
 
     if (initialLoad) {
       setInitialLoad(false);

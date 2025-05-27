@@ -40,6 +40,7 @@ import {
   Instagram,
   ExternalLink,
   User,
+  MessageSquare,
 } from "lucide-react";
 import { useSupabase } from "@/shared/providers/SupabaseProvider";
 import { Button } from "@/shared/components/ui/button";
@@ -154,15 +155,15 @@ export default function PropertyPage() {
             if (!error && agentData) {
               propertyData.agent = {
                 name: agentData.name || "Property Agent",
-                email: agentData.email || "contact@realestate.com",
-                phone: agentData.phone || "+1 (555) 123-4567",
+                email: agentData.email || "abodmohd880@gmail.com",
+                phone: agentData.phone || "+967 736 750 497",
               };
             } else {
               // Just use default agent data as fallback
               propertyData.agent = {
                 name: "Property Agent",
-                email: "contact@realestate.com",
-                phone: "+1 (555) 123-4567",
+                email: "abodmohd880@gmail.com",
+                phone: "+967 736 750 497",
               };
             }
           } catch (agentError) {
@@ -447,6 +448,36 @@ export default function PropertyPage() {
     // If features is false, return only basic features
     return standardFeatures;
   };
+
+  // Format phone number for WhatsApp - removes any non-digit characters
+  const formatPhoneForWhatsApp = useCallback((phone) => {
+    if (!phone) return "";
+    // Remove any non-numeric characters
+    return phone.replace(/\D/g, "");
+  }, []);
+
+  // Create WhatsApp link with pre-populated message
+  const createWhatsAppLink = useCallback(
+    (phone, propertyDetails) => {
+      const formattedPhone = formatPhoneForWhatsApp(phone);
+
+      // Create a well-structured message with property details
+      const message = encodeURIComponent(
+        `👋 Hello from RealEstate!\n\n` +
+          `I'm interested in this property:\n` +
+          `🏠 "${propertyDetails.title}"\n` +
+          `📍 ${propertyDetails.address}, ${propertyDetails.city}\n` +
+          `💰 $${formatPrice(propertyDetails.price)}${
+            propertyDetails.listing_type === ListingType.RENT ? "/month" : ""
+          }\n\n` +
+          `✅ ${propertyDetails.bedrooms} bed | ${propertyDetails.bathrooms} bath | ${propertyDetails.area} sq ft\n\n` +
+          `Could you please provide more information about this property? I'm particularly interested in scheduling a viewing.`
+      );
+
+      return `https://wa.me/${formattedPhone}?text=${message}`;
+    },
+    [formatPhoneForWhatsApp, formatPrice]
+  );
 
   if (loading) {
     // Enhanced loading skeleton with more realistic appearance
@@ -1110,16 +1141,33 @@ export default function PropertyPage() {
                         <div className="grid grid-cols-2 gap-3">
                           {property.agent.phone && (
                             <a
-                              href={`tel:${property.agent.phone}`}
-                              className="flex flex-col items-center justify-center py-2 px-1 border border-gray-200 dark:border-gray-700 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/20 transition-colors"
+                              href={createWhatsAppLink(
+                                property.agent.phone,
+                                property
+                              )}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="group relative flex flex-col items-center justify-center py-3 px-2 border-2 border-green-500 dark:border-green-600 rounded-lg hover:bg-green-50 dark:hover:bg-green-900/30 transition-all duration-300 hover:shadow-md overflow-hidden"
                             >
-                              <Phone className="h-5 w-5 text-blue-500 mb-1" />
-                              <span className="text-xs text-gray-500 dark:text-gray-400">
-                                Phone
+                              {/* WhatsApp branding bar on top */}
+                              <div className="absolute top-0 left-0 right-0 h-1 bg-green-500"></div>
+
+                              <div className="relative">
+                                <MessageSquare className="h-6 w-6 text-green-600 dark:text-green-500 mb-1 group-hover:scale-110 transition-transform duration-300" />
+                                <span className="absolute -top-1 -right-1 flex h-3 w-3">
+                                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                                  <span className="relative inline-flex rounded-full h-3 w-3 bg-green-500"></span>
+                                </span>
+                              </div>
+                              <span className="text-xs font-medium text-green-700 dark:text-green-500 uppercase tracking-wide">
+                                WhatsApp
                               </span>
-                              <span className="text-sm font-medium text-gray-800 dark:text-white">
+                              <span className="text-sm font-medium text-gray-800 dark:text-white mt-1">
                                 {property.agent.phone}
                               </span>
+
+                              {/* Hover effect */}
+                              <div className="absolute inset-0 bg-green-500 opacity-0 group-hover:opacity-10 transition-opacity duration-300"></div>
                             </a>
                           )}
 
